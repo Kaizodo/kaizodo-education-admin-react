@@ -1,0 +1,43 @@
+type StudentForm = {
+    id?: number;
+    aadharNumber: string;
+    admissionDate: string; 
+    admissionNumber: string;
+    allergies: string;
+    bloodGroup: string;
+    caste: string;
+    category: string;
+    city: string;
+    class: string;
+    dateOfBirth: string;
+    documents: {
+      birthCertificate: File;
+      transferCertificate: File;
+      idProof: File;
+      photo: File;
+    };
+    emergencyContactName: string;
+    emergencyContactPhone: string;
+    emergencyContactRelation: string;
+    feeStructure: string;
+    firstName: string;
+    gender: 'Male' | 'Female' | 'Other';
+    lastName: string;
+    medicalConditions: string;
+    medications: string;
+    nationality: string;
+    parentIds: string[];
+    password: string;
+    permanentAddress: string;
+    pincode: string;
+    presentAddress: string;
+    previousClass: string;
+    previousSchool: string;
+    religion: string;
+    rollNumber: string;
+    section: string;
+    state: string;
+    transportFee: string;
+    username: string;
+  };
+  

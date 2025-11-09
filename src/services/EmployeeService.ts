@@ -1,0 +1,41 @@
+import Api from '@/lib/api';
+
+export class EmployeeService {
+    private static endpoint = 'employee';
+
+    public static async search(form: any) {
+        return Api(`${this.endpoint}/search`, form);
+    }
+
+    public static async create(form: any) {
+        return Api(`${this.endpoint}/create`, form);
+    }
+
+    public static async update(form: any) {
+        return Api(`${this.endpoint}/update`, form);
+    }
+
+    public static async detail(id: number) {
+        return Api(`${this.endpoint}/detail`, { id });
+    }
+
+    public static async delete(id: number) {
+        return Api(`${this.endpoint}/delete`, { id });
+    }
+
+    public static async setPassword(form: any) {
+        return Api(`${this.endpoint}/set-password`, form);
+    }
+
+    public static async searchSubordinates(form: any) {
+        return Api(`${this.endpoint}/search-subordinate`, form);
+    }
+
+    public static async addSubordinate(form: any) {
+        return Api(`${this.endpoint}/add-subordinate`, form);
+    }
+
+    public static async removeSubordinate(form: any) {
+        return Api(`${this.endpoint}/remove-subordinate`, form);
+    }
+}
