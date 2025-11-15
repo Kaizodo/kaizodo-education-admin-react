@@ -1,8 +1,13 @@
 import { useState } from 'react'
 import { useSetValue } from './use-set-value';
 
-export function useForm<T = any>(data = {}) {
-    const [form, setForm] = useState<T | any>(data);
-    const setValue = useSetValue(setForm);
-    return [form, setValue, setForm];
+export function useForm<T>(data?: T) {
+    const [form, setForm] = useState<T>(data as T)
+    const setValue = useSetValue<T>(setForm)
+
+    return [form, setValue, setForm] as [
+        T,
+        typeof setValue,
+        typeof setForm
+    ]
 }

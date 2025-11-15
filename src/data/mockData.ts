@@ -320,3 +320,253 @@ export const transportData = {
   studentsUsingTransport: 856,
   maintenanceScheduled: 3
 };
+
+
+
+export type LeadStatus = "new" | "contacted" | "qualified" | "proposal" | "negotiation" | "won" | "lost";
+export type LeadSource = "website" | "referral" | "social" | "email" | "cold-call" | "event";
+export type Priority = "low" | "medium" | "high" | "urgent";
+
+export interface Lead {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  position: string;
+  status: LeadStatus;
+  source: LeadSource;
+  priority: Priority;
+  value: number;
+  assignedTo: string;
+  createdAt: string;
+  lastContact: string;
+  notes: string;
+  tags: string[];
+}
+
+export interface Activity {
+  id: string;
+  leadId: string;
+  type: "call" | "email" | "meeting" | "note" | "task";
+  title: string;
+  description: string;
+  timestamp: string;
+  user: string;
+}
+
+export const mockLeads: Lead[] = [
+  {
+    id: "1",
+    name: "Sarah Johnson",
+    email: "sarah.j@techcorp.com",
+    phone: "+1 (555) 123-4567",
+    company: "TechCorp Solutions",
+    position: "VP of Sales",
+    status: "qualified",
+    source: "website",
+    priority: "high",
+    value: 45000,
+    assignedTo: "John Doe",
+    createdAt: "2024-01-15",
+    lastContact: "2024-01-20",
+    notes: "Interested in enterprise plan. Follow up next week.",
+    tags: ["Enterprise", "Hot Lead"],
+  },
+  {
+    id: "2",
+    name: "Michael Chen",
+    email: "m.chen@innovate.io",
+    phone: "+1 (555) 234-5678",
+    company: "Innovate Labs",
+    position: "CTO",
+    status: "proposal",
+    source: "referral",
+    priority: "urgent",
+    value: 78000,
+    assignedTo: "Jane Smith",
+    createdAt: "2024-01-10",
+    lastContact: "2024-01-22",
+    notes: "Proposal sent. Waiting for board approval.",
+    tags: ["Technical", "Decision Maker"],
+  },
+  {
+    id: "3",
+    name: "Emily Rodriguez",
+    email: "emily.r@startup.com",
+    phone: "+1 (555) 345-6789",
+    company: "StartupXYZ",
+    position: "Founder",
+    status: "contacted",
+    source: "social",
+    priority: "medium",
+    value: 23000,
+    assignedTo: "John Doe",
+    createdAt: "2024-01-18",
+    lastContact: "2024-01-19",
+    notes: "Schedule demo for next week.",
+    tags: ["Startup", "Fast Growing"],
+  },
+  {
+    id: "4",
+    name: "David Park",
+    email: "d.park@megacorp.com",
+    phone: "+1 (555) 456-7890",
+    company: "MegaCorp Industries",
+    position: "Director of Operations",
+    status: "negotiation",
+    source: "event",
+    priority: "high",
+    value: 125000,
+    assignedTo: "Jane Smith",
+    createdAt: "2024-01-05",
+    lastContact: "2024-01-23",
+    notes: "Negotiating contract terms. Price point agreed.",
+    tags: ["Large Enterprise", "Multi-year"],
+  },
+  {
+    id: "5",
+    name: "Lisa Thompson",
+    email: "lisa.t@designco.com",
+    phone: "+1 (555) 567-8901",
+    company: "Design Co",
+    position: "Creative Director",
+    status: "new",
+    source: "website",
+    priority: "low",
+    value: 15000,
+    assignedTo: "Tom Wilson",
+    createdAt: "2024-01-23",
+    lastContact: "2024-01-23",
+    notes: "Just signed up. Need to reach out.",
+    tags: ["New", "Design Industry"],
+  },
+  {
+    id: "6",
+    name: "James Wilson",
+    email: "james.w@finance.com",
+    phone: "+1 (555) 678-9012",
+    company: "Finance Plus",
+    position: "CFO",
+    status: "won",
+    source: "referral",
+    priority: "high",
+    value: 95000,
+    assignedTo: "John Doe",
+    createdAt: "2024-01-01",
+    lastContact: "2024-01-15",
+    notes: "Contract signed. Onboarding scheduled.",
+    tags: ["Closed Won", "Finance"],
+  },
+  {
+    id: "7",
+    name: "Amanda Foster",
+    email: "a.foster@retailco.com",
+    phone: "+1 (555) 789-0123",
+    company: "Retail Co",
+    position: "Marketing Manager",
+    status: "lost",
+    source: "cold-call",
+    priority: "low",
+    value: 18000,
+    assignedTo: "Tom Wilson",
+    createdAt: "2024-01-08",
+    lastContact: "2024-01-20",
+    notes: "Went with competitor. Budget constraints.",
+    tags: ["Lost", "Price Sensitive"],
+  },
+  {
+    id: "8",
+    name: "Robert Kim",
+    email: "r.kim@healthtech.com",
+    phone: "+1 (555) 890-1234",
+    company: "HealthTech Inc",
+    position: "Product Manager",
+    status: "qualified",
+    source: "email",
+    priority: "medium",
+    value: 52000,
+    assignedTo: "Jane Smith",
+    createdAt: "2024-01-12",
+    lastContact: "2024-01-21",
+    notes: "Interested in Q2 implementation.",
+    tags: ["Healthcare", "Q2 Target"],
+  },
+];
+
+export const mockActivities: Activity[] = [
+  {
+    id: "a1",
+    leadId: "1",
+    type: "email",
+    title: "Sent proposal document",
+    description: "Sent detailed proposal with pricing and implementation timeline.",
+    timestamp: "2024-01-20T10:30:00",
+    user: "John Doe",
+  },
+  {
+    id: "a2",
+    leadId: "1",
+    type: "call",
+    title: "Discovery call completed",
+    description: "45-minute call discussing requirements and pain points.",
+    timestamp: "2024-01-18T14:00:00",
+    user: "John Doe",
+  },
+  {
+    id: "a3",
+    leadId: "2",
+    type: "meeting",
+    title: "Product demo",
+    description: "Technical demo with engineering team. Very positive feedback.",
+    timestamp: "2024-01-22T11:00:00",
+    user: "Jane Smith",
+  },
+  {
+    id: "a4",
+    leadId: "2",
+    type: "note",
+    title: "Board meeting scheduled",
+    description: "Client scheduled internal board meeting for Jan 28 to review proposal.",
+    timestamp: "2024-01-21T16:45:00",
+    user: "Jane Smith",
+  },
+  {
+    id: "a5",
+    leadId: "3",
+    type: "task",
+    title: "Schedule demo",
+    description: "Need to schedule product demo for next week.",
+    timestamp: "2024-01-19T09:00:00",
+    user: "John Doe",
+  },
+];
+
+export const getLeadById = (id: string): Lead | undefined => {
+  return mockLeads.find((lead) => lead.id === id);
+};
+
+export const getActivitiesByLeadId = (leadId: string): Activity[] => {
+  return mockActivities.filter((activity) => activity.leadId === leadId);
+};
+
+export const getLeadsByStatus = (status: LeadStatus): Lead[] => {
+  return mockLeads.filter((lead) => lead.status === status);
+};
+
+export const statusConfig = {
+  new: { label: "New", color: "bg-blue-500" },
+  contacted: { label: "Contacted", color: "bg-indigo-500" },
+  qualified: { label: "Qualified", color: "bg-purple-500" },
+  proposal: { label: "Proposal", color: "bg-amber-500" },
+  negotiation: { label: "Negotiation", color: "bg-orange-500" },
+  won: { label: "Won", color: "bg-success" },
+  lost: { label: "Lost", color: "bg-destructive" },
+};
+
+export const priorityConfig = {
+  low: { label: "Low", color: "text-muted-foreground" },
+  medium: { label: "Medium", color: "text-primary" },
+  high: { label: "High", color: "text-warning" },
+  urgent: { label: "Urgent", color: "text-destructive" },
+};

@@ -13,7 +13,6 @@ import CenterLoading from '@/components/common/CenterLoading';
 import Dropdown from '@/components/common/Dropdown';
 import { useGlobalContext } from '@/hooks/use-global-context';
 import { OrganizationOnboardingStepsProps } from '../OrganizationEditor';
-import { useParams } from 'react-router-dom';
 import { Label } from '@/components/ui/label';
 import { CurriculumTypeArray, getOrganizationTypeName, OrganizationTypeArray } from '@/data/Organization';
 import Radio from '@/components/common/Radio';
@@ -23,11 +22,14 @@ import SuggestState from '@/components/common/suggest/SuggestState';
 import SuggestCity from '@/components/common/suggest/SuggestCity';
 import SuggestDistrict from '@/components/common/suggest/SuggestDistrict';
 import SuggestLocality from '@/components/common/suggest/SuggestLocality';
+import { useDefaultParams } from '@/hooks/use-default-params';
 
 
 
-export default function OrganizationOnboardingStepBasicInformation({ onLoading, registerCallback, $state }: OrganizationOnboardingStepsProps) {
-    const { id } = useParams<{ id: string }>();
+export default function OrganizationOnboardingStepBasicInformation({ organization_id, onLoading, registerCallback, $state }: OrganizationOnboardingStepsProps & {
+    organization_id?: number
+}) {
+    const { id } = useDefaultParams<{ id: string }>(organization_id ? { id: `${organization_id}` } : undefined);
     const { openCropperFile } = useCropper();
     const [form, setForm] = useState<any>({});
     const setValue = useSetValue(setForm);

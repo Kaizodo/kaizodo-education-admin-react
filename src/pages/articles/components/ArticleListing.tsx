@@ -124,7 +124,7 @@ export default function ArticleListing({ article_type }: { article_type: Article
                                     </div>
                                 </TableCell>
 
-                                <TableCell>{record.category_name}</TableCell>
+                                <TableCell>{record.article_category_name}</TableCell>
                                 <TableCell>
                                     <Badge variant={record.status ? 'default' : 'secondary'}>
                                         {record.publish ? 'Yes' : 'No'}

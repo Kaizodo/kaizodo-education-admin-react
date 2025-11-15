@@ -15,6 +15,10 @@ export class UserOrderService {
         return Api('orders/assign-deployment-manager', form);
     }
 
+    public static async assignRelationshipManager(form: any) {
+        return Api('orders/assign-relationship-manager', form);
+    }
+
     public static async assignTeam(form: any) {
         return Api('orders/assign-team', form);
     }

@@ -1,27 +1,106 @@
-import React from 'react';
 import { Calendar } from 'lucide-react';
-import { OrderState, Phase, PhaseStep } from '../OrderDetail';
-import { LuClock } from 'react-icons/lu';
-import { getColorShade } from '@/lib/utils';
+import { LuCircleCheck, LuClock } from 'react-icons/lu';
+import { formatDateTime, getColorShade, nameLetter } from '@/lib/utils';
+import { getPhaseStatusName, OrderCommonProps, Phase, PhaseStep, ProjectPhaseStatus } from '@/pages/orders/OrderDetail';
+
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { TbProgressBolt } from 'react-icons/tb';
 
 
 
-// Helper function to map status to Tailwind colors
-// const getStatusColor = (status: any) => {
-//     switch (status) {
-//         case 'completed':
-//             return 'text-green-600 bg-green-100 border-green-400';
-//         case 'in-progress':
-//             return 'text-yellow-600 bg-yellow-100 border-yellow-400';
-//         case 'pending':
-//         default:
-//             return 'text-gray-500 bg-gray-100 border-gray-300';
-//     }
-// };
+const getStatusColor = (status: ProjectPhaseStatus) => {
+    switch (status) {
+        case ProjectPhaseStatus.Completed:
+            return 'text-green-600 bg-green-100 border-green-400';
+        case ProjectPhaseStatus.Progress:
+            return 'text-yellow-600 bg-yellow-100 border-yellow-400';
+        case ProjectPhaseStatus.Pending:
+        default:
+            return 'text-gray-500 bg-gray-100 border-gray-300';
+    }
+};
 
-const PhaseStep = ({ phase }: { phase: Phase }) => {
+
+const PhaseStepEditor = ({ step, state, is_last, is_first }: OrderCommonProps & { step: PhaseStep, is_last: boolean, is_first: boolean }) => {
+
     const dotCenterOffset = '22px';
     const gapBetweenItems = '1.5rem';
+
+    const colorClasses = getStatusColor(step.status);
+
+
+
+
+
+    var user = state.users.find(u => u.id == step.user_id);
+    return (
+        <div className="mb-6 flex items-stretch">
+
+            <div className="relative w-12 flex-shrink-0">
+
+                <div
+                    className={`absolute left-1/2 w-1 bg-gray-200 transform -translate-x-1/2`}
+                    style={{
+                        top: is_first ? dotCenterOffset : '0',
+                        height: is_last
+                            ? dotCenterOffset
+                            : is_first
+                                ? `calc(100% + ${gapBetweenItems} - ${dotCenterOffset})`
+                                : `calc(100% + ${gapBetweenItems})`,
+                    }}
+                />
+                <div
+                    className={`absolute left-1/2 transform -translate-x-1/2 p-2 rounded-full shadow-lg border-4 z-20  ${colorClasses}`}
+                    style={{ top: '0' }}
+                >
+                    {step.status == ProjectPhaseStatus.Pending && <LuClock />}
+                    {step.status == ProjectPhaseStatus.Progress && <TbProgressBolt />}
+                    {step.status == ProjectPhaseStatus.Completed && <LuCircleCheck />}
+                </div>
+            </div>
+
+            <div className={`flex-1 mt-1 p-3 rounded-xl shadow-sm transition-all duration-300 bg-white border border-gray-200 hover:shadow-md`}>
+                <div className="flex justify-between items-start">
+                    <h3 className="font-semibold text-sm text-gray-800">{step.name}</h3>
+                    <span className={`text-[0.6rem] font-medium px-2 py-0.5 rounded-full whitespace-nowrap  ${step.status == ProjectPhaseStatus.Completed ? 'bg-green-50 text-green-700' :
+                        step.status == ProjectPhaseStatus.Progress ? 'bg-yellow-50 text-yellow-700' :
+                            'bg-gray-50 text-gray-700'}`}
+                    >
+                        {getPhaseStatusName(step.status)}
+                    </span>
+                </div>
+                <p className="text-xs text-gray-600 mt-1">{step.description}</p>
+                {!!user && <div className="flex items-center bg-white border rounded-lg p-2">
+                    <Avatar className="h-10 w-10 mr-3">
+                        <AvatarImage src={user.image} />
+                        <AvatarFallback>
+                            {nameLetter(user.first_name)}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col flex-1">
+                        <div className="text-sm font-medium text-gray-900">{user.first_name} {user.last_name}</div>
+                        <span className="text-xs text-gray-500">Email :- {user.email}</span>
+                        <span className="text-xs text-gray-500">Mobile : {user.mobile}</span>
+                    </div>
+                </div>}
+                {!!step.remarks && <div className='bg-sky-50 border border-sky-300 p-2 rounded-lg mt-3 text-xs italic'>{step.remarks}</div>}
+                {step.has_update && <p className="text-[0.65rem] text-gray-400 mt-2 flex items-center">
+                    <Calendar className="w-3 h-3 mr-1" />
+                    Started at : {formatDateTime(step.created_at)}
+                </p>}
+                {step.has_update && !!step.updated_at && <p className="text-[0.65rem] text-gray-400 mt-2 flex items-center">
+                    <Calendar className="w-3 h-3 mr-1" />
+                    Completed at : {formatDateTime(step.updated_at)}
+                </p>}
+
+
+            </div>
+        </div>
+    );
+}
+
+const PhaseStep = ({ phase, state, setState }: OrderCommonProps & { phase: Phase }) => {
+
 
     return (
         <>
@@ -31,66 +110,7 @@ const PhaseStep = ({ phase }: { phase: Phase }) => {
             </div>}
             {!!phase.is_active && <div className="relative px-4 py-4">
                 {phase.steps.map((step, index) => {
-                    // const colorClasses = getStatusColor(event.status);
-                    const colorClasses = '';
-                    const isFirst = index === 0;
-                    const isLast = index === phase.steps.length - 1;
-                    var status = 'in-progress';
-                    return (
-                        // mb-6 provides the vertical spacing between items.
-                        <div key={step.id} className="mb-6 flex items-stretch">
-
-                            {/* 1. Timeline Track & Dot Container (Fixed w-12 gutter for spacing) */}
-                            <div className="relative w-12 flex-shrink-0">
-
-                                {/* Line Segment (Track) */}
-                                <div
-                                    className={`absolute left-1/2 w-1 bg-gray-200 transform -translate-x-1/2`}
-                                    style={{
-                                        // 1. Clipping top: If first, start line 22px down (below the center of the first dot).
-                                        top: isFirst ? dotCenterOffset : '0',
-
-                                        // 2. Extending bottom: If not last, line height must extend into the mb-6 space (1.5rem)
-                                        // If last, clip height at 22px.
-                                        height: isLast
-                                            ? dotCenterOffset
-                                            : isFirst
-                                                ? `calc(100% + ${gapBetweenItems} - ${dotCenterOffset})`
-                                                : `calc(100% + ${gapBetweenItems})`,
-                                    }}
-                                />
-
-                                {/* Timeline Dot/Icon - z-20 to ensure it is above the line */}
-                                <div
-                                    className={`absolute left-1/2 transform -translate-x-1/2 p-2 rounded-full shadow-lg border-4 z-20 
-                  ${colorClasses}`}
-                                    style={{ top: '0' }}
-                                >
-                                    <LuClock />
-                                </div>
-                            </div>
-
-                            {/* 2. Content Card (Starts after the w-12 container, providing clean separation) */}
-                            <div className={`flex-1 mt-1 p-3 rounded-xl shadow-sm transition-all duration-300 bg-white border border-gray-200 hover:shadow-md`}>
-                                {/* mt-1 aligns the card slightly better with the center of the dot */}
-                                <div className="flex justify-between items-start">
-                                    <h3 className="font-semibold text-sm text-gray-800">{step.name}</h3>
-                                    <span className={`text-[0.6rem] font-medium px-2 py-0.5 rounded-full whitespace-nowrap
-                    ${status === 'completed' ? 'bg-green-50 text-green-700' :
-                                            status === 'in-progress' ? 'bg-yellow-50 text-yellow-700' :
-                                                'bg-gray-50 text-gray-700'}`}
-                                    >
-                                        Pending
-                                    </span>
-                                </div>
-                                <p className="text-xs text-gray-600 mt-1">{step.description}</p>
-                                <p className="text-[0.65rem] text-gray-400 mt-2 flex items-center">
-                                    <Calendar className="w-3 h-3 mr-1" />
-                                    Due:
-                                </p>
-                            </div>
-                        </div>
-                    );
+                    return <PhaseStepEditor key={step.id} state={state} setState={setState} is_first={index === 0} is_last={index === phase.steps.length - 1} step={step} />
                 })}
             </div>}
         </>
@@ -128,18 +148,19 @@ const PhaseHeader = ({ phase }: { phase: Phase }) => {
     );
 };
 
-export default function OrderPhase({ state }: { state: OrderState, setState: React.Dispatch<React.SetStateAction<OrderState | undefined>> }) {
+export default function OrderPhase({ state, setState }: OrderCommonProps) {
     return (
-        <div className="flex overflow-x-auto p-4 space-x-8 pb-8 custom-scrollbar bg-sky-50 rounded-lg mt-3   border border-sky-300 max-w-7xl">
+        <div className="flex flex-row gap-4 relative">
+
+
 
             {state.phases.map((phase) => (
                 <div
                     key={phase.id}
-                    className="min-w-[320px] max-w-sm flex-shrink-0"
+                    className="min-w-[400px] max-w-sm flex-shrink-0 bg-white p-3 rounded-lg border shadow-lg"
                 >
                     <PhaseHeader phase={phase} />
-
-                    <PhaseStep phase={phase} />
+                    <PhaseStep state={state} setState={setState} phase={phase} />
                 </div>
             ))}
         </div>

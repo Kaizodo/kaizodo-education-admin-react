@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
     LuMenu, LuLogOut, LuBell, LuSearch,
     LuShield,
@@ -6,42 +6,24 @@ import {
 
 
 import { SidebarContent } from "./SidebarContent";
-import { Navigate, Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import CenterLoading from "../common/CenterLoading";
 import { AuthenticationService } from "@/services/AuthenticationService";
 import { useGlobalContext } from "@/hooks/use-global-context";
 import { nameLetter } from "@/lib/utils";
-import { BootService } from "@/services/BootService";
-import { Storage } from "@/lib/storage";
 
 
 
 export default function MainLayout() {
     const navigate = useNavigate();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
     const [logoutProcessing, setLogoutProcessing] = useState(false);
-    const { context, setContext } = useGlobalContext();
-    const [loading, setLoading] = useState(true);
-    useEffect(() => {
-        AuthenticationService.isAuthenticated().then(setIsAuthenticated).catch(() => setIsAuthenticated(false));
-    }, []);
+    const { context } = useGlobalContext();
 
-    const initProfile = async () => {
-        var r = await BootService.boot();
-        if (r.success) {
-            await Storage.set('permissions', r.data.user.permissions);
-            setContext(c => ({ ...c, ...r.data }));
-            setLoading(false);
-        } else {
-            await AuthenticationService.logoutPlatform();
-            setIsAuthenticated(false);
-        }
-    }
+
 
 
     const logout = async () => {
@@ -50,21 +32,7 @@ export default function MainLayout() {
         setLogoutProcessing(false);
     }
 
-    useEffect(() => {
-        if (isAuthenticated === true) {
-            initProfile();
-        } else if (isAuthenticated === false) {
-            setLoading(false);
-        }
-    }, [isAuthenticated]);
 
-    if (isAuthenticated === null || loading) {
-        return <CenterLoading />
-    }
-
-    if (!isAuthenticated) {
-        return <Navigate to={'/login'} />
-    }
 
 
 

@@ -11,6 +11,8 @@ import CenterLoading from "@/components/common/CenterLoading";
 import NoRecords from "@/components/common/NoRecords";
 
 import { SubscriptionPlanThumbnail } from "./components/SubscriptionPlanThumbnail";
+import TextField from "@/components/common/TextField";
+import Dropdown from "@/components/common/Dropdown";
 
 
 export default function SubscriptionPlans() {
@@ -19,7 +21,8 @@ export default function SubscriptionPlans() {
     const [paginated, setPaginated] = useState<any>(getDefaultPaginated());
     const [filters, setFilters] = useState<any>({
         page: 1,
-        keyword: ''
+        keyword: '',
+        custom: 0
     });
     const setFilter = useSetValue(setFilters);
     const search = async () => {
@@ -41,6 +44,15 @@ export default function SubscriptionPlans() {
             subtitle="Manage predefined subscription plans for your organization"
             actions={<Btn onClick={() => navigate('/subscription-plans/create')}><LuPlus />Create New Plan</Btn>}
         >
+            <div className="bg-white rounded-lg p-2 shadow-lg mb-6 grid grid-cols-5 gap-3">
+                <TextField value={filters.keyword} onChange={v => setFilter('keyword', 'debounce')(v, true)} placeholder="Search by name ">Search</TextField>
+                <Dropdown searchable={false} value={filters.custom} onChange={setFilter('custom', 'debounce')} placeholder="Select plan type" getOptions={async () => {
+                    return [
+                        { id: 0, name: 'Standard Plan' },
+                        { id: 1, name: 'Custom Plan' }
+                    ]
+                }}>Plan Type</Dropdown>
+            </div>
             {searching && <CenterLoading className="relative h-[400px]" />}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                 {!searching && paginated.records.map((record: any, index: number) => {

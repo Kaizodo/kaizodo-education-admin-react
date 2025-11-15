@@ -4,7 +4,6 @@ import { useForm } from '@/hooks/use-form';
 import { LuArrowRight, LuTrendingUp } from 'react-icons/lu';
 import { cn, formatDate, formatDays } from '@/lib/utils';
 import AppPage from '@/components/app/AppPage';
-import { Search } from '@/components/ui/search';
 import Dropdown from '@/components/common/Dropdown';
 import Btn from '@/components/common/Btn';
 import { TbRefresh } from "react-icons/tb";
@@ -13,8 +12,11 @@ import { getTopupTypeName, UserQuotaCodeEnum } from '@/data/Subscription';
 import DownloadInvoiceBtn from './components/DownloadInvoiceBtn';
 import { getDefaultPaginated, PaginationType } from '@/data/pagination';
 import { UserOrderService } from '@/services/UserOrderService';
-import { getUserOrderStatusMeta, UserOrder, UserOrderStatus } from '@/data/order';
+import { getUserOrderStatusMeta, UserOrder } from '@/data/order';
 import { useNavigate } from 'react-router-dom';
+import SuggestSubscriptionPlan from '@/components/common/suggest/SuggestSubscriptionPlan';
+import TextField from '@/components/common/TextField';
+import NoRecords from '@/components/common/NoRecords';
 
 
 
@@ -48,25 +50,55 @@ export default function Orders() {
             title='Orders'
             subtitle='Track your package orders and deployment progress'
         >
-            <div className='border bg-white rounded-lg p-3 shadow flex flex-row items-end gap-3'>
-                <div className='flex-1'>
-                    <Search placeholder='Search order' value={filters.keyword} onChange={e => setFilter('keyword', 'debounce')(e.target.value, true)} />
-                </div>
-                <div>
-                    <Dropdown
-                        value={filters.status}
-                        onChange={setFilter('status', 'debounce')}
-                        placeholder='Select a status'
-                        getOptions={async () => [
-                            { id: UserOrderStatus.Pending, name: 'Awaiting Payment' },
-                            { id: UserOrderStatus.Active, name: 'Active Order' },
+            <div className='border bg-white rounded-lg p-3 shadow grid grid-cols-5 gap-3'>
+                <TextField placeholder='Enter order id' value={filters.keyword} onChange={v => setFilter('keyword', 'debounce')(v, true)}>Search</TextField>
+                <Dropdown
+                    searchable={false}
+                    value={filters.is_renwal}
+                    onChange={setFilter('is_renwal', 'debounce')}
+                    placeholder='Select an option'
+                    getOptions={async () => [
+                        { id: 1, name: 'Renwal' },
+                        { id: 0, name: 'Purchase' },
 
-                        ]}>Order Status</Dropdown>
-                </div>
+                    ]}>Order Type</Dropdown>
+                <Dropdown
+                    searchable={false}
+                    value={filters.duration}
+                    onChange={setFilter('duration', 'debounce')}
+                    placeholder='Select a duration'
+                    getOptions={async () => [
+                        { id: '30d', name: 'Within 30 Days' },
+                        { id: '1y', name: '30 Days+ and within 1 Year' },
+                        { id: '1y+', name: '1 Year+' },
+                    ]}>Duration</Dropdown>
+                <SuggestSubscriptionPlan
+                    value={filters.subscription_plan_id}
+                    onChange={setFilter('subscription_plan_id', 'debounce')}
+                />
+                <Dropdown
+                    value={filters.progress}
+                    onChange={setFilter('progress', 'debounce')}
+                    placeholder='Select progress'
+                    getOptions={async () => [
+                        { id: '!dma', name: 'Deployment Manager Not Assigned' },
+                        { id: 'dma', name: 'Deployment Manager Assigned' },
+                        { id: '!ta', name: 'Team Not Assigned' },
+                        { id: 'ta', name: 'Team Assigned' },
+                        { id: 'rfd', name: 'Ready for deployment' },
+                        { id: '!rfd', name: 'Not ready for deployment' },
+                        { id: 'dc', name: 'Deployment Completed' },
+                        { id: 'do', name: 'Deployment Onboing' },
+                        { id: 'rma', name: 'Relationship Manager Assigned' },
+                        { id: '!rma', name: 'Relationship manager not assigned' },
+
+                    ]}>Deployment Progress</Dropdown>
             </div>
+            {!searching && <span className='text-xs italic flex'>Found {paginated.total} Orders | Showing {paginated.records.length} on current page {paginated.page}</span>}
 
             <div className="space-y-6">
                 {searching && <CenterLoading className="relative h-[400px]" />}
+                {!searching && paginated.records.length == 0 && <NoRecords title='No Orders found' />}
                 {!searching && paginated.records.map((order) => {
                     const meta = getUserOrderStatusMeta(order.status)
 

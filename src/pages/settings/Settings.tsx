@@ -157,6 +157,8 @@ const SettingsManagement = () => {
                     <TextField value={form.linkedin_page_url} onChange={setValue('linkedin_page_url')} placeholder="LinkedIn page url">LinkedIn page url</TextField>
                     <TextField value={form.instagram_page_url} onChange={setValue('instagram_page_url')} placeholder="Instagram page url">Instagram page url</TextField>
                     <TextField value={form.youtube_page_url} onChange={setValue('youtube_page_url')} placeholder="YouTube channel url">YouTube channel url</TextField>
+                    <TextField value={form.facebook_handle} onChange={setValue('facebook_handle')} placeholder="Facebook handle @yourhandle">Facebook handle @yourhandle</TextField>
+                    <TextField value={form.x_handle} onChange={setValue('x_handle')} placeholder="Twitter (X) handle @yourhandle">Twitter (X) handle @yourhandle</TextField>
                 </div>
 
                 <strong className='flex'>Taxes</strong>

@@ -20,6 +20,8 @@ type Props = {
     title: string,
     subtitle: string,
     exclude_ids?: number[],
+    lead_ids?: (number | undefined)[],
+    is_contact?: number,
     user_type?: UserType,
     user_types?: UserType[],
     class_id?: number,
@@ -40,10 +42,17 @@ export async function pickMultipleUsers({
         subtitle: string
     }): Promise<User[]> {
     return new Promise((resolve) => {
+        var resolved = false;
         const modal_id = Modal.show({
             title,
             subtitle,
             maxWidth: 500,
+            onClose: () => {
+                if (!resolved) {
+                    resolve([]);
+                    resolved = true;
+                }
+            },
             content: () => {
                 const [paginated, setPaginated] = useState<PaginationType<User>>(getDefaultPaginated());
                 const [searching, setSearching] = useState(true);
@@ -117,8 +126,10 @@ export async function pickMultipleUsers({
                     <ModalFooter className="flex flex-row items-center justify-between">
                         <span className="text-xs">Selected <Badge> {selected.length}</Badge></span>
                         <Btn size={'sm'} onClick={() => {
+                            resolved = true;
                             Modal.close(modal_id);
                             resolve(selected);
+
                         }}>Select <LuArrowRight /></Btn>
                     </ModalFooter>
                 </>);

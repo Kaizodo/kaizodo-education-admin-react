@@ -12,7 +12,8 @@ import { SuggestProp } from './Suggest';
 
 
 
-export default function SuggestState({ children = 'State', disabled, country_id, value, onChange, selected, placeholder = 'Select state', onSelect, includedValues }: SuggestProp & {
+export default function SuggestState({ children = 'State', exclude_ids, disabled, country_id, value, onChange, selected, placeholder = 'Select state', onSelect, includedValues }: SuggestProp & {
+    exclude_ids?: number[],
     country_id?: number
 }) {
     return (
@@ -26,7 +27,7 @@ export default function SuggestState({ children = 'State', disabled, country_id,
             includedValues={includedValues}
             onSelect={onSelect} getOptions={async ({ page, keyword }) => {
                 var r = await StateService.search({
-                    page, keyword, country_id
+                    page, keyword, country_id, exclude_ids
                 });
                 if (r.success) {
                     return r.data.records;

@@ -28,44 +28,5 @@ export class DesignationService {
         return Api(`${this.endpoint}/delete`, { id });
     }
 
-    public static async loadWeekOffConfiguration(id: number) {
-        return Api(`${this.endpoint}/load-weekoff-configuration`, { id });
-    }
 
-    public static async saveWeekOffConfiguration(form: {
-        designation_id: number,
-        mode: string,
-        fixed_days: any[],
-        alternate_days: any,
-    }) {
-        return Api(`${this.endpoint}/save-weekoff-configuration`, form);
-    }
-
-
-    public static async loadLeaveConfiguration(id: number) {
-        return Api(`${this.endpoint}/load-leave-configuration`, { id });
-    }
-
-    public static async saveLeaveConfiguration(form: {
-        designation_id: number,
-        leave_types: {
-            id: number,
-            quota: number
-        }[]
-    }) {
-        return Api(`${this.endpoint}/save-leave-configuration`, form);
-    }
-
-
-
-    public static async loadFeedbackConfiguration(id: number) {
-        return Api(`${this.endpoint}/load-feedback-configuration`, { id });
-    }
-
-    public static async saveFeedbackConfiguration(form: {
-        designation_id: number,
-        probation_criteria_ids: number[]
-    }) {
-        return Api(`${this.endpoint}/save-feedback-configuration`, form);
-    }
 }

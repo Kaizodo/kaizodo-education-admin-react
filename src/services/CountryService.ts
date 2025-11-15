@@ -7,7 +7,8 @@ export class CountryService {
 
     public static async search(form: {
         page: number,
-        keyword: string
+        keyword: string,
+        exclude_ids?: number[]
     }) {
         return Api(`${this.endpoint}/search`, form);
     }

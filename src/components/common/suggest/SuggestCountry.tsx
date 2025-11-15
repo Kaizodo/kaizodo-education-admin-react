@@ -10,7 +10,9 @@ import { SuggestProp } from './Suggest';
 
 
 
-export default function SuggestCountry({ children = 'Country', value, selected, onChange, placeholder = 'Select country', onSelect, includedValues }: SuggestProp) {
+export default function SuggestCountry({ children = 'Country', exclude_ids, value, selected, onChange, placeholder = 'Select country', onSelect, includedValues }: SuggestProp & {
+    exclude_ids?: number[]
+}) {
     return (
         <Dropdown
             searchable={true}
@@ -21,7 +23,7 @@ export default function SuggestCountry({ children = 'Country', value, selected, 
             includedValues={includedValues}
             onSelect={onSelect} getOptions={async ({ page, keyword }) => {
                 var r = await CountryService.search({
-                    page, keyword
+                    page, keyword, exclude_ids
                 });
                 if (r.success) {
                     return r.data.records;

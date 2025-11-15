@@ -19,6 +19,18 @@ export class ProjectService {
         return Api('project/assign-team', form);
     }
 
+    public static async updatePhaseStep(form: any) {
+        return Api('project/update-phase-step', form);
+    }
+
+    public static async startProjectDeployment(form: any) {
+        return Api('project/start-project-deployment', form);
+    }
+    public static async finishProjectDeployment(form: any) {
+        return Api('project/finish-project-deployment', form);
+    }
+
+
 
     public static async invoice(internal_reference_number: string) {
         return Api('project/invoice', { internal_reference_number }, {

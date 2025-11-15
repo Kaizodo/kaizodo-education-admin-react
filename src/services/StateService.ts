@@ -7,6 +7,7 @@ export class StateService {
 
     public static async search(form: {
         country_id?: number,
+        exclude_ids?: number[],
         page: number,
         keyword: string
     }) {

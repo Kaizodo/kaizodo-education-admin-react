@@ -12,11 +12,12 @@ import {
     LuBus,
     LuGitCompare,
     LuBadgeIndianRupee,
+    LuFileStack,
 } from "react-icons/lu";
 import { NavType } from "./data/sidenav";
 import { BiSliderAlt } from "react-icons/bi";
 import { LiaBullhornSolid, LiaUserTieSolid } from "react-icons/lia";
-import { TbListTree, TbTimelineEventText } from "react-icons/tb";
+import { TbListTree, TbTimelineEventText, TbUserStar } from "react-icons/tb";
 import { TiGroupOutline } from "react-icons/ti";
 import { GrGroup, GrNavigate } from "react-icons/gr";
 import { PRODUCTION_MODE } from "./lib/api";
@@ -27,7 +28,7 @@ import { VscFeedback } from "react-icons/vsc";
 import { RxIdCard } from "react-icons/rx";
 import { RiDiscountPercentLine } from "react-icons/ri";
 import { FaTimeline } from "react-icons/fa6";
-import { PiProjectorScreenChart } from "react-icons/pi";
+import { PiNetwork, PiProjectorScreenChart } from "react-icons/pi";
 
 export const navs: NavType[] = [
     { route: '', label: 'Dashboard', icon: LuHouse },
@@ -58,19 +59,26 @@ export const navs: NavType[] = [
         icon: LiaUserTieSolid,
         route: 'clients'
     },
+
     {
-        label: 'Projects',
-        icon: PiProjectorScreenChart,
-        route: 'projects'
+        label: 'Projects & Steps',
+        icon: PiNetwork,
+        children: [
+            {
+                label: 'Projects',
+                icon: PiProjectorScreenChart,
+                route: 'projects'
+            },
+            { label: 'Project Phases', icon: FaTimeline, route: 'phases' },
+            { label: 'Project Phase Steps', icon: TbTimelineEventText, route: 'phase-steps' },
+        ]
     },
     {
         label: 'Employees & Team',
         icon: GrGroup,
         children: [
             { label: 'Employees', icon: LuUsers, route: 'employees' },
-            { label: 'Teams', icon: TiGroupOutline, route: 'teams' },
-            { label: 'Project Phases', icon: FaTimeline, route: 'phases' },
-            { label: 'Project Phase Steps', icon: TbTimelineEventText, route: 'phase-steps' },
+            { label: 'Teams', icon: TiGroupOutline, route: 'teams' }
         ]
     },
     {
@@ -85,6 +93,8 @@ export const navs: NavType[] = [
         icon: LuClipboardList,
         route: 'orders'
     },
+    { label: 'Product Management', icon: LuCrown, route: 'product-management' },
+    { label: 'Lead Management', icon: TbUserStar, route: 'lead-management' },
     {
         label: 'Ticket Support',
         icon: LuHeadphones,
@@ -104,6 +114,7 @@ export const navs: NavType[] = [
         label: 'Website',
         icon: FaGlobeAsia,
         children: [
+            { route: 'article-bulk-upload', label: 'Bulk Upload Articles', icon: LuFileStack },
             { route: 'news', label: 'News', icon: LuNewspaper },
             { route: 'blogs', label: 'Blogs', icon: LuNewspaper },
             { route: 'gallery', label: 'Gallery', icon: LuBus },

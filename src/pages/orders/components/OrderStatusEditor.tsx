@@ -2,13 +2,13 @@ import Btn from '@/components/common/Btn';
 import SuggestEmployee from '@/components/common/suggest/SuggestEmployee';
 import React, { ReactNode, useEffect, useState } from 'react';
 import OrderPhase from './OrderPhase';
-import { OrderState } from '../OrderDetail';
+import { OrderCommonProps, OrderState } from '../OrderDetail';
 import { useForm } from '@/hooks/use-form';
 import { formatDateTime, nameLetter } from '@/lib/utils';
 import { UserOrderService } from '@/services/UserOrderService';
 import { msg } from '@/lib/msg';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LuMail, LuPhone } from 'react-icons/lu';
+import { LuArrowRight, LuMail, LuPhone } from 'react-icons/lu';
 import { EmployeeService } from '@/services/EmployeeService';
 import { getDefaultPaginated, PaginationType } from '@/data/pagination';
 import { User } from '@/data/user';
@@ -18,6 +18,7 @@ import Pagination from '@/components/common/Pagination';
 import NoRecords from '@/components/common/NoRecords';
 import CenterLoading from '@/components/common/CenterLoading';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Link } from 'react-router-dom';
 
 // --- 1. Type Definitions ---
 interface TimelineStep {
@@ -111,12 +112,13 @@ const TimelineItem: React.FC<TimelineItemProps> = ({ children, item, isLast }) =
 };
 
 
-export default function OrderStatusEditor({ state, setState }: { state: OrderState, setState: React.Dispatch<React.SetStateAction<OrderState | undefined>> }) {
+export default function OrderStatusEditor({ state, setState }: OrderCommonProps) {
     const [form, setValue, setForm] = useForm<OrderState["project"]>(state.project);
 
     const [subordindatePaginated, setSubordindatePaginated] = useState<PaginationType<User>>(getDefaultPaginated());
 
     const [assigningDeploymentManager, setAssigningDeploymentManager] = useState(false);
+    const [assigningRelationshipManager, setAssigningRelationshipManager] = useState(false);
     const [assigningTeam, setAssigningTeam] = useState(false);
     const [searchingSubordindates, setSearchingSubordindates] = useState(false);
     const [subordinateFilters, setSubordindateFilters] = useState<any>({
@@ -144,6 +146,24 @@ export default function OrderStatusEditor({ state, setState }: { state: OrderSta
             msg.success('Manager is assigned');
         }
         setAssigningDeploymentManager(false);
+    }
+
+    const assignRelationshipManager = async () => {
+        setAssigningRelationshipManager(true);
+        var r = await UserOrderService.assignRelationshipManager({
+            user_id: form.relationship_manager_user_id,
+            project_id: state.project.id
+        });
+        if (r.success) {
+            setState(s => (s ? {
+                ...s,
+                project: r.data.project,
+                users: r.data.users
+            } : s));
+            setForm(r.data.project);
+            msg.success('Manager is assigned');
+        }
+        setAssigningRelationshipManager(false);
     }
 
     const assignTeam = async () => {
@@ -195,6 +215,7 @@ export default function OrderStatusEditor({ state, setState }: { state: OrderSta
 
 
     var deploymentManager = state?.users?.find?.(u => u.id === state?.project?.deployment_manager_user_id) ?? undefined;
+    var relationshipManager = state?.users?.find?.(u => u.id === state?.project?.relationship_manager_user_id) ?? undefined;
 
     return (
         <div className="relative">
@@ -321,14 +342,21 @@ export default function OrderStatusEditor({ state, setState }: { state: OrderSta
                     status: form.is_ready_deployment ? 'completed' : (form.is_team_assigned ? 'in-progress' : 'upcoming'),
                 }}
                 isLast={false}
-            />
+            >
+                {!!form.is_team_assigned && <div className='flex flex-col gap-1 items-start'>
+                    <span className='font-bold text-primary text-lg'>{state.project.internal_reference_number}</span>
+                    <Link to={'/projects/' + state.project.internal_reference_number}>
+                        <Btn variant={'outline'} size={'sm'}>View Project <LuArrowRight /></Btn>
+                    </Link>
+                </div>}
+            </TimelineItem>
             <TimelineItem
                 item={{
                     id: 1,
                     title: 'Deployment Phase',
                     date: form.deployment_phase_datetime,
                     description: 'Deployment phases',
-                    status: form.is_deployment_phase ? 'completed' : (form.is_ready_deployment ? 'in-progress' : 'upcoming'),
+                    status: form.is_deployment_completed ? 'completed' : (form.is_ready_deployment ? 'in-progress' : 'upcoming'),
                 }}
                 isLast={false}
             >
@@ -338,26 +366,49 @@ export default function OrderStatusEditor({ state, setState }: { state: OrderSta
                 item={{
                     id: 1,
                     title: 'Deployment Completed',
-                    date: 'Oct 1, 2025',
+                    date: form.deployment_complete_datetime,
                     description: 'Deployment phases',
-                    status: 'upcoming',
+                    status: form.is_deployment_completed ? 'completed' : (form.is_deployment_phase ? 'in-progress' : 'upcoming'),
                 }}
                 isLast={false}
-            >some ui</TimelineItem>
+            />
             <TimelineItem
                 item={{
                     id: 1,
                     title: 'Assign Relationship Manager',
-                    date: 'Oct 1, 2025',
-                    description: 'Deployment phases',
-                    status: 'upcoming',
+                    date: form.relationship_manager_assigned_datetime,
+                    description: 'Assign a relationship manager who will handle after sale service requests',
+                    status: form.is_relationship_manager_assigned ? 'completed' : (form.is_deployment_completed ? 'in-progress' : 'upcoming'),
                 }}
                 isLast={true}
             >
-                <div className='max-w-sm border space-y-3 p-3 rounded-sm bg-sky-50 border-sky-300 mt-3'>
-                    <SuggestEmployee value={form.relationship_manager_user_id} onChange={setValue('relationship_manager_user_id')} placeholder='Select manager'>Select a manager</SuggestEmployee>
-                    <Btn>Assign Manager</Btn>
-                </div>
+                {!!form.is_deployment_completed && !form.is_relationship_manager_assigned && <div className='max-w-sm border space-y-3 p-3 rounded-sm bg-sky-50 border-sky-300 mt-3'>
+                    <SuggestEmployee is_manager={1}
+                        value={form.relationship_manager_user_id}
+                        onChange={setValue('relationship_manager_user_id')}
+                        placeholder='Select manager'
+                    >Relationship Manager</SuggestEmployee>
+                    <Btn loading={assigningRelationshipManager} onClick={assignRelationshipManager} disabled={!form.relationship_manager_user_id}>Assign Manager</Btn>
+                </div>}
+                {relationshipManager && <div className='bg-sky-50 border border-sky-300 p-3 rounded-sm flex items-center self-start'>
+                    <Avatar className="h-20 w-20 mr-3">
+                        <AvatarImage src={relationshipManager.image} />
+                        <AvatarFallback>
+                            {nameLetter(relationshipManager.first_name)}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div>
+                        <div className="text-sm font-medium text-gray-900">{relationshipManager.first_name} {relationshipManager.last_name}</div>
+                        <div className="text-sm text-gray-500 flex flex-row items-center gap-1">
+                            <LuPhone />
+                            <span>{relationshipManager.mobile}</span>
+                        </div>
+                        <div className="text-sm text-gray-500 flex flex-row items-center gap-1">
+                            <LuMail />
+                            <span>{relationshipManager.email}</span>
+                        </div>
+                    </div>
+                </div>}
             </TimelineItem>
 
         </div>

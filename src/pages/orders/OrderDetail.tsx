@@ -5,13 +5,15 @@ import { formatCurrency, formatDateTime, formatDays } from '@/lib/utils';
 import { UserOrderService } from '@/services/UserOrderService';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
-import { LuArrowRight, LuCrown, LuLayers } from 'react-icons/lu';
+import { LuArrowRight, LuCrown, LuLayers, LuReceiptIndianRupee } from 'react-icons/lu';
 import DownloadInvoiceBtn from './components/DownloadInvoiceBtn';
 import { getTopupTypeName, UserQuotaCodeEnum } from '@/data/Subscription';
 import { getUserOrderStatusMeta, UserOrder, UserOrderItem } from '@/data/order';
 import { useNavigate, useParams } from 'react-router-dom';
 import OrderStatusEditor from './components/OrderStatusEditor';
 import { User } from '@/data/user';
+import NoRecords from '@/components/common/NoRecords';
+import { MdPlaylistRemove } from 'react-icons/md';
 
 
 
@@ -111,11 +113,12 @@ const AddonsDisplay = ({ items }: { items: UserOrderItem[] }) => (
             <LuLayers className={"text-orange-500"} />
             Addons   & Top-Ups
         </h2>
-        <div className="space-y-4">
+        {items.length > 0 && <div className="space-y-4">
             {items.map((item) => (
                 <ConsumableProgressBar key={item.id} item={item} />
             ))}
-        </div>
+        </div>}
+        {items.length == 0 && <NoRecords title='No Addons' subtitle='No Addons on this order' />}
     </div>
 );
 
@@ -127,10 +130,11 @@ const PaymentsAndRenewals = ({ orders }: { orders: UserOrder[] }) => {
     return (
         <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-green-500">
             <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                <svg className="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m0 0l-1 1h4l1-1h4l1 1h4l1-1m-1-1h-1"></path></svg>
-                Payments & Renewals
+                <LuReceiptIndianRupee />
+                Renewals
             </h2>
-            <ul className="space-y-4">
+            {orders.length == 0 && <NoRecords icon={MdPlaylistRemove} title='No Renewals Yet' subtitle='Any renewals will showup here' />}
+            {orders.length > 0 && <ul className="space-y-4">
                 {orders.map((order, index) => {
                     var meta = getUserOrderStatusMeta(order.status);
                     return (
@@ -149,7 +153,7 @@ const PaymentsAndRenewals = ({ orders }: { orders: UserOrder[] }) => {
                         </li>
                     );
                 })}
-            </ul>
+            </ul>}
         </div>
     );
 };
@@ -183,6 +187,12 @@ export type PhaseStep = {
     phase_id: number,
     name: string,
     description: string,
+    has_update: boolean,
+    remarks: string,
+    created_at: string,
+    updated_at: string,
+    user_id: number,
+    status: ProjectPhaseStatus
 }
 
 export type Project = {
@@ -230,6 +240,11 @@ export type OrderState = {
     users: User[],
     order: UserOrder,
     orders: UserOrder[]
+}
+
+export type OrderCommonProps = {
+    state: OrderState,
+    setState: React.Dispatch<React.SetStateAction<OrderState | undefined>>
 }
 
 export default function OrderDetail() {
@@ -281,7 +296,7 @@ export default function OrderDetail() {
             </div>
 
 
-            <OrderStatusEditor state={state} setState={setState} />
+            {!!state.project && <OrderStatusEditor state={state} setState={setState} />}
             <PaymentsAndRenewals orders={state.orders} />
 
         </AppPage>

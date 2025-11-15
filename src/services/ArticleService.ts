@@ -26,5 +26,7 @@ export class ArticleService {
     }
 
 
-
+    public static async bulkCreate(form: any) {
+        return Api(`${this.endpoint}/bulk-create`, form);
+    }
 }
