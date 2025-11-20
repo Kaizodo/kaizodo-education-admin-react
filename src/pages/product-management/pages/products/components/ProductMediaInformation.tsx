@@ -1,5 +1,4 @@
 import { RiImageAddLine, RiImageAiLine } from 'react-icons/ri'
-import { CommonProductStateProps } from './ProductEditorForm'
 import FileDrop from '@/components/common/FileDrop'
 import NoRecords from '@/components/common/NoRecords'
 import { ProductService } from '@/services/ProductService';
@@ -9,6 +8,9 @@ import SafeImage from '@/components/common/SafeImage';
 import Btn from '@/components/common/Btn';
 import { LuHeart, LuTrash2 } from 'react-icons/lu';
 import { FaHeartCircleCheck } from 'react-icons/fa6';
+
+
+import { CommonProductStateProps } from '@/data/Product';
 
 export default function ProductMediaInformation({ state, setStateValue }: CommonProductStateProps) {
     const uploadingRef = useRef(false);

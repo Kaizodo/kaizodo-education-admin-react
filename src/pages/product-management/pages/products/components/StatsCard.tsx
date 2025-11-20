@@ -1,11 +1,11 @@
-import { LucideIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { IconType } from "react-icons/lib";
 
 interface StatsCardProps {
   title: string;
   value: string;
   change: string;
-  icon: LucideIcon;
+  icon: IconType;
   trend: "up" | "down";
 }
 

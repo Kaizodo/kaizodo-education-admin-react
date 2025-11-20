@@ -18,7 +18,7 @@ import { ReferralSchemeService } from '@/services/ReferralSchemeService';
 import { Search } from '@/components/ui/search';
 import moment from 'moment';
 
-const LazyEditorDialog = lazy(() => import('./components/SubscriptionModuleEditorDialog'));
+const LazyEditorDialog = lazy(() => import('./components/ReferralSchemeEditorDialog'));
 
 export default function SubscriptionModules() {
     const [searching, setSearching] = useState(true);
@@ -98,11 +98,12 @@ export default function SubscriptionModules() {
                     {!searching && <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead></TableHead>
                                 <TableHead>Name</TableHead>
                                 <TableHead>Com %</TableHead>
                                 <TableHead>Com on Renewal</TableHead>
                                 <TableHead>Com % on Renewal</TableHead>
-                                <TableHead>Subscription Plan</TableHead>
+                                <TableHead>Product</TableHead>
                                 <TableHead>Validity</TableHead>
                                 <TableHead>Publish</TableHead>
                                 <TableHead className='text-end'>Actions</TableHead>
@@ -111,11 +112,16 @@ export default function SubscriptionModules() {
                         <TableBody>
                             {paginated.records.map((record) => (
                                 <TableRow key={record.id}>
+                                    <TableCell className="font-medium">
+                                        {!!record.image && <img src={record.image} className='border rounded-sm' style={{
+                                            height: 100
+                                        }} />}
+                                    </TableCell>
                                     <TableCell>{record.name}</TableCell>
                                     <TableCell>{record.commission_percentage}%</TableCell>
                                     <TableCell>{record.has_commission_on_renewal ? 'Yes' : 'No'}</TableCell>
                                     <TableCell>{record.renewal_commission_percentage}%</TableCell>
-                                    <TableCell>{record.subscription_plan_name}</TableCell>
+                                    <TableCell>{record.product_name}</TableCell>
                                     <TableCell>
                                         <div className='flex flex-col'>
                                             <span>{moment(record.valid_from).format('DD MMM, Y LT')}</span>

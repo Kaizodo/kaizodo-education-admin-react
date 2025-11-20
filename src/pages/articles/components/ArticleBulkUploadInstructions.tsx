@@ -9,7 +9,7 @@ import { ReactNode } from 'react';
 import { LuCopy } from 'react-icons/lu';
 
 export default function ArticleBulkUploadInstructions() {
-    const [form, setValue] = useForm();
+    const [form, setValue] = useForm<any>({});
     const InstructionItem = ({ name, children }: { name: string, children: ReactNode }) => {
         return (<div className='flex flex-row gap-3 items-center'>
             <span className='text-blue-600 font-medium text-sm text-nowrap flex min-w-[100px]'>{name}</span>

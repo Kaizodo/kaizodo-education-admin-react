@@ -1,5 +1,4 @@
 import { useForm } from '@/hooks/use-form';
-import { CommonProductStateProps, FeatureGroup } from './ProductEditorForm'
 import TextField from '@/components/common/TextField';
 import Radio from '@/components/common/Radio';
 import { YesNoArray } from '@/data/Common';
@@ -9,7 +8,7 @@ import { useState } from 'react';
 import { ProductService } from '@/services/ProductService';
 import { msg } from '@/lib/msg';
 import Richtext from '@/components/common/Richtext';
-
+import { CommonProductStateProps, FeatureGroup } from '@/data/Product';
 export default function ProductFeatureInformation({ state }: CommonProductStateProps) {
     const [form, setValue] = useForm<{
         product_id: number,

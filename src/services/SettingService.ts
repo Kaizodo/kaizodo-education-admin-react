@@ -14,12 +14,12 @@ export class SettingService {
         return Api(`${this.endpoint}/set-settings`, form);
     }
 
-    public static async saveFooterLinks(form: any) {
-        return Api(`${this.endpoint}/save-footer-links`, form);
+    public static async saveNavigation(form: any) {
+        return Api(`${this.endpoint}/save-navigation`, form);
     }
 
-    public static async loadFooterLinks() {
-        return Api(`${this.endpoint}/load-footer-links`);
+    public static async loadNavigation() {
+        return Api(`${this.endpoint}/load-navigation`);
     }
 
 }

@@ -120,10 +120,10 @@ export default function SectionNavigator({ menuItems, children }: SectionNavigat
                             <li key={item.id}>
                                 <button
                                     onClick={() => scrollToSection(item.id)}
-                                    className={`w-full text-left py-3 px-3 rounded-sm transition-all duration-200 flex items-start space-x-3
+                                    className={`w-full text-left p-2 rounded-sm transition-all duration-200 flex items-center space-x-3
                                     ${isActive ? 'bg-indigo-600 text-white shadow-lg font-semibold scale-[1.02]' : 'text-gray-700 hover:bg-indigo-50 hover:text-indigo-700'}`}
                                 >
-                                    <div className='w-8 h-8 border rounded-sm flex items-center justify-center text-xl'><Icon /></div>
+                                    <div className='w-8 h-8 border rounded-sm flex items-center justify-center text-xl bg-white text-primary'><Icon /></div>
                                     <div className="flex flex-col">
                                         <span className="font-bold text-sm">{item.title}</span>
                                         <span className={`text-xs ${isActive ? 'text-indigo-200' : 'text-gray-500'}`}>{item.subtitle}</span>

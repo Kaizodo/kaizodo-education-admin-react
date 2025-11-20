@@ -8,7 +8,7 @@ type Props = {
     size?: "default" | "xs" | "sm" | "lg" | "icon" | null | undefined,
     onChange: (value?: any) => void,
     disabled?: boolean,
-    children?: string,
+    children?: ReactNode,
     options: {
         id: any,
         name: string,

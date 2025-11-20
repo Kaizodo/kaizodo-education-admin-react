@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { StatsCard } from "./components/StatsCard";
-import { Package, DollarSign, TrendingUp, AlertCircle, Edit, Trash2 } from "lucide-react";
+import { Package, TrendingUp, AlertCircle, Edit } from "lucide-react";
 import AppPage from "@/components/app/AppPage";
 import Btn from "@/components/common/Btn";
-import { LuArrowRight, LuCamera, LuPlus } from "react-icons/lu";
+import { LuArchive, LuArrowRight, LuCamera, LuCopy, LuPlus } from "react-icons/lu";
 import TextField from "@/components/common/TextField";
 import { useSetValue } from "@/hooks/use-set-value";
 import { getDefaultPaginated, PaginationType } from "@/data/pagination";
@@ -19,28 +19,56 @@ import { msg } from "@/lib/msg";
 import { Link } from "react-router-dom";
 import SafeImage from "@/components/common/SafeImage";
 import { CategoryTree } from "../product-categories/ProductCategoryListing";
-import { getProductTypeName } from "@/data/Product";
-import { cn } from "@/lib/utils";
+import { getProductTypeName, ProductType } from "@/data/Product";
+import { cn, formatDays } from "@/lib/utils";
+import { Modal } from "@/components/common/Modal";
+import { Badge } from "@/components/ui/badge";
+import Radio from "@/components/common/Radio";
+import { YesNoArray } from "@/data/Common";
+import { Skeleton } from "@/components/ui/skeleton";
+import { GrMoney } from "react-icons/gr";
+const LazyCloneProductForm = lazy(() => import('./components/CloneProductForm'));
 
 
+const StatsSkeleton = () => {
+    return <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Skeleton className="h-[120px] border shadow-sm bg-white" />
+        <Skeleton className="h-[120px] border shadow-sm bg-white" />
+        <Skeleton className="h-[120px] border shadow-sm bg-white" />
+        <Skeleton className="h-[120px] border shadow-sm bg-white" />
+    </div>
+}
 
 const Products = () => {
-
+    const [stats, setStats] = useState({
+        currency_symbol: '₹',
+        non_archived: 0,
+        archived: 0,
+        total_products: 0,
+        low_stock: 0,
+        total_stock: 0,
+        total_sp: 0,
+        total_mrp: 0,
+        total_cp: 0
+    });
     const [searching, setSearching] = useState(true);
     const [paginated, setPaginated] = useState<PaginationType<any>>(getDefaultPaginated());
-    const [filters, setFilters] = useState<{
-        debounce?: boolean,
-        page: number,
-        keyword: string,
-        product_category_id?: number,
-        is_service?: number,
-        sort_by?: string,
-        publish?: number
-    }>({
+    const [filters, setFilters] = useState<any>({
         debounce: true,
         page: 1,
         keyword: '',
     });
+
+    const [loading, setLoading] = useState(true);
+
+    const load = async () => {
+        setLoading(true);
+        var r = await ProductService.stats();
+        if (r.success) {
+            setStats(r.data);
+        }
+        setLoading(false);
+    }
 
     const setFilter = useSetValue(setFilters);
 
@@ -57,6 +85,21 @@ const Products = () => {
         setSearching(false);
     }
 
+    const openCloner = async (product: any) => {
+        const modal_id = Modal.show({
+            title: 'Clone Product',
+            subtitle: `Clone ${product.name} and create new product`,
+            content: () => <Suspense fallback={<CenterLoading className='h-[400px] relative' />}>
+                <LazyCloneProductForm product={product} onSuccess={() => {
+                    search();
+                    load();
+                    Modal.close(modal_id);
+                }} />
+            </Suspense>
+        });
+    }
+
+
     useEffect(() => {
         if (filters.debounce) {
             debounceSearch();
@@ -67,6 +110,9 @@ const Products = () => {
     }, [filters]);
 
 
+    useEffect(() => {
+        load();
+    }, [])
 
 
     return (
@@ -77,46 +123,48 @@ const Products = () => {
             containerClassName="space-y-6"
         >
             {/* Stats */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {loading && <StatsSkeleton />}
+
+            {!loading && <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <StatsCard
                     title="Total Products"
-                    value="156"
-                    change="+12% from last month"
+                    value={`${stats.total_products}`}
+                    change={`${stats.archived} Archived`}
                     icon={Package}
                     trend="up"
                 />
                 <StatsCard
-                    title="Total Revenue"
-                    value="$45,231"
-                    change="+8% from last month"
-                    icon={DollarSign}
+                    title="Stock Value"
+                    value={`${stats.currency_symbol}${stats.total_cp}`}
+                    change={`${stats.currency_symbol}${stats.total_sp} selling value`}
+                    icon={GrMoney}
                     trend="up"
                 />
                 <StatsCard
                     title="Active Products"
-                    value="142"
-                    change="+4% from last month"
+                    value={`${stats.non_archived}`}
+                    change={`${stats.total_products} total products`}
                     icon={TrendingUp}
                     trend="up"
                 />
                 <StatsCard
                     title="Low Stock"
-                    value="8"
-                    change="-2 from last week"
+                    value={`${stats.low_stock}`}
+                    change={`${stats.total_stock} total stock`}
                     icon={AlertCircle}
                     trend="down"
                 />
-            </div>
+            </div>}
 
-            {/* Filters */}
-
-
-            {/* Products Table */}
             <div className="overflow-x-auto bg-white rounded-lg border shadow-sm">
                 <div className="   p-4 grid grid-cols-5 gap-4 border-b">
                     <TextField value={filters.keyword} onChange={v => setFilter('keyword', 'debounce')(v, true)} placeholder="Search by name">Keyword</TextField>
                     <SuggestProductCategory value={filters.product_category_id} onChange={setFilter('product_category_id', 'debounce')} />
-                    <Dropdown searchable={false} value={filters.is_service} onChange={setFilter('is_service', 'debounce')} getOptions={async () => [{ id: undefined, name: "All" }, { id: 1, name: 'Service' }, { id: 0, name: 'Goods' }]}>Product Type</Dropdown>
+                    <Dropdown searchable={false} value={filters.product_type} onChange={setFilter('product_type', 'debounce')} getOptions={async () => [
+                        { id: undefined, name: "All" },
+                        { id: ProductType.Service, name: 'Service' },
+                        { id: ProductType.Goods, name: 'Goods' }
+                    ]}>Product Type</Dropdown>
                     <Dropdown
                         searchable={false}
                         value={filters.sort_by}
@@ -132,20 +180,36 @@ const Products = () => {
                     </Dropdown>
                     <Dropdown
                         searchable={false}
-                        value={filters.publish}
-                        onChange={setFilter('publish', 'debounce')}
+                        value={filters.is_draft}
+                        onChange={setFilter('is_draft', 'debounce')}
                         getOptions={async () => [
                             { id: undefined, name: 'All' },
-                            { id: 1, name: 'Public' },
-                            { id: 0, name: 'Not Public' }
+                            { id: 0, name: 'Public' },
+                            { id: 1, name: 'Draft' }
                         ]}
                     >
                         Status
                     </Dropdown>
+                    <Radio value={filters.show_deleted} onChange={setFilter('show_deleted', 'debounce')} options={YesNoArray}>Show Arcived Products</Radio>
+                    <div className="col-span-2">
+                        <Radio value={filters.show_clones} onChange={setFilter('show_clones', 'debounce')} options={[
+                            { id: undefined, name: 'All Products' },
+                            { id: 1, name: 'Clones Only' },
+                            { id: 0, name: 'Orignals Only' }
+                        ]}>Orignal & Clone</Radio>
+                    </div>
+                    <div className="self-end">
+                        <Btn onClick={() => setFilters({
+                            page: 1,
+                            keyword: '',
+                            debounce: false
+                        })}>Clear Filters</Btn>
+                    </div>
                 </div>
                 {!searching && <Table>
                     <TableHeader>
                         <TableRow>
+                            <TableHead className="w-[50px]">#ID</TableHead>
                             <TableHead className="w-[100px]">Image</TableHead>
                             <TableHead>Name</TableHead>
                             <TableHead>Category</TableHead>
@@ -158,15 +222,26 @@ const Products = () => {
                     <TableBody>
                         {paginated.records.map((record) => (
                             <TableRow key={record.id}>
+                                <TableCell>{record.id}</TableCell>
                                 <TableCell>
-
-                                    <SafeImage src={record.image} className="h-12 w-12 rounded-md border object-cover">
+                                    <SafeImage src={record?.media?.media_path} className="h-12 w-12 rounded-md border object-cover">
                                         <div className="text-2xl flex items-center justify-center flex-1  h-full w-full text-gray-400">
                                             <LuCamera />
                                         </div>
                                     </SafeImage>
                                 </TableCell>
-                                <TableCell>{record.name}</TableCell>
+                                <TableCell>
+                                    <div className="flex flex-col">
+                                        <div className="flex flex-row items-center gap-1">
+                                            <span>{record.name}</span>
+                                            {!!record.product_id && <Badge>Cloned</Badge>}
+                                        </div>
+                                        {!!record.product_id && <div className="text-xs text-gray-500">
+                                            <span>Clone of </span>
+                                            <Link to={"/product-management/products/" + record.product_id} className="text-blue-700 font-medium cursor-pointer hover:text-blue-900">{record.main_product_name}</Link>
+                                        </div>}
+                                    </div>
+                                </TableCell>
                                 <TableCell>
                                     <div className='flex flex-row gap-1 text-xs flex-wrap items-center'>
                                         {record.tree.map((item: CategoryTree, index: number) => {
@@ -184,29 +259,38 @@ const Products = () => {
 
                                 <TableCell>
                                     <div className="flex flex-col">
-                                        <span className="text-xs">₹0.0</span>
+                                        {record.prices.map((price: any) => {
+                                            return <span className="text-xs" key={price.id}>
+                                                {price.country_name} - {price.currency_symbol}{price.sp} / {record.unit_name} {record.product_type === ProductType.Service ? `(${formatDays(price.duration_days)})` : ''}
+                                            </span>
+                                        })}
                                     </div>
                                 </TableCell>
                                 <TableCell>{record.is_draft ? 'Draft' : 'Published'}</TableCell>
                                 <TableCell>
                                     <div className="flex gap-2 justify-end">
+                                        <Btn size={'sm'} variant={'outline'} onClick={() => openCloner(record)}>Clone <LuCopy /></Btn>
                                         <Link to={'/product-management/products/' + record.id}>
                                             <Btn variant="outline" size="sm">
                                                 <Edit className="h-4 w-4" />
                                             </Btn>
                                         </Link>
                                         <Btn onClick={() => {
-                                            msg.confirm('Delete ' + record.name, 'Are you sure you want to delete ' + record.name + '? this action cannot be undone.', {
-                                                onConfirm: async () => {
-                                                    var r = await ProductService.delete(record.id);
-                                                    if (r.success) {
-                                                        search();
+                                            msg.confirm(
+                                                `Archive ${record.name}`,
+                                                `Are you sure you want to archive ${record.name}? Once archived, it will no longer be visible anywhere.`,
+                                                {
+                                                    onConfirm: async () => {
+                                                        const r = await ProductService.delete(record.id);
+                                                        if (r.success) search();
+                                                        return r.success;
                                                     }
-                                                    return r.success;
                                                 }
-                                            })
-                                        }} variant="outline" size="sm">
-                                            <Trash2 className="h-4 w-4" />
+                                            );
+
+                                        }} variant="destructive" size="sm">
+                                            Archive
+                                            <LuArchive className="h-4 w-4" />
                                         </Btn>
                                     </div>
                                 </TableCell>

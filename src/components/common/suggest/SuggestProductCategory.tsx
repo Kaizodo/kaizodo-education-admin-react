@@ -6,6 +6,8 @@ import Btn from '../Btn';
 import CenterLoading from '../CenterLoading';
 import { Modal } from '../Modal';
 import { ProductCategoryService } from '@/services/ProductCategoryService';
+import { CategoryTree } from '@/data/Product';
+import { LuArrowRight } from 'react-icons/lu';
 
 
 const LazyEditorDialog = lazy(() => import('@/pages/product-management/pages/product-categories/components/ProductCategoryEditorDialog'));
@@ -30,7 +32,7 @@ export default function SuggestProductCategory({ exclude_ids, product_category_i
             footer={(updateOptions) => {
                 return (<Btn size={'xs'} onClick={() => {
                     const modal_id = Modal.show({
-                        title: 'Add ' + name + ' Category',
+                        title: 'Add  Product Category',
                         maxWidth: 700,
                         content: () => <Suspense fallback={<CenterLoading className='h-[200px] relative' />}><LazyEditorDialog onSuccess={(data) => {
                             updateOptions(data);
@@ -50,7 +52,27 @@ export default function SuggestProductCategory({ exclude_ids, product_category_i
                     page, keyword
                 });
                 if (r.success) {
-                    return r.data.records;
+                    return r.data.records.map((record: any) => {
+                        return {
+                            ...record,
+                            widget: () => {
+                                return <div className="flex flex-col">
+                                    <div className='flex flex-col w-full items-start justify-start'>
+                                        <span className='text-sm font-medium text-start flex flex-start'>{record.name}</span>
+                                        <span className='text-xs text-gray-500 text-start flex flex-start'>{record.description}</span>
+                                        <div className='flex flex-row gap-1 text-xs flex-wrap items-center'>
+                                            {record.tree.map((item: CategoryTree, index: number) => {
+                                                return <>
+                                                    <span key={item.id} className='flex px-1'>{item.name}</span>
+                                                    {index !== record.tree.length - 1 && <LuArrowRight />}
+                                                </>
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        };
+                    });
                 }
 
                 return [];

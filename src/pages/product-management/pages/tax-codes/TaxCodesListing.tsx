@@ -17,7 +17,6 @@ import { Modal } from '@/components/common/Modal';
 import { TaxCodeService } from '@/services/TaxCodeService';
 import { Search } from '@/components/ui/search';
 import { formatDateTime } from '@/lib/utils';
-import { getTaxModeName } from '@/data/Tax';
 
 const LazyEditorDialog = lazy(() => import('./components/TaxCodeEditorDialog'));
 
@@ -95,9 +94,8 @@ export default function TaxCodesListing() {
                     {!searching && <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Name</TableHead>
                                 <TableHead>Country</TableHead>
-                                <TableHead>Tax Mode</TableHead>
+                                <TableHead>Name</TableHead>
                                 <TableHead>Last Updated</TableHead>
                                 <TableHead className='text-end'>Actions</TableHead>
                             </TableRow>
@@ -105,9 +103,14 @@ export default function TaxCodesListing() {
                         <TableBody>
                             {paginated.records.map((record) => (
                                 <TableRow key={record.id}>
+                                    <TableCell>
+                                        <div className='flex flex-row items-center gap-2'>
+                                            <img src={record.image} alt={record.name} className='h-6' />
+                                            <span>{record.country_name}</span>
+                                        </div>
+                                    </TableCell>
                                     <TableCell>{record.name}</TableCell>
-                                    <TableCell>{record.country_name}</TableCell>
-                                    <TableCell>{getTaxModeName(record.tax_mode)}</TableCell>
+
                                     <TableCell>
                                         <div className='flex flex-col'>
                                             <span className='text-xs italic text-gray-500'>Created : {formatDateTime(record.created_at)}</span>

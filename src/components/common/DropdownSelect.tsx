@@ -14,7 +14,11 @@ export default function DropdownSelect({
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild onClick={() => setOpen(true)}>
+            <PopoverTrigger asChild onClick={() => {
+                if (options.length > 0) {
+                    setOpen(true);
+                }
+            }}>
                 <div>{children}</div>
             </PopoverTrigger>
 

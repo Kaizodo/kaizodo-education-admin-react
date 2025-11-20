@@ -154,7 +154,8 @@ export default function Dropdown({ value, includedValues = [undefined], selected
                                         value={`${record.id}`}
                                         onSelect={() => {
                                             if (onSelect) {
-                                                onSelect(record);
+                                                var { widget, ...rest } = record;
+                                                onSelect(rest);
                                             }
                                             onChange(record.id);
                                             setOpen(false)
@@ -163,6 +164,10 @@ export default function Dropdown({ value, includedValues = [undefined], selected
                                     >
                                         {!!record.widget ? record.widget(record) : <>
                                             {!!record.icon && <record.icon className="h-4 w-4 me-2" />}
+                                            {!record.widget && record?.image && <Avatar className="h-6 w-6 me-2">
+                                                <AvatarImage src={record?.image} />
+                                                <AvatarFallback>{nameLetter(record?.name)}</AvatarFallback>
+                                            </Avatar>}
                                             <div className="flex flex-col">
                                                 <span>{record.name}</span>
                                                 <span className="text-[10px] leading-none text-gray-600 font-normal">{record.description}</span>

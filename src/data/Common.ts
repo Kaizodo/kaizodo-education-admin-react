@@ -43,13 +43,13 @@ export const getDiscountByName = (by: DiscountBy) => {
 
 export enum DiscountType {
     OrderValue = 0,
-    SubscriptionPlan = 1,
-    TopupPlan = 2
+    Product = 1,
+    ProductCategory = 2
 }
 export const DiscountTypeArray = [
     { id: DiscountType.OrderValue, name: 'Order Value' },
-    { id: DiscountType.SubscriptionPlan, name: 'Subscription Plan' },
-    { id: DiscountType.TopupPlan, name: 'Topup Plan' }
+    { id: DiscountType.Product, name: 'Specific Products' },
+    { id: DiscountType.ProductCategory, name: 'Product Category' },
 ];
 
 

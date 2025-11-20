@@ -1,4 +1,3 @@
-import { UserType } from '@/data/user';
 import Dropdown from '../Dropdown';
 import { FaPlus } from 'react-icons/fa6';
 import { SuggestProp } from './Suggest';
@@ -12,8 +11,8 @@ import { PhaseService } from '@/services/PhaseService';
 const LazyEditorDialog = lazy(() => import('@/pages/phase/components/PhaseEditorDialog'));
 
 
-export default function SuggestPhase({ children = 'Project Phase', value, onChange, selected, placeholder = 'Select project phase', onSelect, includedValues }: SuggestProp & {
-    user_type?: UserType
+export default function SuggestPhase({ exclude_ids, children = 'Project Phase', value, onChange, selected, placeholder = 'Select project phase', onSelect, includedValues }: SuggestProp & {
+    exclude_ids?: number[]
 }) {
     return (
         <Dropdown
@@ -41,7 +40,7 @@ export default function SuggestPhase({ children = 'Project Phase', value, onChan
             }}
             getOptions={async ({ page, keyword }) => {
                 var r = await PhaseService.search({
-                    page, keyword
+                    page, keyword, exclude_ids
                 });
                 if (r.success) {
                     return r.data.records;

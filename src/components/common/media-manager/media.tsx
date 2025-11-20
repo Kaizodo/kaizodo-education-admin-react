@@ -6,10 +6,10 @@ const LazyMediaManager = lazy(() => import("@/components/common/media-manager/Me
 
 export enum MediaType {
     Image = 0,
-    Video,
-    Document,
-    Audio,
-    All
+    Video = 1,
+    Document = 2,
+    Audio = 3,
+    All = 4
 }
 
 export const mediaTypeToString = (type: MediaType): string => {

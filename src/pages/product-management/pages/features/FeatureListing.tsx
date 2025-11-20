@@ -78,7 +78,7 @@ export default function FeatureListing() {
 
     return (
         <AppPage
-            title='Features'
+            title='Features & Attributes'
             subtitle='Predefined list of features which can be assigned to product categories'
             actions={<div className='me-4'><Btn size={'sm'} onClick={() => openEditor()}><FaPlus />Add New</Btn></div>}
             containerClassName="md:pt-0"

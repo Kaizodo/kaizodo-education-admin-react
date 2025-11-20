@@ -23,7 +23,7 @@ import { GrGroup, GrNavigate } from "react-icons/gr";
 import { PRODUCTION_MODE } from "./lib/api";
 import { IoCodeSlashOutline } from "react-icons/io5";
 import { FaGlobeAsia } from "react-icons/fa";
-import { BsCardHeading, BsInbox, BsPatchQuestion } from "react-icons/bs";
+import { BsCardHeading, BsDatabaseGear, BsInbox, BsPatchQuestion } from "react-icons/bs";
 import { VscFeedback } from "react-icons/vsc";
 import { RxIdCard } from "react-icons/rx";
 import { RiDiscountPercentLine } from "react-icons/ri";
@@ -95,6 +95,8 @@ export const navs: NavType[] = [
     },
     { label: 'Product Management', icon: LuCrown, route: 'product-management' },
     { label: 'Lead Management', icon: TbUserStar, route: 'lead-management' },
+    { label: 'Website Management', icon: FaGlobeAsia, route: 'website-management' },
+    { label: 'Data Management', icon: BsDatabaseGear, route: 'data-management' },
     {
         label: 'Ticket Support',
         icon: LuHeadphones,

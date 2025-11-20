@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useCallback, useState } from 'react';
 import Btn from '@/components/common/Btn';
 import { LuPlus, LuSave, LuTrash2 } from 'react-icons/lu';
 import TextField from '@/components/common/TextField';
@@ -7,11 +7,13 @@ import NoRecords from '@/components/common/NoRecords';
 import { TbTransactionRupee } from 'react-icons/tb';
 import SuggestCountry from '@/components/common/suggest/SuggestCountry';
 import SuggestTaxCode from '@/components/common/suggest/SuggestTaxCode';
-import { CommonProductStateProps, ProductPrice } from './ProductEditorForm';
+import { CommonProductStateProps, ProductPrice } from '@/data/Product';
+
 import { useForm } from '@/hooks/use-form';
 import { ProductService } from '@/services/ProductService';
 import { msg } from '@/lib/msg';
 import { ProductType } from '@/data/Product';
+import { Switch } from '@/components/ui/switch';
 function TableCell({ children, fixed = false, className, is_last_bottom, is_last_right }: { children?: ReactNode, fixed?: boolean, className?: string, is_last_right?: boolean, is_last_bottom?: boolean }) {
     return (<td
 
@@ -48,7 +50,7 @@ function HeadingTitle({ children }: { children?: string }) {
 
 export default function ProductPricingInformation({ state, setStateValue }: CommonProductStateProps) {
     const [saving, setSaving] = useState(false);
-    const [form, setValue] = useForm<{
+    const [form, setValue, setForm] = useForm<{
         prices: ProductPrice[]
     }>({
         prices: state.prices
@@ -67,10 +69,40 @@ export default function ProductPricingInformation({ state, setStateValue }: Comm
         setSaving(false);
     }
 
+    const togglePopular = useCallback(
+        (country_id: number, id: number, checked: boolean) => {
+            setForm(prev => {
+                const next = structuredClone(prev) as any;
+                if (!next?.prices || !Array.isArray(next.prices)) return prev;
+
+                next.prices = next.prices.map((p: any) => {
+                    if (p.country_id !== country_id) return p;
+
+                    // turn off → only clear this item
+                    if (!checked && p.id === id) {
+                        return { ...p, popular: false };
+                    }
+
+                    // turn on → set this true, all others false
+                    if (checked) {
+                        return { ...p, popular: p.id === id };
+                    }
+
+                    return p;
+                });
+
+                return next;
+            });
+        },
+        [setForm]
+    );
+
 
     const addPricing = () => {
+
         setValue('prices[]')({
-            id: new Date().getTime()
+            id: new Date().getTime(),
+            popular: 1
         })
     }
 
@@ -108,6 +140,9 @@ export default function ProductPricingInformation({ state, setStateValue }: Comm
                                 <TableHeading className='min-w-[150px]'>
                                     <HeadingTitle>Duration (Days)</HeadingTitle>
                                 </TableHeading>}
+                            <TableHeading className='min-w-[150px]'>
+                                <HeadingTitle>Popular</HeadingTitle>
+                            </TableHeading>
 
                             <TableHeading className='min-w-[50px]' is_last_right={true}>
                                 <div className='flex items-center justify-center'>
@@ -120,10 +155,14 @@ export default function ProductPricingInformation({ state, setStateValue }: Comm
                         {form.prices.map((pp: ProductPrice) => (
                             <tr key={pp.id} className="hover:bg-accent" onClick={() => { }}>
                                 <TableCell fixed={true} className='min-w-[150px]' >
-                                    <SuggestCountry value={pp.country_id} onChange={setValue(`prices[id:${pp.id}].country_id`)} children='' selected={{ id: pp.country_id, name: pp.country_name }} />
+                                    <SuggestCountry value={pp.country_id} onChange={setValue(`prices[id:${pp.id}].country_id`)} children='' selected={{ id: pp.country_id, name: pp.country_name, image: pp.image }} />
                                 </TableCell>
                                 <TableCell className='min-w-[150px]' >
-                                    <SuggestTaxCode country_id={pp.country_id} disabled={!pp.country_id} value={pp.tax_code_id} onChange={setValue(`prices[id:${pp.id}].tax_code_id`)} children='' selected={{ id: pp.tax_code_id, name: pp.tax_code_name }} />
+                                    <SuggestTaxCode
+                                        country_id={pp.country_id} disabled={!pp.country_id} value={pp.tax_code_id}
+                                        onChange={setValue(`prices[id:${pp.id}].tax_code_id`)}
+                                        children=''
+                                        selected={{ id: pp.tax_code_id, name: pp.tax_code_name }} />
                                 </TableCell>
                                 <TableCell className='min-w-[150px]' >
                                     <TextField type='number' disabled={!pp.country_id} value={pp.mrp} onChange={setValue(`prices[id:${pp.id}].mrp`)} />
@@ -139,6 +178,20 @@ export default function ProductPricingInformation({ state, setStateValue }: Comm
                                 {state.product.product_type === ProductType.Service && <TableCell className='min-w-[150px]' >
                                     <TextField type='number' disabled={!pp.country_id} value={pp.duration_days} onChange={setValue(`prices[id:${pp.id}].duration_days`)} />
                                 </TableCell>}
+                                <TableCell className='min-w-[150px]' >
+                                    <Switch
+                                        checked={!!pp.popular}
+                                        onCheckedChange={(checked) => {
+                                            const count = form.prices.filter(p => p.country_id === pp.country_id && !!p.popular).length;
+
+                                            if (!checked && count === 1) return;        // block turning off last one
+                                            togglePopular(pp.country_id, pp.id, checked);
+                                        }}
+                                    />
+
+
+
+                                </TableCell>
                                 <TableCell className='min-w-[50px]' is_last_right={true} >
                                     <Btn size={'sm'} variant={'outline'} onClick={() => setValue('prices')(form.prices.filter((ppx: ProductPrice) => ppx.id !== pp.id))}><LuTrash2 /></Btn>
                                 </TableCell>

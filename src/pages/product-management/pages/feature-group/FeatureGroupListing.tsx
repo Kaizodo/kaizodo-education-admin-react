@@ -78,7 +78,7 @@ export default function FeatureGroupListing() {
 
     return (
         <AppPage
-            title='Feature Groups'
+            title='Features & Attribute Groups'
             subtitle='Organize features properly by grouping them'
             actions={<div className='me-4'><Btn size={'sm'} onClick={() => openEditor()}><FaPlus />Add New</Btn></div>}
             containerClassName="md:pt-0"

@@ -28,14 +28,14 @@ export const routes: RouteType[] = [
                     { path: 'projects/:internal_reference_number', element: lazy(() => import('@/pages/projects/ProjectDetail')) },
                     { path: 'phases', element: lazy(() => import('@/pages/phase/PhaseManagement')) },
                     { path: 'phase-steps', element: lazy(() => import('@/pages/phase-step/PhaseStepManagement')) },
-                    { path: 'footer-links', element: lazy(() => import('@/pages/footer-links/FooterLinks')) },
+
                     { path: 'employees', element: lazy(() => import('@/pages/employees/EmployeeListing')) },
                     { path: 'feature-cards', element: lazy(() => import('@/pages/feature-cards/FeatureCards')) },
                     { path: 'teams', element: lazy(() => import('@/pages/teams/Teams')) },
                     { path: 'settings', element: lazy(() => import('@/pages/settings/Settings')) },
                     { path: 'orders', element: lazy(() => import('@/pages/orders/Orders')) },
                     { path: 'orders/:internal_reference_number', element: lazy(() => import('@/pages/orders/OrderDetail')) },
-                    { path: 'discount-plans', element: lazy(() => import('@/pages/discount-plans/DiscountPlans')) },
+
                     { path: 'organizations', element: lazy(() => import('@/pages/organizations/OrganizationListing')) },
                     { path: 'organizations/create', element: lazy(() => import('@/pages/organizations/OrganizationEditor')) },
                     { path: 'organizations/update/:id', element: lazy(() => import('@/pages/organizations/OrganizationEditor')) },
@@ -59,6 +59,25 @@ export const routes: RouteType[] = [
                 ],
             },
             {
+                path: 'website-management', element: lazy(() => import('@/pages/website-management/WebsiteLayout')), children: [
+                    { path: '', element: lazy(() => import('@/pages/website-management/pages/dashboard/WebsiteDashboard')) },
+                    { path: 'navigation', element: lazy(() => import('@/pages/website-management/pages/navigation/NavigationManagement')) },
+
+                ]
+            },
+            {
+                path: 'data-management', element: lazy(() => import('@/pages/data-management/DataLayout')), children: [
+                    { path: '', element: lazy(() => import('@/pages/data-management/pages/dashboard/DataDashboard')) },
+                    { path: 'country', element: lazy(() => import('@/pages/data-management/pages/country/CountryManagement')) },
+                    { path: 'state', element: lazy(() => import('@/pages/data-management/pages/state/StateManagement')) },
+                    { path: 'city', element: lazy(() => import('@/pages/data-management/pages/city/CityManagement')) },
+                    { path: 'district', element: lazy(() => import('@/pages/data-management/pages/district/DistrictManagement')) },
+                    { path: 'locality', element: lazy(() => import('@/pages/data-management/pages/locality/LocalityManagement')) },
+                    { path: 'currency', element: lazy(() => import('@/pages/data-management/pages/currency/CurrencyManagement')) },
+                    { path: 'exchange', element: lazy(() => import('@/pages/data-management/pages/currency-exchange/CurrencyExchangeManagement')) },
+                ]
+            },
+            {
                 path: 'product-management', element: lazy(() => import('@/pages/product-management/ProductLayout')), children: [
                     { path: '', element: lazy(() => import('@/pages/product-management/pages/dashboard/ProductDashboard')) },
                     { path: 'products', element: lazy(() => import('@/pages/product-management/pages/products/ProductListing')) },
@@ -70,8 +89,13 @@ export const routes: RouteType[] = [
                     { path: 'units', element: lazy(() => import('@/pages/product-management/pages/units/UnitListing')) },
                     { path: 'features', element: lazy(() => import('@/pages/product-management/pages/features/FeatureListing')) },
                     { path: 'feature-groups', element: lazy(() => import('@/pages/product-management/pages/feature-group/FeatureGroupListing')) },
+                    { path: 'modules', element: lazy(() => import('@/pages/product-management/pages/modules/Modules')) },
+                    { path: 'module-features', element: lazy(() => import('@/pages/product-management/pages/module-features/ModuleFeatures')) },
+                    { path: 'courier-partners', element: lazy(() => import('@/pages/product-management/pages/courier-channel/CourierChannelListing')) },
+                    { path: 'discount-plans', element: lazy(() => import('@/pages/product-management/pages/discount-plans/DiscountPlans')) },
                 ]
             },
+
             {
                 path: 'lead-management', element: lazy(() => import('@/pages/lead-management/LeadLayout')), children: [
                     { path: '', element: lazy(() => import('@/pages/lead-management/dashboard/LeadDashboard')) },
