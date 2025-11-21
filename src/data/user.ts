@@ -1,11 +1,13 @@
 
+
 export const enum EarningWithdrawalStatus {
     Pending = 0,
     Processing = 1,
     Completed = 2,
     Rejected = 3,
-    CancelledByUser = 4,
-    CancelledByPlatform = 5
+    OnHold = 4,
+    CancelledByUser = 5,
+    CancelledByPlatform = 6
 }
 
 export const EarningWithdrawalStatusArray = [
@@ -13,10 +15,10 @@ export const EarningWithdrawalStatusArray = [
     { id: EarningWithdrawalStatus.Processing, name: 'Processing' },
     { id: EarningWithdrawalStatus.Completed, name: 'Completed' },
     { id: EarningWithdrawalStatus.Rejected, name: 'Rejected' },
+    { id: EarningWithdrawalStatus.OnHold, name: 'On Hold' },
     { id: EarningWithdrawalStatus.CancelledByUser, name: 'Cancelled By User' },
     { id: EarningWithdrawalStatus.CancelledByPlatform, name: 'Cancelled By Platform' }
 ];
-
 export function getEarningWithdrawalStatusName(id: EarningWithdrawalStatus) {
     return EarningWithdrawalStatusArray.find(x => x.id === id)?.name || '';
 }

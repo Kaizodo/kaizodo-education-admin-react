@@ -10,12 +10,17 @@ export class ReferralEarningWithdrawalService {
         return Api(`${this.endpoint}/search`, form);
     }
 
-
+    public static async updateItemStatus(form: any) {
+        return Api(`${this.endpoint}/update-item-status`, form);
+    }
 
     public static async update(form: any) {
         return Api(`${this.endpoint}/update`, form);
     }
 
+    public static async detail(id: number) {
+        return Api(`${this.endpoint}/detail`, { id });
+    }
 
 
 

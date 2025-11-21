@@ -23,7 +23,7 @@ const SettingsManagement = () => {
     const [saving, setSaving] = useState(false);
 
 
-    const [form, setValue, setForm] = useForm();
+    const [form, setValue, setForm] = useForm<any>({});
 
 
     const load = async () => {
@@ -171,6 +171,7 @@ const SettingsManagement = () => {
                 <strong className='flex'>Referrer Earning Withdrawal</strong>
                 <div className="grid grid-cols-4 gap-3">
                     <TextField value={form.min_earning_withdrawal} onChange={setValue('min_earning_withdrawal')} placeholder="Enter min withdrawal limit for referrer">Min Withdrawal Limit</TextField>
+                    <TextField value={form.referral_link_expiry_duration} onChange={setValue('referral_link_expiry_duration')} placeholder="Enter expiry duration">Referral Link Expiry Duration (Days)</TextField>
                 </div>
 
                 <span className='text-center flex items-center justify-center w-full text-3xl font-bold'>Website Content</span>

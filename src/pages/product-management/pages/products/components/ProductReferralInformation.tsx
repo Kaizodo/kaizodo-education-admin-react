@@ -34,6 +34,7 @@ export default function ProductReferralInformation({ state, setStateValue }: Com
             has_renewal_secondary_commission: form.has_renewal_secondary_commission,
             renewal_secondary_commission: form.renewal_secondary_commission,
             referral_content: form.referral_content,
+            maturity_days: form.maturity_days,
             product_marketing_materials: state.product_marketing_materials.map(pmm => ({
                 marketing_material_id: pmm.id,
                 message: pmm.message
@@ -128,6 +129,7 @@ export default function ProductReferralInformation({ state, setStateValue }: Com
                     <div className='flex flex-col max-w-sm gap-3 mb-3'>
                         <Radio value={form.has_referral} onChange={setValue('has_referral')} options={YesNoArray}>Avaiable for referral ?</Radio>
                         {!!form.has_referral && <>
+                            <TextField type='number' value={form.maturity_days} onChange={setValue('maturity_days')} placeholder='Enter days' >Allow withdrawal after (Days?)</TextField>
                             <TextField type='number' value={form.commission_percentage} onChange={setValue('commission_percentage')} placeholder='Enter %'>Commission Percentage / Referral</TextField>
                             <Radio value={form.has_commission_on_renewal} onChange={setValue('has_commission_on_renewal')} options={YesNoArray}>Give commision on renewal ?</Radio>
                             {!!form.has_commission_on_renewal && <TextField type='number' value={form.renewal_commission_percentage} onChange={setValue('renewal_commission_percentage')} placeholder='Enter %'>Renewal Commission Percentage</TextField>}

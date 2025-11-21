@@ -2,11 +2,10 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Edit, Trash2 } from 'lucide-react';
+import { Search, Edit } from 'lucide-react';
 import { getDefaultPaginated, PaginationType } from '@/data/pagination';
 import { useSetValue } from '@/hooks/use-set-value';
 import { useDebounce } from '@/hooks/use-debounce';
-import { msg } from '@/lib/msg';
 import CenterLoading from '@/components/common/CenterLoading';
 import AppPage from '@/components/app/AppPage';
 import Btn from '@/components/common/Btn';
@@ -17,6 +16,7 @@ import Pagination from '@/components/common/Pagination';
 import { Modal } from '@/components/common/Modal';
 import { CurrencyExchangeService } from '@/services/CurrencyExchangeService';
 import { formatDateTime } from '@/lib/utils';
+import { LuUsers } from 'react-icons/lu';
 
 const LazyEditorDalog = lazy(() => import('./components/CurrencyExchangeEditorDailog'));
 
@@ -94,10 +94,12 @@ export default function CurrencyExchangeManagement() {
                     {!searching && <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead></TableHead>
                                 <TableHead>Base Currency</TableHead>
                                 <TableHead>Target Currency</TableHead>
                                 <TableHead>Rate</TableHead>
+                                <TableHead>Reverse Rate</TableHead>
+                                <TableHead>Affected clients</TableHead>
+                                <TableHead>Publising Status</TableHead>
                                 <TableHead>Created At</TableHead>
                                 <TableHead>Last Updated At</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
@@ -106,35 +108,25 @@ export default function CurrencyExchangeManagement() {
                         <TableBody>
                             {paginated.records.map((record) => (
                                 <TableRow key={record.id}>
-                                    <TableCell className="font-medium">
-                                        {!!record.image && <img src={record.image} className='border rounded-sm' style={{
-                                            height: 50
-                                        }} />}
-                                    </TableCell>
                                     <TableCell>{record.base_currency_name} ({record.base_currency_symbol})</TableCell>
                                     <TableCell>{record.target_currency_name} ({record.target_currency_symbol})</TableCell>
                                     <TableCell>{record.base_currency_symbol}1  = {record.target_currency_symbol}{record.rate}</TableCell>
-                                    <TableCell>{formatDateTime(record.created_at)}</TableCell>
-                                    <TableCell>{formatDateTime(record.updated_at ?? record.created_At)}</TableCell>
+                                    <TableCell>{record.target_currency_symbol}1  = {record.base_currency_symbol}{record.reverse_rate}</TableCell>
                                     <TableCell>
-                                        <div className="flex gap-2">
+                                        <div className='flex flex-row items-center gap-1'>
+                                            <span>{record.affected_clients}</span>
+                                            <LuUsers />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className='text-xs'>{record.publish ? 'Published' : 'Unpublished'}</TableCell>
+                                    <TableCell className='text-xs'>{formatDateTime(record.created_at)}</TableCell>
+                                    <TableCell className='text-xs'>{formatDateTime(record.updated_at ?? record.created_At)}</TableCell>
+                                    <TableCell className='w-[50px]'>
+                                        <div className='justify-end flex'>
                                             <Btn variant="outline" size="sm" onClick={() => openEditor(record.id)}>
+                                                Update
                                                 <Edit className="h-4 w-4" />
                                             </Btn>
-                                            <Btn onClick={() => {
-                                                msg.confirm('Delete ' + record.name, 'Are you sure you want to delete ' + record.name + '? this action cannot be undone.', {
-                                                    onConfirm: async () => {
-                                                        var r = await CurrencyExchangeService.delete(record.id);
-                                                        if (r.success) {
-                                                            search();
-                                                        }
-                                                        return r.success;
-                                                    }
-                                                })
-                                            }} variant="outline" size="sm">
-                                                <Trash2 className="h-4 w-4" />
-                                            </Btn>
-
                                         </div>
                                     </TableCell>
                                 </TableRow>

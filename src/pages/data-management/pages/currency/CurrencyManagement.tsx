@@ -2,11 +2,10 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Edit, Trash2 } from 'lucide-react';
+import { Search, Edit } from 'lucide-react';
 import { getDefaultPaginated, PaginationType } from '@/data/pagination';
 import { useSetValue } from '@/hooks/use-set-value';
 import { useDebounce } from '@/hooks/use-debounce';
-import { msg } from '@/lib/msg';
 import CenterLoading from '@/components/common/CenterLoading';
 import AppPage from '@/components/app/AppPage';
 import Btn from '@/components/common/Btn';
@@ -98,6 +97,7 @@ export default function CurrencyManagement() {
                                 <TableHead>Currency Symbol</TableHead>
                                 <TableHead>Currency Code</TableHead>
                                 <TableHead>Smallest Unit</TableHead>
+                                <TableHead>Publishing Status</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -113,25 +113,13 @@ export default function CurrencyManagement() {
                                     <TableCell>{record.symbol}</TableCell>
                                     <TableCell>{record.code}</TableCell>
                                     <TableCell>{record.smallest_currency_unit}</TableCell>
+                                    <TableCell className='text-xs'>{record.publish ? 'Published' : 'Unpublished'}</TableCell>
                                     <TableCell>
-                                        <div className="flex gap-2">
+                                        <div className="flex justify-end">
                                             <Btn variant="outline" size="sm" onClick={() => openEditor(record.id)}>
+                                                Update
                                                 <Edit className="h-4 w-4" />
                                             </Btn>
-                                            <Btn onClick={() => {
-                                                msg.confirm('Delete ' + record.name, 'Are you sure you want to delete ' + record.name + '? this action cannot be undone.', {
-                                                    onConfirm: async () => {
-                                                        var r = await CurrencyService.delete(record.id);
-                                                        if (r.success) {
-                                                            search();
-                                                        }
-                                                        return r.success;
-                                                    }
-                                                })
-                                            }} variant="outline" size="sm">
-                                                <Trash2 className="h-4 w-4" />
-                                            </Btn>
-
                                         </div>
                                     </TableCell>
                                 </TableRow>

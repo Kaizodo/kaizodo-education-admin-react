@@ -29,6 +29,8 @@ const DetailRow: React.FC<{ label: string, value: ReactNode }> = ({ label, value
     </div>
 );
 
+
+
 export default function ReferralEarningWithdrawal() {
     const [searching, setSearching] = useState(true);
     const [paginated, setPaginated] = useState<PaginationType<any>>(getDefaultPaginated());
@@ -70,7 +72,7 @@ export default function ReferralEarningWithdrawal() {
     const openEditor = async (record: any) => {
         const modal_id = Modal.show({
             title: 'Process Withdrwal Request',
-            maxWidth: 500,
+            maxWidth: 1500,
             content: () => <Suspense fallback={<CenterLoading className='h-[400px] relative' />}>
                 <LazyEditorDialog
                     record={record}
@@ -165,22 +167,10 @@ export default function ReferralEarningWithdrawal() {
                                     </TableCell>
 
                                     <TableCell>
-                                        {![
-                                            EarningWithdrawalStatus.Pending,
-                                            EarningWithdrawalStatus.Processing
-                                        ].includes(record.status) && <div className='flex flex-col'>
-                                                {!!record.status_remarks && <span className='text-xs text-gray-500 italic'>"{record.status_remarks}"</span>}
-                                                {!!record.reference_number && <span className='font-medium  text-sm'>REF :- {record.reference_number}</span>}
-                                            </div>}
-                                        {[
-                                            EarningWithdrawalStatus.Pending,
-                                            EarningWithdrawalStatus.Processing
-                                        ].includes(record.status) && <div className="flex gap-2 justify-end">
-                                                <Btn variant="outline" size="sm" onClick={() => openEditor(record)}>
-                                                    Process
-                                                    <LuArrowRight />
-                                                </Btn>
-                                            </div>}
+                                        <Btn variant="outline" size="sm" onClick={() => openEditor(record)}>
+                                            View Details
+                                            <LuArrowRight />
+                                        </Btn>
                                     </TableCell>
                                 </TableRow>
                             ))}

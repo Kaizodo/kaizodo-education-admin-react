@@ -7,6 +7,8 @@ import CenterLoading from '@/components/common/CenterLoading';
 import { ApiResponseType } from '@/lib/api';
 import { msg } from '@/lib/msg';
 import { CurrencyService } from '@/services/CurrencyService';
+import Radio from '@/components/common/Radio';
+import { YesNoArray } from '@/data/Common';
 
 
 
@@ -73,6 +75,7 @@ export default function CurrencyEditorDailog({ id, onSuccess, onCancel }: Props)
                     <div className='text-xs flex items-end'>
                         <span>1 {form.currency_code} = {form.smallest_currency_unit} Cents / Paisa etc</span>
                     </div>
+                    <Radio value={form.publish} onChange={setValue('publish')} options={YesNoArray}>Publish</Radio>
                 </div>
             </ModalBody>
             {!loading && <ModalFooter className='gap-4'>

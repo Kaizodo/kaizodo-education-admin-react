@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import { LuLoader } from "react-icons/lu"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "cursor-pointer inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -39,21 +39,31 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
   VariantProps<typeof buttonVariants> {
   loading?: boolean,
+  asyncClick?: () => {},
   asChild?: boolean
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, loading, disabled, children, ...props }, ref) => {
+  ({ className, variant, size, onClick, asyncClick, asChild = false, loading, disabled, children, ...props }, ref) => {
+    const [showLoading, setShowLoading] = React.useState(false);
     const Comp = asChild ? Slot : "button"
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }), !!loading && 'relative overflow-hidden')}
+        className={cn(buttonVariants({ variant, size, className }), (!!loading || showLoading) && 'relative overflow-hidden')}
         ref={ref}
-        disabled={loading || disabled}
+        disabled={loading || disabled || showLoading}
+        onClick={onClick ? onClick : async () => {
+          if (asyncClick) {
+            setShowLoading(true);
+            await asyncClick?.();
+            setShowLoading(false);
+          }
+
+        }}
         {...props}
       >
         {children}
-        {!!loading && <div className="absolute w-full h-full flex items-center justify-center z-10 bg-inherit opacity-90  text-inherit"><LuLoader className="animate-spin" /></div>}
+        {(!!loading || showLoading) && <div className="absolute w-full h-full flex items-center justify-center z-10 bg-inherit opacity-90  text-inherit"><LuLoader className="animate-spin" /></div>}
 
       </Comp>
     )
