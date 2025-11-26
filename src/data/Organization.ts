@@ -1,3 +1,24 @@
+export interface Organization {
+    id: number;
+    name: string;
+    gst_number: string;
+    billing_address: string;
+    code: string;
+    logo_short: string;
+    logo_full: string;
+}
+
+export const enum StoreOnboardingStep {
+    BasicDetails = 1,
+    BillingInformation = 2,
+    ProductCategories = 3,
+    Employees = 4,
+    Domain = 5,
+    ConfirmSubmition = 6
+}
+
+
+
 export const enum OrganizationOnboardingStep {
     BasicDetails = 1,
     AdditionalInformation = 2,

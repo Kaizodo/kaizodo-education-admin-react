@@ -17,6 +17,7 @@ import SuggestDistrict from '@/components/common/suggest/SuggestDistrict';
 import SuggestLocality from '@/components/common/suggest/SuggestLocality';
 import Radio from '@/components/common/Radio';
 import { YesNoArray } from '@/data/Common';
+import Richtext from '@/components/common/Richtext';
 
 const SettingsManagement = () => {
     const [loading, setLoading] = useState(true);
@@ -164,9 +165,10 @@ const SettingsManagement = () => {
                 <strong className='flex'>Taxes</strong>
                 <div className="grid grid-cols-4 gap-3">
                     <TextField value={form.gst_number} onChange={(v) => { setValue('gst_number')(v); }} placeholder="Enter gst number">GST Number</TextField>
-                    <TextField value={form.cgst} onChange={(v) => { setValue('cgst')(v); }} placeholder="Enter CGST %">CGST %</TextField>
-                    <TextField value={form.sgst} onChange={(v) => setValue('sgst')(v)} placeholder="Enter SGST %">SGST %</TextField>
-                    <TextField value={form.igst} onChange={(v) => setValue('igst')(v)} placeholder="Enter IGST % (Inter-state)">IGST %</TextField>
+
+                </div>
+                <div className=''>
+                    <Richtext value={form.store_document_instructions} onChange={setValue('store_document_instructions')}>Document Instructions</Richtext>
                 </div>
                 <strong className='flex'>Referrer Earning Withdrawal</strong>
                 <div className="grid grid-cols-4 gap-3">

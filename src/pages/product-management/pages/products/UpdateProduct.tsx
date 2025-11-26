@@ -8,8 +8,8 @@ import { ProductService } from '@/services/ProductService';
 import CenterLoading from '@/components/common/CenterLoading';
 import SectionNavigator, { NavigatorSection } from '@/components/common/SectionNavigator';
 import { TbHeartPlus, TbSitemap, TbTransactionRupee, TbUserShare } from "react-icons/tb";
-import { IoExtensionPuzzleOutline } from "react-icons/io5";
-import { RiSoundModuleFill } from "react-icons/ri";
+import { IoExtensionPuzzleOutline, IoReturnDownBackOutline } from "react-icons/io5";
+import { RiSoundModuleFill, RiVerifiedBadgeLine } from "react-icons/ri";
 import { HiOutlineWrenchScrewdriver } from "react-icons/hi2";
 import { LiaShippingFastSolid } from "react-icons/lia";
 import { BsImages, BsInfo, BsListStars } from 'react-icons/bs';
@@ -25,6 +25,8 @@ import ProductAddonInformation from './components/ProductAddonInformation';
 import ProductPhaseInformation from './components/ProductPhaseInformation';
 import ProductReferralInformation from './components/ProductReferralInformation';
 import ProductShippingInformation from './components/ProductShippingInformation';
+import ProductWarrantyInformation from './components/ProductWarrantyInformation';
+import ProductReturnInformation from './components/ProductReturnInformation';
 
 export default function UpdateProduct() {
     const navigate = useNavigate();
@@ -86,7 +88,9 @@ export default function UpdateProduct() {
             { id: 'modules', title: 'Modules', subtitle: 'Add modular components', icon: RiSoundModuleFill },
             { id: 'phases', title: 'Installation Phases', subtitle: 'Organize deployment workflow', icon: HiOutlineWrenchScrewdriver },
             { id: 'shipping', title: 'Shipping Details', subtitle: 'Set delivery and logistics info', icon: LiaShippingFastSolid },
-            { id: 'referral', title: 'Referral Program', subtitle: 'Create referral incentives', icon: TbUserShare }
+            { id: 'warranty', title: 'Warranty Details', subtitle: 'Provide product warranty information', icon: RiVerifiedBadgeLine },
+            { id: 'referral', title: 'Referral Program', subtitle: 'Create referral incentives', icon: TbUserShare },
+            { id: 'return', title: 'Return Policy', subtitle: 'Your return policy and duration', icon: IoReturnDownBackOutline }
         ]
         }>
             <NavigatorSection
@@ -102,8 +106,8 @@ export default function UpdateProduct() {
             <NavigatorSection
                 id="pricing"
                 icon={TbTransactionRupee}
-                title="Product Pricing & Variants"
-                subtitle="Upload attractive photos of produts"
+                title="Product Pricing"
+                subtitle="Add country and stock wise pricing for product"
                 className="p-0"
             >
                 <ProductPricingInformation state={state} setState={setState} setStateValue={setValue} />
@@ -195,6 +199,17 @@ export default function UpdateProduct() {
 
             </NavigatorSection>
             <NavigatorSection
+                id="warranty"
+                icon={RiVerifiedBadgeLine}
+                title="Warranty Information"
+                subtitle="Provide product warranty details"
+                className='p-0'
+            >
+                <ProductWarrantyInformation state={state} setState={setState} setStateValue={setValue} />
+
+
+            </NavigatorSection>
+            <NavigatorSection
                 id="referral"
                 icon={HiOutlineWrenchScrewdriver}
                 title="Referral Program"
@@ -205,6 +220,19 @@ export default function UpdateProduct() {
 
 
             </NavigatorSection>
+            <NavigatorSection
+                id="return"
+                icon={IoReturnDownBackOutline}
+                title="Return Policy"
+                subtitle="Your return policy and duration"
+
+            >
+                <ProductReturnInformation state={state} setState={setState} setStateValue={setValue} />
+
+
+            </NavigatorSection>
+
+
         </SectionNavigator>}
     </AppPage>)
 }

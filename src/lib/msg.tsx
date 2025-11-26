@@ -1,6 +1,80 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast, { ToastOptions } from "react-hot-toast";
 import { LuLoader } from "react-icons/lu";
+import { createPortal } from "react-dom";
+
+
+function Overlay({ t, resolve }: any) {
+  const [show, setShow] = useState(true);
+  if (!show) {
+    return null;
+  }
+  return <div className="fixed inset-0 bg-black/50 z-[9998]" onClick={() => {
+    resolve();
+    toast.dismiss(t.id);
+    setShow(false)
+  }}></div>
+}
+
+function ConfirmToast({ t, title, message, options, resolve }: any) {
+  const [loading, setLoading] = useState(false);
+  const [resolved, setResolved] = useState(false);
+  useEffect(() => {
+    return () => resolve();
+  }, []);
+
+
+  return (
+    <>
+      {!resolved && createPortal(<Overlay t={t} resolve={resolve} />, document.body)}
+
+      {/* POPUP */}
+      <div className="p-2 flex flex-col w-80 relative z-[9999] ">
+        <span className="text-lg font-semibold mb-2">{title}</span>
+        <p className="text-sm mb-4">{message}</p>
+
+        <div className="flex justify-end gap-2">
+          <button
+            className="px-4 py-2 bg-gray-300 rounded"
+            onClick={() => {
+              options?.onCancel?.();
+              toast.dismiss(t.id);
+              resolve();
+              setResolved(true);
+            }}
+          >
+            {options?.cancelText || "Cancel"}
+          </button>
+
+          <button
+            disabled={loading}
+            className="px-4 py-2 bg-blue-600 rounded text-white relative"
+            onClick={async () => {
+              setLoading(true);
+
+              const result = await options?.onConfirm?.();
+              if (result === false) {
+                setLoading(false);
+                return;
+              }
+              setResolved(true);
+              toast.dismiss(t.id);
+              resolve();
+            }}
+          >
+            {loading && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <LuLoader className="animate-spin" />
+              </div>
+            )}
+            {options?.confirmText || "Yes"}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
 
 export class msg {
 
@@ -44,47 +118,19 @@ export class msg {
       cancelText?: string;
     }
   ) {
-    return toast((t) => {
-      const [loading, setLoading] = useState(false);
-      return (
-        <div className="p-2 flex flex-col w-80">
-          <span className="text-lg font-semibold mb-2">{title}</span>
-          <p className="text-sm mb-4">{message}</p>
-          <div className="flex justify-end gap-2">
-            <button
-              className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-gray-800"
-              onClick={() => {
-                options?.onCancel?.();
-                toast.dismiss(t.id);
-              }}
-            >
-              {options?.cancelText || "Cancel"}
-            </button>
-            <button
-              disabled={loading}
-              className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700 text-white relative overflow-hidden"
-              onClick={async () => {
-                setLoading(true);
-                const promise = options?.onConfirm?.();
-                if (promise instanceof Promise) {
-                  var result = await promise;
-                  if (typeof result === 'boolean') {
-                    if (!result) {
-                      setLoading(false);
-                      return;
-                    }
-                  }
-                }
-                setLoading(false);
-                toast.dismiss(t.id);
-              }}
-            >
-              {!!loading && <div className="absolute w-full h-full flex items-center justify-center z-10 bg-inherit opacity-90 text-white text-inherit top-0 left-0"><LuLoader className="animate-spin" /></div>}
-              {options?.confirmText || "Yes"}
-            </button>
-          </div>
-        </div>
-      )
+    return new Promise<void>((resolve) => {
+      toast((t) => {
+        return <ConfirmToast
+          t={t}
+          title={title}
+          message={message}
+          options={options}
+          resolve={resolve}
+        />
+      }, {
+        duration: Infinity,
+        removeDelay: 0
+      })
     });
   }
 }

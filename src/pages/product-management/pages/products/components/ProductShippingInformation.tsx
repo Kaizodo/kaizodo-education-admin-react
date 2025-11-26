@@ -10,6 +10,7 @@ import { CommonProductStateProps } from '@/data/Product';
 import SuggestCourierChannel from "@/components/common/suggest/SuggestCourierChannel";
 import NoRecords from "@/components/common/NoRecords";
 import { TbTruckOff } from "react-icons/tb";
+import Dropdown from "@/components/common/Dropdown";
 
 export default function ProductShippingInformation({ state, setStateValue }: CommonProductStateProps) {
     const [saving, setSaving] = useState(false);
@@ -37,8 +38,30 @@ export default function ProductShippingInformation({ state, setStateValue }: Com
 
                 </div>
                 <div className=" grid grid-cols-2 max-w-[500px] gap-3">
+                    <Radio value={form.has_local_delivery} onChange={setValue('has_local_delivery')} options={YesNoArray} >Has Local delivery ?</Radio>
+                    <Radio value={form.has_distance_delivery} onChange={setValue('has_distance_delivery')} options={YesNoArray} >Has Long distance delivery ?</Radio>
                     <SuggestCourierChannel value={form.courier_channel_id} onChange={setValue('courier_channel_id')} selected={{ id: form.courier_channel_id, name: form.courier_channel_name }} />
                     <TextField value={form.shipping_charge} onChange={setValue('shipping_charge')} placeholder="Enter charge">Shipping Charge</TextField>
+                    <div className="col-span-2 flex gap-3">
+                        <div className="flex-1">
+                            <TextField value={form.estimated_delivery} onChange={setValue('estimated_delivery')} placeholder="Enter estimated delivery time">Estimate Delivery Time</TextField>
+
+                        </div>
+                        <Dropdown
+                            value={form.estimated_delivery_unit}
+                            onChange={setValue('estimated_delivery_unit')}
+                            placeholder="Select duration"
+                            searchable={false}
+                            selected={{ id: state.product.estimated_delivery_unit, name: state.product.estimated_delivery_unit }}
+                            getOptions={async () => ([
+                                { id: 'minutes', name: 'Minutes' },
+                                { id: 'hours', name: 'Hours' },
+                                { id: 'days', name: 'Days' },
+                                { id: 'weeks', name: 'Weeks' },
+                                { id: 'months', name: 'Months' }
+                            ])}>Duration</Dropdown>
+                    </div>
+
                 </div>
             </>}
             {!form.has_shipping && <NoRecords

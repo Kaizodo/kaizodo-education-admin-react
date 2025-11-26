@@ -4,7 +4,7 @@ import { DittoMode, openDitto } from '@/components/common/Ditto';
 import TouchableField from '@/components/common/TouchableField';
 import { ReactNode, useEffect, useState } from 'react';
 import Btn from './Btn';
-import { FaTimes } from 'react-icons/fa';
+import { LuX } from 'react-icons/lu';
 
 type Props = {
     value?: any,
@@ -67,14 +67,14 @@ export default function DateTimeField({ value, inputFormat, previewFormat, outpu
             label={children}
             onClick={async () => openDitto({ mode, value: value, callback: setValue })}
             placeholder={!value ? placeholder : previewDate} >
-            {!!value && <div className='flex flex-row relative'>
-                <span style={{ opacity: 0.5, flex: 1 }}>{!value ? placeholder : previewDate}</span>
+            {!!value && <div className='flex flex-row relative items-center h-full'>
+                <span className='text-xs flex-1 flex'>{!value ? placeholder : previewDate}</span>
                 {!!can_unset && <Btn size={'sm'} onClick={(event) => {
                     event.stopPropagation();
 
                     setValue(undefined)
                 }} variant={'ghost'} className='absolute right-[-10px] top-[-7px]' >
-                    <FaTimes />
+                    <LuX />
                 </Btn>}
             </div>}
         </TouchableField>

@@ -8,57 +8,98 @@ import { TbTransactionRupee } from 'react-icons/tb';
 import SuggestCountry from '@/components/common/suggest/SuggestCountry';
 import SuggestTaxCode from '@/components/common/suggest/SuggestTaxCode';
 import { CommonProductStateProps, ProductPrice } from '@/data/Product';
-
 import { useForm } from '@/hooks/use-form';
 import { ProductService } from '@/services/ProductService';
 import { msg } from '@/lib/msg';
 import { ProductType } from '@/data/Product';
 import { Switch } from '@/components/ui/switch';
-function TableCell({ children, fixed = false, className, is_last_bottom, is_last_right }: { children?: ReactNode, fixed?: boolean, className?: string, is_last_right?: boolean, is_last_bottom?: boolean }) {
-    return (<td
-
-        className={cn(
-            ` cursor-pointer min-w-[150px] max-w-[150px] text-center border border-t-0 border-s-0 border-e-1 border-b-1 border-gray-200 p-2`,
-            fixed && "sticky left-0 bg-gray-50 z-0     border-r-1  ",
-            is_last_bottom && 'border-b-0',
-            is_last_right && 'border-e-0',
-            className
-        )}
-    >
-        {children}
-    </td>);
+import DateTimeField from '@/components/common/DateTimeField';
+function TableCell({
+    children,
+    fixedLeft = 0,
+    fixedRight = 0,
+    className,
+    is_last_bottom,
+    is_last_right
+}: {
+    children?: ReactNode,
+    fixedLeft?: number,
+    fixedRight?: number,
+    className?: string,
+    is_last_right?: boolean,
+    is_last_bottom?: boolean
+}) {
+    return (
+        <td
+            className={cn(
+                `cursor-pointer min-w-[150px] max-w-[150px] text-center border border-gray-200 p-2`,
+                (fixedLeft > 0 || fixedRight > 0) && "sticky bg-gray-50 z-30",
+                fixedLeft > 0 && 'border-r border-gray-300',
+                fixedRight > 0 && 'border-l border-gray-300',
+                is_last_bottom && 'border-b-0',
+                is_last_right && 'border-e-0',
+                className
+            )}
+            style={{
+                left: fixedLeft > 0 ? `${fixedLeft}px` : undefined,
+                right: fixedRight > 0 ? `${fixedRight}px` : undefined,
+            }}
+        >
+            {children}
+        </td>
+    );
 }
 
-function TableHeading({ children, className, fixed = false, is_last_bottom, is_last_right }: { children?: ReactNode, fixed?: boolean, className?: string, is_last_right?: boolean, is_last_bottom?: boolean }) {
-    return (<th
-        className={cn(
-            `border border-t-0  border-s-0 border-e-1 border-b-1 border-gray-200   min-w-[150px]  max-w-[150px] text-center bg-gray-50 p-2 text-gray-500`,
-            fixed && "sticky left-0   z-30     top-0",
-            is_last_bottom && 'border-b-0',
-            is_last_right && 'border-e-0',
-            className
-        )}
-    >{children}</th>)
+
+function TableHeading({
+    children,
+    className,
+    fixedLeft = 0,
+    fixedRight = 0,
+    is_last_bottom,
+    is_last_right
+}: {
+    children?: ReactNode,
+    className?: string,
+    fixedLeft?: number,
+    fixedRight?: number,
+    is_last_right?: boolean,
+    is_last_bottom?: boolean
+}) {
+    return (
+        <th
+            className={cn(
+                `border border-gray-200 min-w-[150px] max-w-[150px] text-center bg-gray-50 p-2 text-gray-500`,
+                (fixedLeft > 0 || fixedRight > 0) && "sticky top-0 z-40",
+                fixedLeft > 0 && 'border-r border-gray-300',
+                fixedRight > 0 && 'border-l border-gray-300',
+                is_last_bottom && 'border-b-0',
+                is_last_right && 'border-e-0',
+                className
+            )}
+            style={{
+                left: fixedLeft > 0 ? `${fixedLeft}px` : undefined,
+                right: fixedRight > 0 ? `${fixedRight}px` : undefined,
+            }}
+        >
+            {children}
+        </th>
+    );
 }
 
-function HeadingTitle({ children }: { children?: string }) {
-    return <div className='font-medium text-sm'>{children}</div>
+function HeadingTitle({ children }: { children?: ReactNode }) {
+    return <div className='font-medium text-sm'>{children}</div>;
 }
-
-
-
 
 export default function ProductPricingInformation({ state, setStateValue }: CommonProductStateProps) {
     const [saving, setSaving] = useState(false);
-    const [form, setValue, setForm] = useForm<{
-        prices: ProductPrice[]
-    }>({
+    const [form, setValue, setForm] = useForm<{ prices: ProductPrice[] }>({
         prices: state.prices
     });
 
     const save = async () => {
         setSaving(true);
-        var r = await ProductService.savePriceInformation({
+        const r = await ProductService.savePriceInformation({
             product_id: state.product.id,
             prices: form.prices
         });
@@ -67,7 +108,7 @@ export default function ProductPricingInformation({ state, setStateValue }: Comm
             msg.success('Prices saved');
         }
         setSaving(false);
-    }
+    };
 
     const togglePopular = useCallback(
         (country_id: number, id: number, checked: boolean) => {
@@ -78,15 +119,8 @@ export default function ProductPricingInformation({ state, setStateValue }: Comm
                 next.prices = next.prices.map((p: any) => {
                     if (p.country_id !== country_id) return p;
 
-                    // turn off → only clear this item
-                    if (!checked && p.id === id) {
-                        return { ...p, popular: false };
-                    }
-
-                    // turn on → set this true, all others false
-                    if (checked) {
-                        return { ...p, popular: p.id === id };
-                    }
+                    if (!checked && p.id === id) return { ...p, popular: false };
+                    if (checked) return { ...p, popular: p.id === id };
 
                     return p;
                 });
@@ -97,55 +131,42 @@ export default function ProductPricingInformation({ state, setStateValue }: Comm
         [setForm]
     );
 
-
     const addPricing = () => {
-
         setValue('prices[]')({
             id: new Date().getTime(),
             popular: 1
-        })
-    }
-
-
-
+        });
+    };
 
     return (
         <>
-
-
-            <div className='w-full max-h-[500px]  min-h-[200px] relative overflow-auto '>
-                <table className="border-separate border-spacing-0 w-full table-auto ">
+            <div className='w-full relative overflow-auto'>
+                <table className="border-separate border-spacing-0 w-full table-auto">
                     <thead className="sticky top-0 bg-white z-20">
                         <tr className="bg-white">
-                            <TableHeading fixed={true} className='min-w-[150px]'>
-                                <HeadingTitle>Country</HeadingTitle>
-                            </TableHeading>
-                            <TableHeading className='min-w-[150px]'>
-                                <HeadingTitle>Tax Scheme</HeadingTitle>
-                            </TableHeading>
-                            <TableHeading className='min-w-[150px]'>
-                                <HeadingTitle>MRP</HeadingTitle>
-                            </TableHeading>
+                            {/* Left fixed columns */}
+                            <TableHeading fixedLeft={1}><HeadingTitle>Country</HeadingTitle></TableHeading>
+                            <TableHeading fixedLeft={150}><HeadingTitle>Tax Scheme</HeadingTitle></TableHeading>
 
-                            <TableHeading className='min-w-[150px]'>
-                                <HeadingTitle>Selling Price</HeadingTitle>
-                            </TableHeading>
-
-                            <TableHeading className='min-w-[150px]'>
-                                <HeadingTitle>Cost Price</HeadingTitle>
-                            </TableHeading>
-
-
+                            {/* Middle columns */}
+                            <TableHeading><HeadingTitle>MRP</HeadingTitle></TableHeading>
+                            <TableHeading><HeadingTitle>Selling Price</HeadingTitle></TableHeading>
+                            <TableHeading><HeadingTitle>Cost Price</HeadingTitle></TableHeading>
                             {state.product.product_type === ProductType.Service &&
-                                <TableHeading className='min-w-[150px]'>
-                                    <HeadingTitle>Duration (Days)</HeadingTitle>
-                                </TableHeading>}
-                            <TableHeading className='min-w-[150px]'>
-                                <HeadingTitle>Popular</HeadingTitle>
-                            </TableHeading>
+                                <TableHeading><HeadingTitle>Duration (Days)</HeadingTitle></TableHeading>
+                            }
+                            {state.product.product_type === ProductType.Goods &&
+                                <>
+                                    <TableHeading><HeadingTitle>Quantity</HeadingTitle></TableHeading>
+                                    <TableHeading><HeadingTitle>SKU</HeadingTitle></TableHeading>
+                                    <TableHeading><HeadingTitle>Expiry Date</HeadingTitle></TableHeading>
+                                </>
+                            }
 
-                            <TableHeading className='min-w-[50px]' is_last_right={true}>
-                                <div className='flex items-center justify-center'>
+                            {/* Right fixed columns */}
+                            <TableHeading fixedRight={70} className='max-w-[70px] min-w-[70px]'><HeadingTitle>Popular</HeadingTitle></TableHeading>
+                            <TableHeading fixedRight={1} is_last_right={true} className='max-w-[70px] min-w-[70px]'>
+                                <div className='flex justify-center'>
                                     <LuTrash2 />
                                 </div>
                             </TableHeading>
@@ -153,61 +174,61 @@ export default function ProductPricingInformation({ state, setStateValue }: Comm
                     </thead>
                     <tbody>
                         {form.prices.map((pp: ProductPrice) => (
-                            <tr key={pp.id} className="hover:bg-accent" onClick={() => { }}>
-                                <TableCell fixed={true} className='min-w-[150px]' >
-                                    <SuggestCountry value={pp.country_id} onChange={setValue(`prices[id:${pp.id}].country_id`)} children='' selected={{ id: pp.country_id, name: pp.country_name, image: pp.image }} />
+                            <tr key={pp.id} className="hover:bg-accent">
+                                <TableCell fixedLeft={1}>
+                                    <SuggestCountry value={pp.country_id} onChange={setValue(`prices[id:${pp.id}].country_id`)} selected={{ id: pp.country_id, name: pp.country_name, image: pp.image }} children='' />
                                 </TableCell>
-                                <TableCell className='min-w-[150px]' >
-                                    <SuggestTaxCode
-                                        country_id={pp.country_id} disabled={!pp.country_id} value={pp.tax_code_id}
-                                        onChange={setValue(`prices[id:${pp.id}].tax_code_id`)}
-                                        children=''
-                                        selected={{ id: pp.tax_code_id, name: pp.tax_code_name }} />
-                                </TableCell>
-                                <TableCell className='min-w-[150px]' >
-                                    <TextField type='number' disabled={!pp.country_id} value={pp.mrp} onChange={setValue(`prices[id:${pp.id}].mrp`)} />
-                                </TableCell>
-                                <TableCell className='min-w-[150px]' >
-                                    <TextField type='number' disabled={!pp.country_id} value={pp.sp} onChange={setValue(`prices[id:${pp.id}].sp`)} />
+                                <TableCell fixedLeft={150}>
+                                    <SuggestTaxCode country_id={pp.country_id} disabled={!pp.country_id} value={pp.tax_code_id} onChange={setValue(`prices[id:${pp.id}].tax_code_id`)} selected={{ id: pp.tax_code_id, name: pp.tax_code_name }} children='' />
                                 </TableCell>
 
-                                <TableCell className='min-w-[150px]' >
-                                    <TextField type='number' disabled={!pp.country_id} value={pp.cp} onChange={setValue(`prices[id:${pp.id}].cp`)} />
+                                <TableCell><TextField type='number' disabled={!pp.country_id} value={pp.mrp} onChange={setValue(`prices[id:${pp.id}].mrp`)} /></TableCell>
+                                <TableCell><TextField type='number' disabled={!pp.country_id} value={pp.sp} onChange={setValue(`prices[id:${pp.id}].sp`)} /></TableCell>
+                                <TableCell><TextField type='number' disabled={!pp.country_id} value={pp.cp} onChange={setValue(`prices[id:${pp.id}].cp`)} /></TableCell>
+
+                                {state.product.product_type === ProductType.Service &&
+                                    <TableCell><TextField type='number' disabled={!pp.country_id} value={pp.duration_days} onChange={setValue(`prices[id:${pp.id}].duration_days`)} /></TableCell>
+                                }
+                                {state.product.product_type === ProductType.Goods &&
+                                    <>
+                                        <TableCell><TextField type='number' disabled={!pp.country_id} value={pp.quantity} onChange={setValue(`prices[id:${pp.id}].quantity`)} /></TableCell>
+                                        <TableCell><TextField disabled={!pp.country_id} value={pp.sku} onChange={setValue(`prices[id:${pp.id}].sku`)} /></TableCell>
+                                        <TableCell><DateTimeField value={pp.expiry_date} onChange={setValue(`prices[id:${pp.id}].expiry_date`)} mode='date' placeholder='Select a date' /></TableCell>
+                                    </>
+                                }
+
+                                <TableCell fixedRight={70} className='max-w-[70px] min-w-[70px]'>
+                                    <Switch checked={!!pp.popular} onCheckedChange={(checked) => {
+                                        const count = form.prices.filter(p => p.country_id === pp.country_id && !!p.popular).length;
+                                        if (!checked && count === 1) return;
+                                        togglePopular(pp.country_id, pp.id, checked);
+                                    }} />
                                 </TableCell>
 
-                                {state.product.product_type === ProductType.Service && <TableCell className='min-w-[150px]' >
-                                    <TextField type='number' disabled={!pp.country_id} value={pp.duration_days} onChange={setValue(`prices[id:${pp.id}].duration_days`)} />
-                                </TableCell>}
-                                <TableCell className='min-w-[150px]' >
-                                    <Switch
-                                        checked={!!pp.popular}
-                                        onCheckedChange={(checked) => {
-                                            const count = form.prices.filter(p => p.country_id === pp.country_id && !!p.popular).length;
-
-                                            if (!checked && count === 1) return;        // block turning off last one
-                                            togglePopular(pp.country_id, pp.id, checked);
-                                        }}
-                                    />
-
-
-
-                                </TableCell>
-                                <TableCell className='min-w-[50px]' is_last_right={true} >
-                                    <Btn size={'sm'} variant={'outline'} onClick={() => setValue('prices')(form.prices.filter((ppx: ProductPrice) => ppx.id !== pp.id))}><LuTrash2 /></Btn>
+                                <TableCell fixedRight={1} is_last_right={true} className='max-w-[70px] min-w-[70px]'>
+                                    <Btn size='sm' variant='outline' onClick={() => setValue('prices')(form.prices.filter(p => p.id !== pp.id))}><LuTrash2 /></Btn>
                                 </TableCell>
                             </tr>
                         ))}
-
                     </tbody>
                 </table>
-                {form.prices.length > 0 && <div className='flex flex-row justify-between p-3'>
-                    <Btn variant={'outline'} onClick={addPricing}><LuPlus />Add More Pricing</Btn>
-                    <Btn onClick={save} loading={saving}><LuSave />Save Price</Btn>
-                </div>}
-                {form.prices.length == 0 && <NoRecords icon={TbTransactionRupee} title='Add Pricing' subtitle='Try adding some pricing in order to start selling' action={<Btn variant={'outline'} onClick={addPricing}><LuPlus />Add Pricing</Btn>} />}
+
+                {form.prices.length === 0 && (
+                    <NoRecords icon={TbTransactionRupee} title='Add Pricing' subtitle='Try adding some pricing in order to start selling' action={<Btn variant='outline' onClick={addPricing}><LuPlus />Add Pricing</Btn>} />
+                )}
+            </div>
+
+            <div className='sticky bottom-0 px-3 pb-3'>
+                {form.prices.length > 0 && (
+                    <div className='flex flex-row justify-between w-full bg-white rounded-lg p-2 shadow-lg border'>
+                        <Btn variant='outline' onClick={addPricing}><LuPlus />Add More Pricing</Btn>
+                        <div className="items-center gap-3 flex">
+                            <span className="text-xs text-gray-500">Save Price Information</span>
+                            <Btn loading={saving} onClick={save}><LuSave /> Save Price</Btn>
+                        </div>
+                    </div>
+                )}
             </div>
         </>
-
     );
 };
-

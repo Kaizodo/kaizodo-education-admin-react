@@ -20,12 +20,12 @@ export default function NoRecords({
 }: Props) {
     return (
         <div className={cn(
-            "flex flex-col items-center justify-center min-h-64 text-primary py-3",
+            "flex flex-col items-center justify-center min-h-64 text-primary py-3 text-gray-400",
             className
         )}>
             <Icon className="text-6xl mb-4" />
             <p className="text-xl font-medium">{title}</p>
-            <p className="text-sm mt-1 mb-4">{subtitle}</p>
+            <p className="text-sm mt-1 mb-4 text-center">{subtitle}</p>
             {action}
         </div>
     )

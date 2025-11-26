@@ -15,7 +15,7 @@ import { ReferralEarningWithdrawalService } from '@/services/ReferralEarningWith
 import moment from 'moment';
 import TextField from '@/components/common/TextField';
 import Dropdown from '@/components/common/Dropdown';
-import { EarningWithdrawalStatus, EarningWithdrawalStatusArray, getEarningWithdrawalStatusName } from '@/data/user';
+import { EarningWithdrawalStatus, EarningWithdrawalStatusArray, getEarningWithdrawalStatusName, PaymentMethod } from '@/data/user';
 import { nameLetter } from '@/lib/utils';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { LuArrowRight, LuMail, LuPhone } from 'react-icons/lu';
@@ -119,7 +119,8 @@ export default function ReferralEarningWithdrawal() {
                                 <TableHead>Ref No</TableHead>
                                 <TableHead>Marketer</TableHead>
                                 <TableHead>Amount</TableHead>
-                                <TableHead>Bank Details</TableHead>
+                                <TableHead>Total Items</TableHead>
+                                <TableHead>Payment Method</TableHead>
                                 <TableHead>Date Requested</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className='text-end'>Actions</TableHead>
@@ -144,14 +145,24 @@ export default function ReferralEarningWithdrawal() {
                                             </div>
                                         </div>
                                     </TableCell>
-                                    <TableCell>₹{record.amount}</TableCell>
+                                    <TableCell>{record.currency_symbol}{record.amount}</TableCell>
+                                    <TableCell>{record.items_count}</TableCell>
                                     <TableCell>
-                                        <div className='border rounded-sm'>
+                                        {record.payment_method == PaymentMethod.Bank && <div className='border rounded-sm'>
                                             <DetailRow label="Bank Name" value={record.bank_name} />
                                             <DetailRow label="Account No." value={record.bank_account_number} />
                                             <DetailRow label="IFSC Code" value={record.bank_ifsc_code} />
                                             <DetailRow label="Branch" value={record.bank_branch_name} />
-                                        </div>
+                                        </div>}
+                                        {record.payment_method == PaymentMethod.Paypal && <div className='border rounded-sm'>
+                                            <DetailRow label="Paypal" value={record.paypal_email} />
+                                        </div>}
+                                        {record.payment_method == PaymentMethod.UPI && <div className='border rounded-sm'>
+                                            <DetailRow label="UPI" value={record.upi_id} />
+                                        </div>}
+                                        {record.payment_method == PaymentMethod.ClosedWallet && <div className='border rounded-sm text-center'>
+                                            <span className='text-xs'>Closed Wallet</span>
+                                        </div>}
                                     </TableCell>
                                     <TableCell><span className='text-xs text-gray-500'>{moment(record.created_at).format('DD MMM, Y LT')}</span></TableCell>
                                     <TableCell>

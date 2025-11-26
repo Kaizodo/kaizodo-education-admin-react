@@ -5,6 +5,7 @@ export type NavType = {
     label: string,
     subtitle?: string,
     icon?: IconType,
+    admin_only?: boolean,
     children?: NavType[]
 }
 

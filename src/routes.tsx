@@ -29,16 +29,22 @@ export const routes: RouteType[] = [
                     { path: 'phases', element: lazy(() => import('@/pages/phase/PhaseManagement')) },
                     { path: 'phase-steps', element: lazy(() => import('@/pages/phase-step/PhaseStepManagement')) },
 
+                    { path: 'shipments', element: lazy(() => import('@/pages/shipments/Shipments')) },
+                    { path: 'shipments/:internal_reference_number', element: lazy(() => import('@/pages/shipments/ShipmentDetail')) },
+
                     { path: 'employees', element: lazy(() => import('@/pages/employees/EmployeeListing')) },
                     { path: 'feature-cards', element: lazy(() => import('@/pages/feature-cards/FeatureCards')) },
                     { path: 'teams', element: lazy(() => import('@/pages/teams/Teams')) },
                     { path: 'settings', element: lazy(() => import('@/pages/settings/Settings')) },
                     { path: 'orders', element: lazy(() => import('@/pages/orders/Orders')) },
-                    { path: 'orders/:internal_reference_number', element: lazy(() => import('@/pages/orders/OrderDetail')) },
+                    { path: 'orders/:internal_reference_number', element: lazy(() => import('@/pages/orders/UserOrderDetail')) },
 
                     { path: 'organizations', element: lazy(() => import('@/pages/organizations/OrganizationListing')) },
                     { path: 'organizations/create', element: lazy(() => import('@/pages/organizations/OrganizationEditor')) },
                     { path: 'organizations/update/:id', element: lazy(() => import('@/pages/organizations/OrganizationEditor')) },
+                    { path: 'stores', element: lazy(() => import('@/pages/stores/StoreListing')) },
+                    { path: 'stores/create', element: lazy(() => import('@/pages/stores/StoreEditor')) },
+                    { path: 'stores/update/:id', element: lazy(() => import('@/pages/stores/StoreEditor')) },
                     { path: 'ticket-category', element: lazy(() => import('@/pages/ticket-category/TicketCategoryModules')) },
                     { path: 'news', element: lazy(() => import('@/pages/articles/NewsManagement')) },
                     { path: 'blogs', element: lazy(() => import('@/pages/articles/BlogsManagement')) },

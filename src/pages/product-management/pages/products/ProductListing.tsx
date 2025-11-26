@@ -3,7 +3,7 @@ import { StatsCard } from "./components/StatsCard";
 import { Package, TrendingUp, AlertCircle, Edit } from "lucide-react";
 import AppPage from "@/components/app/AppPage";
 import Btn from "@/components/common/Btn";
-import { LuArchive, LuArrowRight, LuCamera, LuCopy, LuPlus } from "react-icons/lu";
+import { LuArchive, LuArrowRight, LuBuilding2, LuCamera, LuCopy, LuPlus } from "react-icons/lu";
 import TextField from "@/components/common/TextField";
 import { useSetValue } from "@/hooks/use-set-value";
 import { getDefaultPaginated, PaginationType } from "@/data/pagination";
@@ -210,6 +210,7 @@ const Products = () => {
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[50px]">#ID</TableHead>
+                            <TableHead>Store</TableHead>
                             <TableHead className="w-[100px]">Image</TableHead>
                             <TableHead>Name</TableHead>
                             <TableHead>Category</TableHead>
@@ -224,7 +225,18 @@ const Products = () => {
                             <TableRow key={record.id}>
                                 <TableCell>{record.id}</TableCell>
                                 <TableCell>
-                                    <SafeImage src={record?.media?.media_path} className="h-12 w-12 rounded-md border object-cover">
+                                    <div className="flex flex-row items-center gap-1">
+                                        <SafeImage src={record?.organization_logo_short} className="h-5 w-5   object-contain ">
+                                            <div className="text-xl flex items-center justify-center flex-1  h-full w-full text-gray-400">
+                                                <LuBuilding2 />
+                                            </div>
+                                        </SafeImage>
+                                        {!!record.organization_id && <span className="text-xs">{record.organization_name}</span>}
+                                        {!record.organization_id && <span className="text-xs text-red-600">NO STORE</span>}
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <SafeImage src={record?.media?.media_path} className="h-12 w-12 rounded-md border object-contain p-1">
                                         <div className="text-2xl flex items-center justify-center flex-1  h-full w-full text-gray-400">
                                             <LuCamera />
                                         </div>
@@ -233,15 +245,17 @@ const Products = () => {
                                 <TableCell>
                                     <div className="flex flex-col">
                                         <div className="flex flex-row items-center gap-1">
-                                            <span>{record.name}</span>
+                                            <span className="font-medium">{record.name}</span>
                                             {!!record.product_id && <Badge>Cloned</Badge>}
                                         </div>
                                         {!!record.product_id && <div className="text-xs text-gray-500">
                                             <span>Clone of </span>
                                             <Link to={"/product-management/products/" + record.product_id} className="text-blue-700 font-medium cursor-pointer hover:text-blue-900">{record.main_product_name}</Link>
                                         </div>}
+                                        <span className="text-xs">/products/{record.product_category_slug}/{record.slug}-{record.id}</span>
                                     </div>
                                 </TableCell>
+
                                 <TableCell>
                                     <div className='flex flex-row gap-1 text-xs flex-wrap items-center'>
                                         {record.tree.map((item: CategoryTree, index: number) => {

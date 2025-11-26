@@ -21,7 +21,7 @@ import { TbListTree, TbTimelineEventText, TbUserStar } from "react-icons/tb";
 import { TiGroupOutline } from "react-icons/ti";
 import { GrGroup, GrNavigate } from "react-icons/gr";
 import { PRODUCTION_MODE } from "./lib/api";
-import { IoCodeSlashOutline } from "react-icons/io5";
+import { IoCodeSlashOutline, IoStorefrontOutline } from "react-icons/io5";
 import { FaGlobeAsia } from "react-icons/fa";
 import { BsCardHeading, BsDatabaseGear, BsInbox, BsPatchQuestion } from "react-icons/bs";
 import { VscFeedback } from "react-icons/vsc";
@@ -82,10 +82,19 @@ export const navs: NavType[] = [
         ]
     },
     {
+        admin_only: true,
         label: 'Organizations',
         icon: LuUniversity,
         route: 'organizations',
         subtitle: 'Manage school,collages, institutes'
+
+    },
+    {
+        admin_only: true,
+        label: 'Stores',
+        icon: IoStorefrontOutline,
+        route: 'stores',
+        subtitle: 'Manage  stores and businesses'
 
     },
     {
@@ -106,6 +115,7 @@ export const navs: NavType[] = [
         ]
     },
     {
+        admin_only: true,
         label: 'Settings',
         icon: LuCog,
         route: 'settings',
@@ -113,6 +123,7 @@ export const navs: NavType[] = [
 
     },
     {
+
         label: 'Website',
         icon: FaGlobeAsia,
         children: [

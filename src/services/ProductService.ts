@@ -62,6 +62,14 @@ export class ProductService {
         return Api(`${this.endpoint}/save-referral-information`, form);
     }
 
+    public static async saveWarrantyInformation(form: any) {
+        return Api(`${this.endpoint}/save-warranty-information`, form);
+    }
+
+    public static async saveReturnInformation(form: any) {
+        return Api(`${this.endpoint}/save-return-information`, form);
+    }
+
     public static async uploadMedia(form: any, onUploadProgress: (p: number) => void) {
         return Api(`${this.endpoint}/upload-media`, form, {
             onUploadProgress

@@ -397,7 +397,7 @@ export function getUserTypeName(tag: UserType) {
 
 export type ModuleModifier = 'admin' | 'employee' | 'student' | 'parent';
 
-export function getModuleModifierMeta(m: ModuleModifier) {
+export function getModuleModifierMeta() {
     var name = '';
     var user_type: UserType = UserType.User;
 
@@ -1046,3 +1046,32 @@ export const TreatmentEnumOption = [
     { id: TreatmentEnum.Rejected, name: "Rejected" },
     { id: TreatmentEnum.Completed, name: "Completed" },
 ];
+
+export const enum PaymentMethod {
+    Bank = 0,
+    Cash = 1,
+    CreditCard = 2,
+    DebitCard = 3,
+    Cheque = 4,
+    UPI = 5,
+    Paypal = 6,
+    ClosedWallet = 7,
+    Online = 8
+}
+
+
+export const PaymentMethodArray = [
+    { id: PaymentMethod.Cash, name: "Cash" },
+    { id: PaymentMethod.CreditCard, name: "Credit Card" },
+    { id: PaymentMethod.DebitCard, name: "Debit Card" },
+    { id: PaymentMethod.Bank, name: "Bank" },
+    { id: PaymentMethod.Cheque, name: "Cheque" },
+    { id: PaymentMethod.UPI, name: "UPI" },
+    { id: PaymentMethod.Paypal, name: "PayPal" },
+    { id: PaymentMethod.ClosedWallet, name: 'Wallet' },
+    { id: PaymentMethod.ClosedWallet, name: 'Online' }
+];
+
+export function getPaymentMethodName(id: PaymentMethod) {
+    return PaymentMethodArray.find(x => x.id === id)?.name || '';
+}

@@ -25,5 +25,5 @@ export default function DownloadInvoiceBtn({ internal_reference_number }: { inte
         setDownloading(false);
     }
 
-    return (<Btn onClick={download} loading={downloading}><LuDownload />Invoice</Btn>)
+    return (<Btn onClick={download} loading={downloading} size={'sm'}><LuDownload />Invoice</Btn>)
 }

@@ -16,6 +16,8 @@ import { useGlobalContext } from "@/hooks/use-global-context";
 import { nameLetter } from "@/lib/utils";
 
 
+import OrganizationSwitch from "./OrganizationSwitch";
+
 
 export default function MainLayout() {
     const navigate = useNavigate();
@@ -72,10 +74,10 @@ export default function MainLayout() {
                         <div className="flex items-center">
 
                             <div className="hidden sm:block  rounded-sm p-1">
-                                <img src={'/logo/dark/lg.png'} style={{
+                                <img src={context.organization.logo_full || context.settings.logo_full} style={{
                                     height: 30
                                 }} />
-                                <p className="text-xs text-primary">Super Administrator Panel</p>
+                                <p className="text-xs text-primary">{context.organization.name || context.settings.company_name}</p>
                             </div>
                             <div className="sm:hidden">
                                 <h1 className="text-lg font-bold">Control Center</h1>
@@ -84,6 +86,11 @@ export default function MainLayout() {
                     </div>
 
                     <div className="flex items-center space-x-2 md:space-x-4">
+
+                        <div className=" relative max-w-[150px]">
+                            <OrganizationSwitch />
+                        </div>
+
                         <Button onClick={() => navigate('/search')} variant="ghost" size="sm" className="text-slate-900 hover:text-white hidden sm:flex">
                             <LuSearch className="h-4 w-4" />
                         </Button>

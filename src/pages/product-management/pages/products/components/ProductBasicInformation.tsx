@@ -10,6 +10,7 @@ import SuggestUnit from "@/components/common/suggest/SuggestUnit";
 import Radio from "@/components/common/Radio";
 import { YesNoArray } from "@/data/Common";
 import { CommonProductStateProps } from '@/data/Product';
+import SuggestStore from "@/components/common/suggest/SuggestStore";
 
 export default function ProductBasicInformation({ state, setStateValue }: CommonProductStateProps) {
     const [saving, setSaving] = useState(false);
@@ -26,7 +27,14 @@ export default function ProductBasicInformation({ state, setStateValue }: Common
     return (
         <>
             <div className="grid grid-cols-4 gap-3">
-                <div className="col-span-3 ">
+                <div>
+                    <SuggestStore value={form.organization_id} onChange={setValue('organization_id')} selected={{
+                        id: state?.product?.organization_id,
+                        name: state?.product?.organization_name,
+                        image: state?.product?.organization_logo_short
+                    }} />
+                </div>
+                <div className="col-span-2">
                     <TextField value={form.name} onChange={setValue('name')} placeholder="Enter product name">Product Name</TextField>
                 </div>
                 <div>
@@ -89,8 +97,11 @@ export default function ProductBasicInformation({ state, setStateValue }: Common
                 <Richtext value={form.tnc} onChange={setValue('tnc')}>Terms & Conditions</Richtext>
                 <Richtext value={form.nda} onChange={setValue('nda')}>NDA - (Non-Disclosure Agreement)</Richtext>
             </div>
-            <div className="flex flex-row justify-end w-full">
-                <Btn loading={saving} onClick={save}>Save Details</Btn>
+            <div className="flex flex-row justify-end w-full sticky bottom-2 ">
+                <div className="items-center gap-3 flex bg-white border rounded-lg p-1 shadow-lg">
+                    <span className="text-xs text-gray-500">Save Product Information</span>
+                    <Btn loading={saving} onClick={save}>Save Details</Btn>
+                </div>
             </div>
         </>
     )

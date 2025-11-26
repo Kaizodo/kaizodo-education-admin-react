@@ -40,13 +40,14 @@ type Props = {
     children?: string,
     includedValues?: (undefined | number | string)[],
     searchable?: boolean,
+    showClearBtn?: boolean,
     disabled?: boolean,
     footer?: (callback: (item: DropdownItemType) => void) => React.ReactNode,
     onSelect?: (output: any) => void,
     getOptions: ({ keyword, page, ids }: { keyword: string, page: number, ids: number[] }) => Promise<DropdownItemType[]>
 };
 
-export default function Dropdown({ value, includedValues = [undefined], selected, onChange, onSelect, children, placeholder, searchable = true, disabled, getOptions, footer }: Props) {
+export default function Dropdown({ value, includedValues = [undefined], selected, showClearBtn = true, onChange, onSelect, children, placeholder, searchable = true, disabled, getOptions, footer }: Props) {
     const [open, setOpen] = useState(false)
     const [searching, setSearching] = useState(false);
     const [records, setRecords] = useState<DropdownItemType[]>([]);
@@ -125,9 +126,10 @@ export default function Dropdown({ value, includedValues = [undefined], selected
                             <AvatarFallback>{nameLetter(found?.name)}</AvatarFallback>
                         </Avatar>}
                         {found && !!found.icon && <found.icon className="h-4 w-4 " />}
-                        <span className="flex-1 text-start">{found ? found.name : placeholder}</span>
+                        {found && <span className="flex-1 text-start text-xs">{found.name}</span>}
+                        {!found && <span className="flex-1 text-start text-gray-500">{placeholder}</span>}
                         <LuChevronsUpDown className="opacity-50" />
-                        {found && <div className="h-full  items-center flex " onClick={(e) => {
+                        {found && showClearBtn && <div className="h-full  items-center flex " onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
                             onChange(undefined);

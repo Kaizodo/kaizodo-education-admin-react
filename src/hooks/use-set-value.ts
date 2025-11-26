@@ -23,6 +23,86 @@ function setByPath(obj: any, path: string | number | (string | number)[], value:
         path = path.slice(0, -2);
     }
 
+    // Removal handling
+    if (typeof path === "string" && path.endsWith("-")) {
+        const pathWithoutDash = path.slice(0, -1);
+        const base = pathWithoutDash.split("[")[0];
+        const inside = pathWithoutDash.split("[")[1]?.replace("]", "") || "";
+
+        const selectors = inside.split(",").map(s => {
+            const [field, raw] = s.split(":");
+            const val = /^\d+$/.test(raw) ? Number(raw) : raw;
+            return { field, val };
+        });
+
+        const arr = obj[base];
+        if (Array.isArray(arr)) {
+            obj[base] = arr.filter(item =>
+                !selectors.every(sel => item?.[sel.field] === sel.val)
+            );
+        }
+        return obj;
+    }
+
+    // Special handling for array bulk update or get
+    if (typeof path === "string" && path.includes("[") && path.includes("]") && !path.endsWith("-")) {
+        const base = path.split("[")[0];
+        const inside = path.split("[")[1].replace("]", "");
+
+        const isSpecial = inside.includes("(") || !inside.includes(".");
+        if (isSpecial) {
+            const wherePart = inside.includes("(")
+                ? inside.split("(")[0]
+                : inside;
+
+            const updatePart = inside.includes("(")
+                ? inside.split("(")[1].replace(")", "")
+                : null;
+
+            const selectors = wherePart.split(",").map(s => {
+                const [field, raw] = s.split(":");
+                const val = /^\d+$/.test(raw) ? Number(raw) : raw;
+                return { field, val };
+            });
+
+            const arr = obj[base];
+            if (!Array.isArray(arr)) return obj;
+
+            if (!updatePart) {
+                const found = arr.find(item =>
+                    selectors.every(sel => item?.[sel.field] === sel.val)
+                );
+                if (found) return found;
+                return obj;
+            }
+
+            const rules = updatePart.split("|").map(r => {
+                const [k, rest] = r.split("=");
+                const parts = rest.split(",");
+                return {
+                    key: k,
+                    match: /^\d+$/.test(parts[0]) ? Number(parts[0]) : parts[0],
+                    unmatch: parts[1]
+                        ? (/^\d+$/.test(parts[1]) ? Number(parts[1]) : parts[1])
+                        : undefined
+                };
+            });
+
+            arr.forEach(item => {
+                const isMatch = selectors.every(sel => item?.[sel.field] === sel.val);
+                rules.forEach(rule => {
+                    if (isMatch) {
+                        item[rule.key] = rule.match;
+                    } else if (rule.unmatch !== undefined) {
+                        item[rule.key] = rule.unmatch;
+                    }
+                });
+            });
+
+            return obj;
+        }
+    }
+
     const keys = normalizePath(path);
     let current: any = obj;
 
@@ -62,65 +142,6 @@ function setByPath(obj: any, path: string | number | (string | number)[], value:
         }
     }
 
-    if (typeof path === "string" && path.includes("[") && path.includes("]")) {
-        const base = path.split("[")[0];
-        const inside = path.split("[")[1].replace("]", "");
-
-        const wherePart = inside.includes("(")
-            ? inside.split("(")[0]                 // before (...)
-            : inside;
-
-        const updatePart = inside.includes("(")
-            ? inside.split("(")[1].replace(")", "") // inside (...)
-            : null;
-
-        // WHERE conditions  (country_id:1,id:2,...)
-        const selectors = wherePart.split(",").map(s => {
-            const [field, raw] = s.split(":");
-            const val = /^\d+$/.test(raw) ? Number(raw) : raw;
-            return { field, val };
-        });
-
-        const arr = obj[base];
-        if (!Array.isArray(arr)) return obj;
-
-        // If no update rules → daisy chain selector only
-        if (!updatePart) {
-            const found = arr.find(item =>
-                selectors.every(sel => item?.[sel.field] === sel.val)
-            );
-            if (found) return found;
-            return obj;
-        }
-
-        // Update rules (key=v1,v2 | key=v1 | key=v1,v2)
-        const rules = updatePart.split("|").map(r => {
-            const [k, rest] = r.split("=");
-            const parts = rest.split(",");
-            return {
-                key: k,
-                match: /^\d+$/.test(parts[0]) ? Number(parts[0]) : parts[0],
-                unmatch: parts[1]
-                    ? (/^\d+$/.test(parts[1]) ? Number(parts[1]) : parts[1])
-                    : undefined
-            };
-        });
-
-        // Apply
-        arr.forEach(item => {
-            const isMatch = selectors.every(sel => item?.[sel.field] === sel.val);
-            rules.forEach(rule => {
-                if (isMatch) {
-                    item[rule.key] = rule.match;
-                } else if (rule.unmatch !== undefined) {
-                    item[rule.key] = rule.unmatch;
-                }
-            });
-        });
-
-        return obj;
-    }
-
     return obj;
 }
 
@@ -132,10 +153,16 @@ export function useSetValue<T>(
             (...values: any[]): Promise<T> =>
                 new Promise((resolve) => {
                     setForm((prev) => {
-                        const updated = structuredClone(prev)
-                        paths.forEach((p, i) => setByPath(updated, p, values[i]))
-                        resolve(updated)
-                        return updated
+                        const updated = structuredClone(prev) as T;
+                        let result: any = updated;
+                        paths.forEach((p, i) => {
+                            const res = setByPath(result, p, values[i]);
+                            if (res !== result && paths.length === 1) {
+                                result = res;
+                            }
+                        });
+                        resolve(result);
+                        return updated;
                     })
                 }),
         [setForm]
@@ -143,3 +170,14 @@ export function useSetValue<T>(
         ...paths: (string | number | (string | number)[])[]
     ) => (...values: any[]) => Promise<T>;
 }
+
+
+/*
+
+Add item: setValue('someArray[]')({id:1,name:'content',abcd:true})
+Update item: setValue('someArray[id:1].name')('new name') or bulk setValue('someArray[id:1](name=newname|other=otherval)')()
+Remove item: setValue('someArray[id:1,name:abcd something,otherkey:1]-')()
+Get item: setValue('someArray[id:1]')() (returns item, no-op if set)
+Nested set: setValue('obj.arr[0].prop')('value')
+
+*/

@@ -1,17 +1,16 @@
 
 import { useEffect, useState } from 'react';
-import { useSetValue } from '@/hooks/use-set-value';
 import { ModalBody, ModalFooter } from '@/components/common/Modal';
 import Btn from '@/components/common/Btn';
-import { msg } from '@/lib/msg';
 import { ReferralEarningWithdrawalService } from '@/services/ReferralEarningWithdrawalService';
 import CenterLoading from '@/components/common/CenterLoading';
 import { useForm } from '@/hooks/use-form';
 import Dropdown from '@/components/common/Dropdown';
 import { Badge } from '@/components/ui/badge';
-import { EarningWithdrawalStatus, EarningWithdrawalStatusArray, getEarningWithdrawalStatusName } from '@/data/user';
+import { EarningWithdrawalStatus, EarningWithdrawalStatusArray, getEarningWithdrawalStatusName, PaymentMethod } from '@/data/user';
 import { formatDateTime } from '@/lib/utils';
 import TextField from '@/components/common/TextField';
+import { Link } from 'react-router-dom';
 
 
 interface Props {
@@ -46,6 +45,7 @@ type WithdrawalRecord = {
         client_user_id: string;
         referrer_user_id: string | null;
         internal_reference_number: string;
+        order_internal_reference_number: string;
         total_amount: string;
         earned_percentage: string;
         earned_amount: string;
@@ -87,22 +87,15 @@ type WithdrawalRecord = {
 
 
 
-export default function ReferralEarningWithdrawalProcessDialog({ record, onSuccess, onCancel }: Props) {
+export default function ReferralEarningWithdrawalProcessDialog({ record, onCancel }: Props) {
     const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
     const [state, setStateValue, setState] = useForm<WithdrawalRecord>()
-    const [form, setForm] = useState<any>({
-        id: record.id,
-        status: record.status,
-        status_remarks: record.status_remarks,
-        reference_number: record.reference_number
-    });
 
-    const setValue = useSetValue(setForm);
+
 
     const load = async () => {
         setLoading(true);
-        let r = await ReferralEarningWithdrawalService.detail(form.id);
+        let r = await ReferralEarningWithdrawalService.detail(record.id);
         if (r.success) {
             setState(r.data);
             setLoading(false);
@@ -114,17 +107,6 @@ export default function ReferralEarningWithdrawalProcessDialog({ record, onSucce
 
 
 
-
-    const save = async () => {
-        setSaving(true);
-        let r = await ReferralEarningWithdrawalService.update(record);
-
-        if (r.success) {
-            msg.success('Status updated sucessfuly');
-            onSuccess(r.data);
-        }
-        setSaving(false);
-    }
 
     useEffect(() => {
         load();
@@ -155,21 +137,22 @@ export default function ReferralEarningWithdrawalProcessDialog({ record, onSucce
                         <div>
                             <span className="font-medium text-muted-foreground">Status:</span>
                             <p className="mt-1">
-                                <Badge variant={state.record.status === 2 ? 'default' : state.record.status === 3 ? 'destructive' : 'secondary'}>
+                                <Badge variant={state.record.status === EarningWithdrawalStatus.Pending ? 'default' : state.record.status === EarningWithdrawalStatus.Rejected ? 'destructive' : 'secondary'}>
                                     {getEarningWithdrawalStatusName(state.record.status)}
                                 </Badge>
                             </p>
                         </div>
                         {/* payment method details same as before */}
-                        {state.record.payment_method === 1 && (
+                        {state.record.payment_method === PaymentMethod.Bank && (
                             <>
                                 <div><span className="font-medium text-muted-foreground">Bank:</span><p className="mt-1">{state.record.bank_name}</p></div>
                                 <div><span className="font-medium text-muted-foreground">A/C No:</span><p className="mt-1 font-mono">{state.record.bank_account_number}</p></div>
                                 <div><span className="font-medium text-muted-foreground">IFSC:</span><p className="mt-1 font-mono uppercase">{state.record.bank_ifsc_code}</p></div>
                             </>
                         )}
-                        {state.record.payment_method === 2 && state.record.paypal_email && <div><span className="font-medium text-muted-foreground">PayPal:</span><p className="mt-1">{state.record.paypal_email}</p></div>}
-                        {state.record.payment_method === 3 && state.record.upi_id && <div><span className="font-medium text-muted-foreground">UPI ID:</span><p className="mt-1">{state.record.upi_id}</p></div>}
+                        {state.record.payment_method === PaymentMethod.Paypal && state.record.paypal_email && <div><span className="font-medium text-muted-foreground">PayPal:</span><p className="mt-1">{state.record.paypal_email}</p></div>}
+                        {state.record.payment_method === PaymentMethod.UPI && state.record.upi_id && <div><span className="font-medium text-muted-foreground">UPI ID:</span><p className="mt-1">{state.record.upi_id}</p></div>}
+                        {state.record.payment_method === PaymentMethod.ClosedWallet && <div><span className="font-medium text-muted-foreground">Payment Method:</span><p className="mt-1">Closed Wallet</p></div>}
                         <div><span className="font-medium text-muted-foreground">Requested On:</span><p className="mt-1">{formatDateTime(state.record.created_at)}</p></div>
                         {state.record.reference_number && <div><span className="font-medium text-muted-foreground">Transaction Ref:</span><p className="mt-1 font-mono">{state.record.reference_number}</p></div>}
                     </div>
@@ -188,6 +171,12 @@ export default function ReferralEarningWithdrawalProcessDialog({ record, onSucce
                                         <div>
                                             <p className="text-sm font-medium text-muted-foreground">Product</p>
                                             <p className="font-semibold">{item.product_name}</p>
+                                            <div className='flex flex-row items-center gap-3'>
+                                                <span className='text-sm'>Customer Order : </span>
+                                                <Link to={'/orders/' + item.order_internal_reference_number} target='_blank'>
+                                                    <span className='text-blue-600 font-medium text-sm hover:underline'>{item.order_internal_reference_number}</span>
+                                                </Link>
+                                            </div>
                                         </div>
                                         <div>
                                             <p className="text-sm font-medium text-muted-foreground">Client</p>
