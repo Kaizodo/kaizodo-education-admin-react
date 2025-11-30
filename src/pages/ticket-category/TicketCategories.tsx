@@ -16,11 +16,12 @@ import Pagination from '@/components/common/Pagination';
 import { Modal } from '@/components/common/Modal';
 import { TicketCategoryService } from '@/services/TicketCategoryService';
 import { Search } from '@/components/ui/search';
-import { getTicketCategoryTypeName } from '@/data/Ticket';
+import { getTicketCategoryActionName } from '@/data/Ticket';
+import { getProductTypeName } from '@/data/Product';
 
-const LazyEditorDialog = lazy(() => import('./components/TicketCategoryModuleEditorDialog'));
+const LazyEditorDialog = lazy(() => import('./components/TicketCategoryEditorDialog'));
 
-export default function TicketCategoryModules() {
+export default function TicketCategories() {
     const [searching, setSearching] = useState(true);
     const [paginated, setPaginated] = useState<PaginationType<any>>(getDefaultPaginated());
     const [filters, setFilters] = useState<{
@@ -60,6 +61,7 @@ export default function TicketCategoryModules() {
     const openEditor = async (id?: number) => {
         const modal_id = Modal.show({
             title: !id ? 'Add Ticket Category' : 'Update Ticket Category',
+            maxWidth: 500,
             content: () => <Suspense fallback={<CenterLoading className='h-[400px] relative' />}>
                 <LazyEditorDialog id={id} onSuccess={() => {
                     search();
@@ -94,17 +96,26 @@ export default function TicketCategoryModules() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Name</TableHead>
-                                <TableHead>Category Type</TableHead>
+                                <TableHead>Category Action</TableHead>
                                 <TableHead>Description</TableHead>
+                                <TableHead>Main</TableHead>
+                                <TableHead>Product Type</TableHead>
                                 <TableHead className='text-end'>Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {paginated.records.map((record) => (
                                 <TableRow key={record.id}>
-                                    <TableCell>{record.name}</TableCell>
-                                    <TableCell>{getTicketCategoryTypeName(record.ticket_category_type)}</TableCell>
+                                    <TableCell>
+                                        <div className='flex flex-col'>
+                                            <span className='font-medium'>{record.name}</span>
+                                            <span className='text-xs text-gray-600'>{record.parent_ticket_category_name}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>{getTicketCategoryActionName(record.ticket_category_action)}</TableCell>
                                     <TableCell>{record.description}</TableCell>
+                                    <TableCell>{record.is_main ? 'Yes' : 'No'}</TableCell>
+                                    <TableCell>{getProductTypeName(record.product_type)}</TableCell>
                                     <TableCell>
                                         <div className="flex gap-2 justify-end">
                                             <Btn variant="outline" size="sm" onClick={() => openEditor(record.id)}>

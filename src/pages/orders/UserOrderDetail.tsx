@@ -1,21 +1,18 @@
 import { Organization } from '@/data/Organization';
-import { OrderDetailState, UserOrderItem } from '@/data/UserOrder';
+import { OrderDetailState } from '@/data/UserOrder';
 import { UserOrderService } from '@/services/UserOrderService';
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom';
-import CreateShipmentDialog from './components/CreateShipmentDialog';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Modal } from '@/components/common/Modal';
-import OrderIssueDialog from './components/OrderIssueDialog';
+
 import DetailSkeleton from './components/OrderDetailSkeleton';
 import AppPage from '@/components/app/AppPage';
-import { formatDateTime } from '@/lib/utils';
-import DownloadInvoiceBtn from './components/DownloadInvoiceBtn';
+import { cn, formatDateTime } from '@/lib/utils';
 import CustomerInformationCard from './components/alt-design/CustomerInformationCard';
 import OrderValueCard from './components/alt-design/OrderValueCard';
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
     TableHead,
     TableHeader,
@@ -24,14 +21,19 @@ import {
 import SafeImage from '@/components/common/SafeImage';
 import { Package, Store } from 'lucide-react';
 import Btn from '@/components/common/Btn';
-import { LuDownload } from 'react-icons/lu';
+import { LuArrowRight, LuSquare, LuSquareCheck } from 'react-icons/lu';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useForm } from '@/hooks/use-form';
 import InvoicesCard from './components/alt-design/InvoicesCard';
-import CancellationCard from './components/alt-design/CancellationCard';
 import FloatingSelectionBar from './components/alt-design/FloatingSelectionBar';
 import ProcessOrder from './components/alt-design/ProcessOrder';
 import StatusDropdown from './components/alt-design/StatusCheck';
+import DownloadListBtn from './components/DownloadListBtn';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { getUserOrderIssueTypeName, getUserOrderStatusMeta, UserOrderIssueType, UserOrderStatus } from '@/data/order';
+import CancellationCard from './components/alt-design/CancellationCard';
+import ShipmentsCard from './components/alt-design/ShipmentsCard';
+import PartyInformationCard from './components/alt-design/PartyInformationCard';
 export default function UserOrderDetail() {
     const navigate = useNavigate();
     const { internal_reference_number } = useParams<{ internal_reference_number: string }>();
@@ -56,48 +58,6 @@ export default function UserOrderDetail() {
 
 
 
-    const openNewShipmentForm = (organization: Organization, items: UserOrderItem[]) => {
-        const modal_id = Modal.show({
-            title: 'Add Shipment',
-            subtitle: `#${state?.order.internal_reference_number}`,
-            maxWidth: 600,
-            content: () => <CreateShipmentDialog
-                user_order_id={state?.order.id}
-                organization={organization}
-                items={items.filter(i => !!i.has_shipping && i.quantity_unlocked > 0)}
-                currency_code={state?.order.currency_code}
-                currency_symbol={state?.order.currency_symbol}
-                onSuccess={() => {
-                    Modal.close(modal_id);
-                    load();
-                }}
-
-            />
-
-        })
-    }
-
-    const openOrderIssueForm = (organization: Organization, items: UserOrderItem[]) => {
-        const modal_id = Modal.show({
-            title: 'New Order Issue',
-            subtitle: `#${state?.order.internal_reference_number}`,
-            maxWidth: 600,
-            content: () => <OrderIssueDialog
-                user_order_id={state?.order.id ?? 0}
-                organization={organization}
-                items={items.filter(i => !!i.has_shipping && i.quantity_unlocked > 0)}
-                currency_code={state?.order.currency_code ?? ''}
-                currency_symbol={state?.order.currency_symbol ?? ''}
-                onSuccess={() => {
-                    Modal.close(modal_id);
-                    load();
-                }}
-
-            />
-
-        })
-    }
-
     useEffect(() => {
         if (!internal_reference_number) {
             return;
@@ -111,11 +71,6 @@ export default function UserOrderDetail() {
 
 
 
-
-
-
-    const has_shipments = state.order_items.filter(i => !!i.has_shipping).length > 0;
-
     return (<AppPage
         enableBack={true}
         backRoute={'/orders'}
@@ -123,9 +78,10 @@ export default function UserOrderDetail() {
         subtitle={`Placed on ${formatDateTime(state.order.created_at)}`}
         containerClassName='space-y-3'
     >
-        <div className='grid grid-cols-2 gap-6'>
+        <div className='grid grid-cols-3 gap-6'>
             <CustomerInformationCard state={state} />
-            <OrderValueCard order={state.order} />
+            <PartyInformationCard state={state} />
+            <OrderValueCard state={state} />
         </div>
         <span className='uppercase font-medium flex'>ITEMS IN ORDER</span>
         {state.organizations.map((organization: Organization) => {
@@ -140,7 +96,7 @@ export default function UserOrderDetail() {
                         <Store className="w-4 h-4 text-indigo-600" />
                     </SafeImage>
                     <h3 className="font-semibold text-gray-900 flex-1">{organization.name}</h3>
-                    <Btn variant={'outline'} size={'sm'}>Download List <LuDownload /></Btn>
+                    <DownloadListBtn internal_reference_number={state.order.internal_reference_number} organization_id={organization.id} />
                 </div>
                 <Table>
                     <TableHeader>
@@ -159,20 +115,42 @@ export default function UserOrderDetail() {
                             <TableHead className="text-right">Unit Price</TableHead>
                             <TableHead className="text-right">Discount</TableHead>
                             <TableHead className="text-right">Total</TableHead>
+                            <TableHead className="text-center">Updates</TableHead>
                             <TableHead className="text-center">Status</TableHead>
+                            <TableHead className="text-end">
+                                <Btn
+                                    variant={all_checked ? 'default' : 'outline'}
+                                    size={'xs'}
+                                    onClick={() => setValue('selected')(all_checked ? [] : items.filter(i => i.quantity_unlocked > 0).map(i => i.id))}
+                                >Process All</Btn>
+                            </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {items.map((item) => (
-                            <TableRow
+                        {items.map((item) => {
+                            var invoices = state.invoices.filter(i => state.invoice_items.filter(ii => ii.invoice_id == i.id).map(ii => ii.user_order_item_id).includes(item.id));
+                            var issues = state.user_order_issues.filter(uoi => state.user_order_issue_items.filter(uoii => uoii.user_order_issue_id == uoi.id).map(ii => ii.user_order_item_id).includes(item.id));
+                            var checked = form.selected.includes(item.id);
+                            var remaining_count = item.quantity_unlocked;
+                            var invoiced_count = state.invoice_items.filter(ii => invoices.filter(i => i.status !== UserOrderStatus.Cancelled).map(i => i.id).includes(ii.invoice_id)).reduce((pv, cv) => pv += cv.quantity, 0);
+                            var cancelled_count = state.user_order_issue_items.filter(uoii => issues.filter(i => i.issue_type === UserOrderIssueType.Cancellation && i.order_cancelled == 1).map(i => i.id).includes(uoii.user_order_issue_id)).reduce((pv, cv) => pv += cv.quantity, 0);
+                            var returns_count = state.user_order_issue_items.filter(uoii => issues.filter(i => i.issue_type === UserOrderIssueType.Return).map(i => i.id).includes(uoii.user_order_issue_id)).reduce((pv, cv) => pv += cv.quantity, 0);
+                            var replacement_count = state.user_order_issue_items.filter(uoii => issues.filter(i => i.issue_type === UserOrderIssueType.Replacement).map(i => i.id).includes(uoii.user_order_issue_id)).reduce((pv, cv) => pv += cv.quantity, 0);
+                            var shipment = state.shipments.find(s => !!s.items.find(i => i.user_order_item_id == item.id) && s.status !== UserOrderStatus.Cancelled);
+
+                            return (<TableRow
                                 key={item.id}
-                                className={`transition-colors ${form.selected.includes(item.id) ? 'bg-indigo-50/50' : 'hover:bg-slate-50/50'}`}
+                                className={cn(
+                                    `transition-colors 'hover:bg-slate-50/50`,
+                                    form.selected.includes(item.id) && `bg-indigo-50/50`,
+                                    item.quantity_unlocked == 0 && "bg-green-50"
+                                )}
                             >
                                 <TableCell>
                                     <Checkbox
                                         disabled={item.quantity_unlocked <= 0}
-                                        checked={form.selected.includes(item.id)}
-                                        onCheckedChange={checked => checked ? setValue('selected', 'selected[]')(form.selected.filter(s => items.filter(i => i.organization_id == organization.id).map(i => i.id).includes(s)), item.id) : setValue('selected')(form.selected.filter(s => s !== item.id))}
+                                        checked={checked}
+                                        onCheckedChange={checked_new => checked_new ? setValue('selected', 'selected[]')(form.selected.filter(s => items.filter(i => i.organization_id == organization.id).map(i => i.id).includes(s)), item.id) : setValue('selected')(form.selected.filter(s => s !== item.id))}
                                         className="border-slate-300"
                                     />
                                 </TableCell>
@@ -182,19 +160,35 @@ export default function UserOrderDetail() {
                                     </SafeImage>
                                 </TableCell>
                                 <TableCell>
-                                    <span className="font-medium text-slate-900">{item.name}</span>
+                                    <div className='flex flex-col'>
+                                        <span className="font-medium text-slate-900">{item.name}</span>
+                                        <span className='text-xs text-gray-600'>{item.product_category_name}</span>
+                                    </div>
                                 </TableCell>
                                 <TableCell>
                                     <span className="text-slate-500 font-mono text-sm">{item.sku}</span>
                                 </TableCell>
                                 <TableCell className="text-center">
                                     <span className="font-semibold">{item.quantity}</span>
+
+                                    <div className="text-xs text-slate-500 flex flex-col">
+                                        {remaining_count > 0 && remaining_count !== item.quantity && (
+                                            <span>{remaining_count} Unhandled</span>
+                                        )}
+
+                                        {invoiced_count > 0 && <span>{invoiced_count} Invoiced</span>}
+                                        {cancelled_count > 0 && <span className="text-red-600">{cancelled_count} Cancelled</span>}
+                                        {returns_count > 0 && <span className="text-orange-600">{returns_count} Returned</span>}
+                                        {replacement_count > 0 && <span className="text-blue-600">{replacement_count} Replaced</span>}
+                                    </div>
+
                                     {item.quantity_unlocked < item.quantity && (
                                         <span className="text-xs text-slate-500 block">
-                                            ({item.quantity - item.quantity_unlocked} invoiced)
+                                            ({item.quantity - item.quantity_unlocked} processed)
                                         </span>
                                     )}
                                 </TableCell>
+
                                 <TableCell className="text-right font-medium">
                                     {state.order.currency_symbol}{item.sp}
                                 </TableCell>
@@ -208,19 +202,95 @@ export default function UserOrderDetail() {
                                 <TableCell className="text-right font-semibold">
                                     {state.order.currency_symbol}{item.total_amount}
                                 </TableCell>
+                                <TableCell className="text-center font-semibold">
+                                    {invoices.length == 0 && issues.length == 0 && <span className='italic text-xs text-gray-600 font-normal'>No Updates Yet</span>}
+                                    {(invoices.length > 0 || issues.length > 0) && <div className="flex flex-col gap-1 items-center justify-center">
+
+                                        <HoverCard openDelay={0} closeDelay={0}>
+                                            <HoverCardTrigger>
+                                                <div className="min-w-[70px] px-2 py-0.5 bg-sky-100 text-sky-700 text-xs rounded cursor-pointer hover:bg-sky-200">
+                                                    {invoices.length} Invoices
+                                                </div>
+                                            </HoverCardTrigger>
+
+                                            <HoverCardContent className="p-2 space-y-1.5 w-56">
+                                                {invoices.map(inv => (
+                                                    <Link
+                                                        key={inv.id}
+                                                        to={`/invoices/${inv.internal_reference_number}`}
+                                                        className="bg-sky-50 border border-sky-300 rounded p-1 w-full flex flex-col hover:bg-sky-100 transition"
+                                                    >
+                                                        <span className="text-[10px] text-sky-800 font-medium">Invoice</span>
+                                                        <span className="text-xs">{inv.internal_reference_number}</span>
+                                                    </Link>
+                                                ))}
+                                            </HoverCardContent>
+                                        </HoverCard>
+
+                                        {issues.length > 0 && (
+                                            <HoverCard openDelay={0} closeDelay={0}>
+                                                <HoverCardTrigger>
+                                                    <div className="min-w-[70px] px-2 py-0.5 bg-rose-100 text-rose-700 text-xs rounded cursor-pointer hover:bg-rose-200">
+                                                        {issues.length} Issues
+                                                    </div>
+                                                </HoverCardTrigger>
+
+                                                <HoverCardContent className="p-2 space-y-1.5 w-56">
+                                                    {issues.map(issue => (
+                                                        <Link
+                                                            key={issue.id}
+                                                            to={`/order-issue/${issue.internal_reference_number}`}
+                                                            className="bg-rose-50 border border-rose-300 rounded p-1 w-full flex flex-col hover:bg-rose-100 transition"
+                                                        >
+                                                            <span className="text-[10px] text-rose-800 font-medium">
+                                                                {getUserOrderIssueTypeName(issue.issue_type)}
+                                                            </span>
+                                                            <span className="text-xs">{issue.internal_reference_number}</span>
+                                                        </Link>
+                                                    ))}
+                                                </HoverCardContent>
+                                            </HoverCard>
+                                        )}
+
+                                    </div>}
+                                </TableCell>
+
+
+
                                 <TableCell className="text-center">
                                     <StatusDropdown user_order_item_id={item.id} status={item.status} order_updates={state.user_order_item_statuses.filter(i => i.user_order_item_id == item.id).map(i => i.status)} />
                                 </TableCell>
-                            </TableRow>
-                        ))}
+                                <TableCell className="text-end">
+                                    {shipment && (() => {
+                                        const meta = getUserOrderStatusMeta(shipment.status);
+                                        return <div className='flex flex-col gap-1 items-end'>
+                                            <span className={`${meta.bg} ${meta.fg} flex px-2 rounded-lg text-xs`}>{meta?.name}</span>
+                                            <Link to={'/shipments/' + shipment.internal_reference_number}>
+                                                <Btn
+                                                    size={'xs'}
+                                                    variant={'destructive'}
+                                                >View Details <LuArrowRight /></Btn>
+                                            </Link>
+                                        </div>
+                                    })()}
+                                    {!shipment && <Btn
+                                        size={'xs'}
+                                        variant={checked ? 'default' : 'outline'}
+                                        disabled={item.quantity_unlocked <= 0}
+                                        onClick={() => checked ? setValue('selected')(form.selected.filter(s => s !== item.id)) : setValue('selected', 'selected[]')(form.selected.filter(s => items.filter(i => i.organization_id == organization.id).map(i => i.id).includes(s)), item.id)}
+                                    >Process {checked ? <LuSquareCheck /> : <LuSquare />}</Btn>}
+                                </TableCell>
+                            </TableRow>);
+                        })}
                     </TableBody>
                 </Table>
             </div>);
         })}
 
-        <div className='grid grid-cols-2 gap-6'>
-            <InvoicesCard />
-            <CancellationCard cancellations={[]} />
+        <div className='grid grid-cols-3 gap-6'>
+            <InvoicesCard state={state} />
+            <ShipmentsCard state={state} />
+            <CancellationCard state={state} />
         </div>
         <FloatingSelectionBar count={form.selected.length} onProcess={() => {
             const modal_id = Modal.show({
@@ -233,6 +303,7 @@ export default function UserOrderDetail() {
                     onSuccess={() => {
                         Modal.close(modal_id);
                         load();
+                        setValue('selected')([])
                     }}
                 />
             })

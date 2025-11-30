@@ -3,6 +3,10 @@ import { Api } from "@/lib/api";
 export class UserOrderService {
 
 
+    public static async stats() {
+        return Api('orders/stats');
+    }
+
     public static async search(form: any) {
         return Api('orders/search', form);
     }
@@ -15,10 +19,20 @@ export class UserOrderService {
         return Api('orders/generate-invoice', form);
     }
 
-
-    public static async createShipment(form: any) {
-        return Api('orders/create-shipment', form);
+    public static async invoiceDetail(internal_reference_number: string) {
+        return Api('orders/invoice-detail', { internal_reference_number });
     }
+
+    public static async updateShipment(form: any) {
+        return Api('orders/update-shipment', form);
+    }
+
+
+    public static async issueDetail(internal_reference_number: string) {
+        return Api('orders/issue-detail', { internal_reference_number });
+    }
+
+
 
     public static async shipmentDetail(internal_reference_number: string) {
         return Api('orders/shipment-detail', { internal_reference_number });
@@ -57,6 +71,11 @@ export class UserOrderService {
         return Api('orders/cancel-delivery', form);
     }
 
+
+    public static async cancelShipment(form: any) {
+        return Api('orders/cancel-shipment', form);
+    }
+
     public static async dispatch(form: any) {
         return Api('orders/dispatch', form);
     }
@@ -73,6 +92,18 @@ export class UserOrderService {
         return Api('orders/update-item-status', form);
     }
 
+
+    public static async scheduleIssuePickup(form: any) {
+        return Api('orders/schedule-issue-pickup', form);
+    }
+
+    public static async handleIssueApproval(form: any) {
+        return Api('orders/handle-issue-approval', form);
+    }
+
+    public static async handleIssueReceivedItemStock(form: any) {
+        return Api('orders/handle-issue-received-item-stock', form);
+    }
 
     public static async downloadList(form: {
         internal_reference_number: string,
@@ -98,4 +129,14 @@ export class UserOrderService {
         });
     }
 
+
+
+    public static async searchShipments(form: any) {
+        return Api('orders/shipment-search', form);
+    }
+
+
+    public static async searchOrderIssues(form: any) {
+        return Api('orders/order-issue-search', form);
+    }
 }

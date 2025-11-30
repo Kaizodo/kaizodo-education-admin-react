@@ -1,11 +1,11 @@
-import { UserOrderStatus } from "./order";
+import { UserOrderIssueSource, UserOrderIssueType, UserOrderStatus } from "./order";
 import { Organization } from "./Organization";
 import { User } from "./user";
 
 export type UserOrderItemStatus = {
     user_order_item_id: number,
     id: number,
-    status: UserOrderItemStatus
+    status: UserOrderStatus
 }
 
 
@@ -16,8 +16,38 @@ export interface OrderDetailState {
     orders: Order[];
     projects: Project[];
     shipments: Shipment[];
-    user_order_item_statuses: UserOrderItemStatus[]
+    user_order_item_statuses: UserOrderItemStatus[],
+    invoices: Invoice[],
+    invoice_items: {
+        invoice_id: number,
+        user_order_item_id: number,
+        quantity: number
+    }[],
+    user_order_issues: UserOrderIssue[],
+    user_order_issue_items: UserOrderIssueItem[]
+    buyer_party: Party
 }
+
+
+export type Party = {
+    id: number;
+    name: string;
+    email: string;
+    mobile: string;
+    country_name: string;
+    country_id: number;
+    state_id: number;
+    state_name: string;
+    address: string;
+    pincode: string;
+    gst_number: string;
+    organization_name: string;
+    organization_id: number;
+    user_id: number;
+    user_order_id: number;
+    created_at: string;
+    updated_at: string;
+};
 
 
 interface Order {
@@ -152,6 +182,36 @@ export interface Project {
     created_at: string
 }
 
+interface Invoice {
+    id: number;
+    package_type: number;
+    user_id: string;
+    delivery_agent_user_id: number | null;
+    cancellation_universal_category_id: number | null;
+    organization_id: number;
+    internal_reference_number: string;
+    organization_order_id: number | null;
+    user_order_id: number;
+    status: number;
+    tracking_number: string;
+    pickup_datetime: string | null;
+    dispatch_datetime: string | null;
+    remarks: string;
+    reference_number: string | null;
+    amount: string;
+    base: string;
+    taxable: string;
+    tax: string;
+    discount: string;
+    shipping: string;
+    package_weight: string;
+    package_length: string;
+    package_width: string;
+    package_height: string;
+    created_at: string;
+    updated_at: string | null;
+    items: ShipmentItem[];
+}
 interface Shipment {
     id: number;
     package_type: number;
@@ -228,3 +288,89 @@ interface ShipmentItem {
     currency_symbol: string;
     currency_code: string;
 }
+
+
+interface UserOrderIssue {
+    id: number;
+    package_type: number;
+    user_id: string;
+    issue_type: UserOrderIssueType,
+    issue_source: UserOrderIssueSource,
+    delivery_agent_user_id: number | null;
+    cancellation_universal_category_id: number | null;
+    issue_universal_category_id: number | null;
+    issue_universal_category_name: string;
+    organization_id: number;
+    internal_reference_number: string;
+    organization_order_id: number | null;
+    user_order_id: number;
+    status: number;
+    order_cancelled: number;
+    tracking_number: string;
+    pickup_datetime: string | null;
+    dispatch_datetime: string | null;
+    remarks: string;
+    reference_number: string | null;
+    amount: string;
+    base: string;
+    taxable: string;
+    tax: string;
+    discount: string;
+    shipping: string;
+    package_weight: string;
+    package_length: string;
+    package_width: string;
+    package_height: string;
+    created_at: string;
+    updated_at: string | null;
+    items: ShipmentItem[];
+}
+
+interface UserOrderIssueItem {
+    id: number;
+    organization_id: number;
+    shipment_id: number;
+    user_order_item_id: number;
+    name: string;
+    barcode: string | null;
+    code: string;
+    sku: string | null;
+    ean: string | null;
+    product_type: number;
+    user_order_issue_id: number;
+    product_payment_type: number;
+    product_category_id: number;
+    product_category_name: string;
+    description: string;
+    user_order_id: number;
+    product_id: number;
+    product_price_id: number;
+    user_id: string;
+    quantity: number;
+    unit_id: number;
+    unit_name: string;
+    mrp: string;
+    sp: string;
+    cp: string;
+    base: string;
+    total_amount: string;
+    discount_amount: number;
+    discount_percentage: string;
+    discount_plan_id: number | null;
+    taxable: string;
+    tax: string;
+    sac: string | null;
+    hsn: string | null;
+    package_weight: string;
+    package_length: string;
+    package_width: string;
+    package_height: string;
+    is_fragile: number;
+    shipping_charge: string;
+    currency_id: number;
+    currency_name: string;
+    currency_symbol: string;
+    currency_code: string;
+}
+
+

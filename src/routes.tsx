@@ -32,6 +32,13 @@ export const routes: RouteType[] = [
                     { path: 'shipments', element: lazy(() => import('@/pages/shipments/Shipments')) },
                     { path: 'shipments/:internal_reference_number', element: lazy(() => import('@/pages/shipments/ShipmentDetail')) },
 
+                    { path: 'invoices', element: lazy(() => import('@/pages/invoices/Invoices')) },
+                    { path: 'invoices/:internal_reference_number', element: lazy(() => import('@/pages/invoices/InvoiceDetail')) },
+
+                    { path: 'order-issue', element: lazy(() => import('@/pages/order-issues/OrderIssues')) },
+                    { path: 'order-issue/:internal_reference_number', element: lazy(() => import('@/pages/order-issues/OrderIssueDetail')) },
+
+
                     { path: 'employees', element: lazy(() => import('@/pages/employees/EmployeeListing')) },
                     { path: 'feature-cards', element: lazy(() => import('@/pages/feature-cards/FeatureCards')) },
                     { path: 'teams', element: lazy(() => import('@/pages/teams/Teams')) },
@@ -45,7 +52,7 @@ export const routes: RouteType[] = [
                     { path: 'stores', element: lazy(() => import('@/pages/stores/StoreListing')) },
                     { path: 'stores/create', element: lazy(() => import('@/pages/stores/StoreEditor')) },
                     { path: 'stores/update/:id', element: lazy(() => import('@/pages/stores/StoreEditor')) },
-                    { path: 'ticket-category', element: lazy(() => import('@/pages/ticket-category/TicketCategoryModules')) },
+                    { path: 'ticket-category', element: lazy(() => import('@/pages/ticket-category/TicketCategories')) },
                     { path: 'news', element: lazy(() => import('@/pages/articles/NewsManagement')) },
                     { path: 'blogs', element: lazy(() => import('@/pages/articles/BlogsManagement')) },
                     { path: 'article-bulk-upload', element: lazy(() => import('@/pages/articles/ArticleBulkUpload')) },

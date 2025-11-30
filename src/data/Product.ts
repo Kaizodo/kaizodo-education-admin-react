@@ -19,11 +19,13 @@ export function getProductPaymentTypeName(id: number) {
 
 export const enum ProductType {
     Goods = 0,
-    Service = 1
+    Service = 1,
+    Both = 2
 }
 export const ProductTypeArray = [
     { id: ProductType.Goods, name: "Goods" },
-    { id: ProductType.Service, name: "Service" }
+    { id: ProductType.Service, name: "Service" },
+    { id: ProductType.Both, name: 'Goods & Services' }
 ];
 
 export function getProductTypeName(id: ProductType): string {

@@ -17,7 +17,7 @@ import DetailSkeleton from './components/OrderDetailSkeleton';
 import { getPaymentMethodName } from '@/data/user';
 import SafeImage from '@/components/common/SafeImage';
 import AppPage from '@/components/app/AppPage';
-import DownloadInvoiceBtn from './components/DownloadInvoiceBtn';
+import DownloadInvoiceBtn from '../invoices/components/DownloadInvoiceBtn';
 import { formatDateTime } from '@/lib/utils';
 import { LuArrowRight, LuChevronRight, LuUser } from 'react-icons/lu';
 import Btn from '@/components/common/Btn';

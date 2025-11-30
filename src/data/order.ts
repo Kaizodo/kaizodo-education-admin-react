@@ -28,6 +28,7 @@ export type UserOrder = {
     user: User,
     items_count: number,
     events: UserOrderEvent[]
+    collapse_open?: boolean
 };
 
 export type UserQuota = {
@@ -91,6 +92,7 @@ export function getUserOrderIssueTypeName(id: number) {
 }
 
 
+
 export enum UserOrderIssueStatus {
     New = 0,
     PendingApproval = 1,
@@ -99,9 +101,11 @@ export enum UserOrderIssueStatus {
     PickupScheduled = 4,
     PickedUp = 5,
     InInspection = 6,
-    Refunded = 7,
-    ReplacementShipped = 8,
-    Completed = 9
+    RefundInitiated = 7,
+    RefundPGFailed = 8,
+    Refunded = 9,
+    ReplacementShipped = 10,
+    Completed = 11
 }
 
 export const UserOrderIssueStatusArray = [
@@ -112,10 +116,18 @@ export const UserOrderIssueStatusArray = [
     { id: UserOrderIssueStatus.PickupScheduled, name: "Pickup Scheduled", description: "Pickup arranged" },
     { id: UserOrderIssueStatus.PickedUp, name: "Picked Up", description: "Item collected" },
     { id: UserOrderIssueStatus.InInspection, name: "In Inspection", description: "Item under inspection" },
+    { id: UserOrderIssueStatus.RefundInitiated, name: "Refund Initiated", description: "Refund is created" },
+    { id: UserOrderIssueStatus.RefundPGFailed, name: "PG Refund Failure", description: "Refund initiated but not refuned from payment gateway" },
     { id: UserOrderIssueStatus.Refunded, name: "Refunded", description: "Refund processed" },
     { id: UserOrderIssueStatus.ReplacementShipped, name: "Replacement Shipped", description: "Replacement item shipped" },
     { id: UserOrderIssueStatus.Completed, name: "Completed", description: "Issue resolved" }
 ];
+
+
+export function getUserOrderIssueStatusName(id: number) {
+    return UserOrderIssueStatusArray.find(x => x.id === id)?.name || "";
+}
+
 
 
 export enum UserOrderStatus {

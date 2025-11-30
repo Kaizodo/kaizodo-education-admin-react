@@ -1,26 +1,15 @@
-import React from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FileText, ExternalLink, Package, CheckCircle } from "lucide-react";
+import { FileText, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
-import { format } from "date-fns";
+import { OrderDetailState } from '@/data/UserOrder';
+import { formatDateTime } from "@/lib/utils";
+import { getUserOrderStatusMeta } from "@/data/order";
 
-const statusConfig = {
-    generated: { label: 'Generated', color: 'bg-slate-100 text-slate-700' },
-    labels_generated: { label: 'Labels Ready', color: 'bg-blue-100 text-blue-700' },
-    ready_to_dispatch: { label: 'Ready to Dispatch', color: 'bg-indigo-100 text-indigo-700' },
-    dispatched: { label: 'Dispatched', color: 'bg-purple-100 text-purple-700' },
-    in_transit: { label: 'In Transit', color: 'bg-cyan-100 text-cyan-700' },
-    near_customer: { label: 'Near Customer', color: 'bg-teal-100 text-teal-700' },
-    out_for_delivery: { label: 'Out for Delivery', color: 'bg-amber-100 text-amber-700' },
-    delivered: { label: 'Delivered', color: 'bg-emerald-100 text-emerald-700' },
-    cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-700' },
-    returned: { label: 'Returned', color: 'bg-orange-100 text-orange-700' }
-};
 
-export default function InvoicesCard({ invoices }) {
-    if (!invoices || invoices.length === 0) {
+export default function InvoicesCard({ state }: { state: OrderDetailState }) {
+    if (!state.invoices || state.invoices.length === 0) {
         return (
             <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
                 <CardHeader className="pb-3">
@@ -49,39 +38,36 @@ export default function InvoicesCard({ invoices }) {
                         <FileText className="w-4 h-4 text-blue-600" />
                     </div>
                     Generated Invoices
-                    <Badge variant="secondary" className="ml-auto">{invoices.length}</Badge>
+                    <Badge variant="secondary" className="ml-auto">{state.invoices.length}</Badge>
                 </CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="space-y-3">
-                    {invoices.map(invoice => {
-                        const status = statusConfig[invoice.status] || statusConfig.generated;
-                        return (
-                            <div
-                                key={invoice.id}
-                                className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
-                            >
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center">
-                                        <FileText className="w-5 h-5 text-indigo-600" />
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold text-slate-900">{invoice.invoice_number}</p>
-                                        <p className="text-sm text-slate-500">
-                                            {invoice.created_date && format(new Date(invoice.created_date), 'MMM d, yyyy')} • ${invoice.total?.toFixed(2)}
-                                        </p>
-                                    </div>
+                    {state.invoices.map(invoice => {
+                        const meta = getUserOrderStatusMeta(invoice.status)
+                        return (<Link
+                            to={'/invoices/' + invoice.internal_reference_number}
+                            className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors"
+                            key={invoice.id}
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center">
+                                    <FileText className="w-5 h-5 text-indigo-600" />
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <Badge className={`${status.color} border-0`}>{status.label}</Badge>
-                                    <Link to={''}>
-                                        <Button variant="ghost" size="sm" className="gap-1">
-                                            View <ExternalLink className="w-3 h-3" />
-                                        </Button>
-                                    </Link>
+                                <div>
+                                    <p className="font-semibold text-slate-900">{invoice.internal_reference_number}</p>
+                                    <p className="text-sm text-slate-500">
+                                        {formatDateTime(invoice.created_at)}
+                                    </p>
                                 </div>
                             </div>
-                        );
+                            <div className="flex items-center gap-3">
+                                <Badge className={`${meta.bg} ${meta.fg} border-0`}>{meta.name}</Badge>
+                                <Button variant="ghost" size="sm" className="gap-1">
+                                    View <ExternalLink className="w-3 h-3" />
+                                </Button>
+                            </div>
+                        </Link>);
                     })}
                 </div>
             </CardContent>

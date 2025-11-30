@@ -5,10 +5,7 @@ export class TicketCategory {
 
     private static endpoint = 'ticket-category';
 
-    public static async search(form: {
-        page: number,
-        keyword: string
-    }) {
+    public static async search(form: any) {
         return Api(`${this.endpoint}/search`, form);
     }
 

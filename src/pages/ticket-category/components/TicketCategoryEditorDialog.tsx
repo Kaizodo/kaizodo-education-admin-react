@@ -9,9 +9,11 @@ import { ApiResponseType } from '@/lib/api';
 import { msg } from '@/lib/msg';
 import { TicketCategoryService } from '@/services/TicketCategoryService';
 import Dropdown from '@/components/common/Dropdown';
-import { TicketCategoryTypeArray } from '@/data/Ticket';
+import { TicketCategoryActionArray } from '@/data/Ticket';
 import Radio from '@/components/common/Radio';
 import { YesNoArray } from '@/data/Common';
+import { ProductTypeArray } from '@/data/Product';
+import SuggestTicketCategory from '@/components/common/suggest/SuggestTicketCategory';
 
 
 interface Props {
@@ -20,7 +22,7 @@ interface Props {
     onCancel: () => void;
 }
 
-export default function TicketCategoryModuleEditorDialog({ id, onSuccess, onCancel }: Props) {
+export default function TicketCategoryEditorDialog({ id, onSuccess, onCancel }: Props) {
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(true);
     const [form, setForm] = useState<any>({});
@@ -67,6 +69,12 @@ export default function TicketCategoryModuleEditorDialog({ id, onSuccess, onCanc
         <>
             <ModalBody className='relative'>
                 {!!loading && <CenterLoading className='absolute z-[50]' />}
+                <SuggestTicketCategory
+                    value={form.ticket_category_id}
+                    onChange={setValue('ticket_category_id')}
+                    selected={{ id: form.ticket_category_id, name: form.ticket_category_name }}
+                    is_main={1}
+                >Parent Ticket Category</SuggestTicketCategory>
                 <TextField value={form.name} onChange={setValue('name')} placeholder='Enter name'>Name</TextField>
                 <TextField
                     value={form.description}
@@ -74,7 +82,15 @@ export default function TicketCategoryModuleEditorDialog({ id, onSuccess, onCanc
                     onChange={setValue('description')}
                     placeholder='Enter Description'
                 >Description</TextField>
-                <Dropdown searchable={false} value={form.ticket_category_type} onChange={setValue('ticket_category_type')} getOptions={async () => TicketCategoryTypeArray}>Category Type</Dropdown>
+                <Dropdown
+                    searchable={false}
+                    placeholder='Select an action'
+                    value={form.ticket_category_action}
+                    onChange={setValue('ticket_category_action')}
+                    getOptions={async () => TicketCategoryActionArray}
+                >Category Action</Dropdown>
+                <Radio value={form.is_main} onChange={setValue('is_main')} options={YesNoArray}>Main Category ?</Radio>
+                <Radio value={form.product_type} onChange={setValue('product_type')} options={ProductTypeArray}>Product Type</Radio>
                 <Radio value={form.publish} onChange={setValue('publish')} options={YesNoArray}>Publish ?</Radio>
             </ModalBody>
             {!loading && <ModalFooter className='gap-4'>

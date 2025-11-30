@@ -14,9 +14,8 @@ import { useForm } from '@/hooks/use-form'
 import SafeImage from '@/components/common/SafeImage'
 import { AlertTriangle, MapPin, Package, Phone } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { LuUser } from 'react-icons/lu'
+import { LuMail, LuUser } from 'react-icons/lu'
 import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
 import { msg } from '@/lib/msg'
 import { UserOrderService } from '@/services/UserOrderService'
 
@@ -65,11 +64,14 @@ export default function ProcessOrder({ state, selected, onSuccess }: { selected:
 
                             <TableHead className="text-center">Process Qty</TableHead>
                             <TableHead className="text-right">Total</TableHead>
+                            <TableHead className='text-end'>Invoice</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {form.items.map((item) => {
                             const calculation = singleItemCalculation(item);
+                            const invoiced_count = item.selected_quantity;
+                            const cancellation_count = item.quantity_unlocked - item.selected_quantity;
                             return (
                                 <TableRow
                                     key={item.id}
@@ -102,7 +104,12 @@ export default function ProcessOrder({ state, selected, onSuccess }: { selected:
                                     <TableCell className="text-right font-semibold">
                                         {state.order.currency_symbol}{Number(calculation.total) * item.selected_quantity}
                                     </TableCell>
-
+                                    <TableCell className="text-right">
+                                        <div className='flex flex-col gap-1 text-xs'>
+                                            {invoiced_count > 0 && <span className='border rounded-full px-2 self-end flex bg-sky-50 border-sky-600 text-sky-800 gap-1'><b>({invoiced_count})</b>Invoiced</span>}
+                                            {cancellation_count > 0 && <span className='border rounded-full px-2 self-end flex bg-red-50 border-red-700 text-red-900 gap-1'><b>({cancellation_count})</b>Cancel</span>}
+                                        </div>
+                                    </TableCell>
                                 </TableRow>
                             );
                         })}
@@ -114,26 +121,34 @@ export default function ProcessOrder({ state, selected, onSuccess }: { selected:
                     <div className="p-5 space-y-6">
                         {/* Customer Details */}
                         <div className="space-y-3">
-                            <h4 className="font-semibold text-slate-900 text-sm uppercase tracking-wide">Customer</h4>
+                            <h4 className="font-semibold text-slate-900 text-sm uppercase tracking-wide">Billing Address</h4>
                             <div className="bg-white rounded-xl p-4 space-y-3 shadow-sm">
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
-                                        <LuUser className="w-4 h-4 text-indigo-600" />
+                                        <LuUser className="w-4 h-4 text-indigo-600 shrink-0" />
                                     </div>
-                                    <span className="font-medium text-sm">{state?.order?.first_name} {state.order.last_name}</span>
+                                    <span className="font-medium text-sm">{state?.buyer_party?.name}</span>
                                 </div>
                                 <div className="flex items-start gap-3">
                                     <div className="w-8 h-8 shrink-0 rounded-lg bg-slate-100 flex items-center justify-center">
-                                        <MapPin className="w-4 h-4 text-slate-600" />
+                                        <MapPin className="w-4 h-4 text-slate-600 shrink-0" />
                                     </div>
-                                    <span className="text-sm text-slate-600 leading-relaxed">{state?.order?.address}</span>
+                                    <span className="text-sm text-slate-600 leading-relaxed">{state?.buyer_party?.address}</span>
                                 </div>
-                                {state?.order?.mobile && (
+                                {!!state?.buyer_party?.mobile && (
                                     <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                                            <Phone className="w-4 h-4 text-slate-600" />
+                                            <Phone className="w-4 h-4 text-slate-600 shrink-0" />
                                         </div>
-                                        <span className="text-sm text-slate-600">{state.order.mobile}</span>
+                                        <span className="text-sm text-slate-600">{state?.buyer_party?.mobile}</span>
+                                    </div>
+                                )}
+                                {!!state?.buyer_party?.email && (
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                                            <LuMail className="w-4 h-4 text-slate-600 shrink-0" />
+                                        </div>
+                                        <span className="text-sm text-slate-600">{state?.buyer_party?.email}</span>
                                     </div>
                                 )}
                             </div>
@@ -164,7 +179,7 @@ export default function ProcessOrder({ state, selected, onSuccess }: { selected:
                             <div className="space-y-3">
                                 <div className="flex items-center gap-2">
                                     <AlertTriangle className="w-4 h-4 text-amber-500" />
-                                    <h4 className="font-semibold text-amber-700 text-sm">Incomplete Items</h4>
+                                    <h4 className="font-semibold text-amber-700 text-sm">Items will be cancelled</h4>
                                 </div>
                                 <div className="bg-amber-50 rounded-xl p-4 space-y-2 border border-amber-200">
                                     {missingItems.map(item => {
@@ -172,18 +187,10 @@ export default function ProcessOrder({ state, selected, onSuccess }: { selected:
                                         return (<div key={item.id} className="flex justify-between items-start">
                                             <span className="text-sm font-medium text-amber-900">{item.name}</span>
                                             <span className="text-xs text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">
-                                                {missing} missing
+                                                {missing} Cancel
                                             </span>
                                         </div>);
                                     })}
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                        <Checkbox
-                                            checked={form.cancel_items}
-                                            onCheckedChange={setValue('cancel_items')}
-                                            className="border-amber-400"
-                                        />
-                                        <span className="text-xs text-amber-700">Cancel remaining items</span>
-                                    </label>
                                 </div>
                             </div>
                         )}
@@ -204,8 +211,7 @@ export default function ProcessOrder({ state, selected, onSuccess }: { selected:
                             items: form.items.map(i => ({
                                 id: i.id,
                                 quantity: i.selected_quantity
-                            })),
-                            cancel_items: form.cancel_items
+                            }))
                         });
                         if (r.success) {
                             onSuccess();

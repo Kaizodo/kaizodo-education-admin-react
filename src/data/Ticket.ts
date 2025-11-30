@@ -1,5 +1,3 @@
-import { LuCreditCard, LuWrench } from "react-icons/lu";
-import { LucideXCircle } from "lucide-react";
 import { UserQuotaCodeEnum } from "./Subscription";
 import { User } from "./user";
 
@@ -41,27 +39,30 @@ export interface Ticket {
     order?: any
 }
 
-export enum TicketCategoryTypeEnum {
-    Other = 0,
-    Billing = 1,
-    Technical = 2,
-    Cancellation = 3,
+export enum TicketCategoryActionEnum {
+    NoAction = 0,
+    CancelOrder = 1,
+    ReturnOrder = 2,
+    ReplaceOrder = 3,
+    RefundRequest = 4
 }
-export const TicketCategoryTypeArray = [
-    { id: TicketCategoryTypeEnum.Other, name: 'Other' },
-    { id: TicketCategoryTypeEnum.Billing, name: 'Billing' },
-    { id: TicketCategoryTypeEnum.Technical, name: 'Technical' },
-    { id: TicketCategoryTypeEnum.Cancellation, name: 'Cancellation' },
+
+export const TicketCategoryActionArray = [
+    { id: TicketCategoryActionEnum.NoAction, name: 'No Action', description: 'No action required' },
+    { id: TicketCategoryActionEnum.CancelOrder, name: 'Cancel Order', description: 'Customer wants to cancel the order' },
+    { id: TicketCategoryActionEnum.ReturnOrder, name: 'Return Order', description: 'Customer wants to return the order' },
+    { id: TicketCategoryActionEnum.ReplaceOrder, name: 'Replace Order', description: 'Customer wants a replacement' },
+    { id: TicketCategoryActionEnum.RefundRequest, name: 'Refund Request', description: 'Customer is asking for a refund' },
 ];
 
-export function getTicketCategoryTypeName(type: TicketCategoryTypeEnum) {
-    return TicketCategoryTypeArray.find(s => s.id === type)?.name ?? 'Other';
+export function getTicketCategoryActionName(type: TicketCategoryActionEnum) {
+    return TicketCategoryActionArray.find(s => s.id === type)?.name ?? 'No Action';
 }
-export const TicketCategoryTypeOptions = [
-    { type: TicketCategoryTypeEnum.Billing, title: 'Billing or Payment Issue', icon: LuCreditCard, description: 'Incorrect charge, failed payment, or refund request.' },
-    { type: TicketCategoryTypeEnum.Technical, title: 'Technical Problem', icon: LuWrench, description: 'Service is down, feature not working, or login issues.' },
-    { type: TicketCategoryTypeEnum.Cancellation, title: 'Cancel Subscription', icon: LucideXCircle, description: 'Stop recurring payments and terminate service access.' },
-];
+
+export function getTicketCategoryActionDescription(type: TicketCategoryActionEnum) {
+    return TicketCategoryActionArray.find(s => s.id === type)?.description ?? '';
+}
+
 
 
 export const enum TicketStatusEnum {

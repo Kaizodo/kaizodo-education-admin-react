@@ -1,4 +1,3 @@
-import { UserType } from '@/data/user';
 import Dropdown from '../Dropdown';
 import { FaPlus } from 'react-icons/fa6';
 import { SuggestProp } from './Suggest';
@@ -9,11 +8,11 @@ import { Modal } from '../Modal';
 import { TicketCategory } from '@/services/TicketCategory';
 
 
-const LazyEditorDialog = lazy(() => import('@/pages/ticket-category/components/TicketCategoryEditorDailog'));
+const LazyEditorDialog = lazy(() => import('@/pages/ticket-category/components/TicketCategoryEditorDialog'));
 
 
-export default function SuggestTicketCategory({ children = 'Category', value, onChange, selected, placeholder = 'Select ticket category', onSelect, includedValues }: SuggestProp & {
-    user_type?: UserType
+export default function SuggestTicketCategory({ is_main, children = 'Category', value, onChange, selected, placeholder = 'Select ticket category', onSelect, includedValues }: SuggestProp & {
+    is_main?: number
 }) {
     return (
         <Dropdown
@@ -41,7 +40,7 @@ export default function SuggestTicketCategory({ children = 'Category', value, on
             }}
             getOptions={async ({ page, keyword }) => {
                 var r = await TicketCategory.search({
-                    page, keyword
+                    page, keyword, is_main
                 });
                 if (r.success) {
                     return r.data.records;

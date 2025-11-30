@@ -1,9 +1,8 @@
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { OrderDetailState } from "@/data/UserOrder";
-import { User, Phone } from "lucide-react";
-import { LuMail } from "react-icons/lu";
+import { User, MapPin, Phone, Mail } from "lucide-react";
 
-export default function CustomerInfoCard({ state }: { state: OrderDetailState }) {
+export default function PartyInformationCard({ state }: { state: OrderDetailState }) {
 
     return (
         <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
@@ -12,7 +11,7 @@ export default function CustomerInfoCard({ state }: { state: OrderDetailState })
                     <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
                         <User className="w-4 h-4 text-indigo-600" />
                     </div>
-                    Customer Information
+                    Billing Address
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -22,29 +21,38 @@ export default function CustomerInfoCard({ state }: { state: OrderDetailState })
                             <User className="w-4 h-4 text-slate-400 mt-0.5  shrink-0" />
                             <div>
                                 <p className="text-xs text-slate-500 uppercase tracking-wide">Name</p>
-                                <p className="font-medium text-slate-900">{state.order.first_name} {state.order.last_name}</p>
+                                <p className="font-medium text-slate-900">{state.buyer_party.name}</p>
                             </div>
                         </div>
-                        {!!state.order.email && (
+                        {state.buyer_party.email && (
                             <div className="flex items-start gap-3">
-                                <LuMail className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                                <Mail className="w-4 h-4 text-slate-400 mt-0.5  shrink-0" />
                                 <div>
                                     <p className="text-xs text-slate-500 uppercase tracking-wide">Email</p>
-                                    <p className="font-medium text-slate-900">{state.order.email}</p>
+                                    <p className="font-medium text-slate-900">{state.buyer_party.email}</p>
                                 </div>
                             </div>
                         )}
-                        {!!state.order.mobile && (
+                        {state.buyer_party.mobile && (
                             <div className="flex items-start gap-3">
                                 <Phone className="w-4 h-4 text-slate-400 mt-0.5  shrink-0" />
                                 <div>
                                     <p className="text-xs text-slate-500 uppercase tracking-wide">Phone</p>
-                                    <p className="font-medium text-slate-900">{state.order.mobile}</p>
+                                    <p className="font-medium text-slate-900">{state.buyer_party.mobile}</p>
                                 </div>
                             </div>
                         )}
                     </div>
+                    <div className="space-y-3">
+                        <div className="flex items-start gap-3">
+                            <MapPin className="w-4 h-4 text-slate-400 mt-0.5  shrink-0" />
+                            <div>
+                                <p className="text-xs text-slate-500 uppercase tracking-wide">Delivery Address</p>
+                                <p className="font-medium text-slate-900 leading-relaxed">{state.buyer_party.address}</p>
+                            </div>
+                        </div>
 
+                    </div>
                 </div>
             </CardContent>
         </Card>

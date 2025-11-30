@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,18 +13,17 @@ import {
 } from "lucide-react";
 import AppPage from '@/components/app/AppPage';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { cn, formatDate, formatDateTime, formatTime, nameLetter } from '@/lib/utils';
+import { cn, formatDateTime, nameLetter } from '@/lib/utils';
 import Btn from '@/components/common/Btn';
-import { LuCalendarSync, LuCircle, LuCircleCheck, LuCornerDownLeft, LuHash, LuListCheck, LuMail, LuPencil, LuPhone, LuPlus, LuPrinter, LuTag, LuTruck } from 'react-icons/lu';
+import { LuCalendarSync, LuCircle, LuCircleCheck, LuCornerDownLeft, LuHash, LuListCheck, LuMail, LuPencil, LuPhone, LuPlus, LuPrinter, LuSave, LuTag, LuTruck } from 'react-icons/lu';
 import CenterLoading from '@/components/common/CenterLoading';
 import { UserOrderService } from '@/services/UserOrderService';
-import { IconType } from 'react-icons/lib';
 import ShippingLabelPrintDialog from '../orders/components/ShippingLabelPrintDialog';
 import { Modal } from '@/components/common/Modal';
 import TextField from '@/components/common/TextField';
 import { useForm } from '@/hooks/use-form';
-import { getUserOrderStatusMeta, UserOrderStatus } from '@/data/order';
-import { TbMapPinCancel, TbMapPinCheck, TbTruckDelivery, TbTruckLoading } from 'react-icons/tb';
+import { getUserOrderStatusMeta, ShipmentPackageType, ShipmentPackageTypeArray, UserOrderIssueSource, UserOrderStatus } from '@/data/order';
+import { TbHomeCancel, TbMapPinCancel, TbMapPinCheck, TbTruckDelivery, TbTruckLoading } from 'react-icons/tb';
 import Radio from '@/components/common/Radio';
 import { YesNoArray } from '@/data/Common';
 import { RiCheckDoubleFill, RiUserLocationLine } from 'react-icons/ri';
@@ -37,72 +36,16 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 import DateTimeField from '@/components/common/DateTimeField';
 import { UniversalCategoryService } from '@/services/UniversalCategoryService';
-import { ShipmentDetailState } from '@/data/Shipment';
+import { ShipmentDetailState, ShipmentItem } from '@/data/Shipment';
 import { IoWarningOutline } from 'react-icons/io5';
+import DownloadInvoiceBtn from '../invoices/components/DownloadInvoiceBtn';
+import { msg } from '@/lib/msg';
+import ShipmentItemReturnDialog from './components/ShipmentItemReturnDialog';
+import { BsHouseCheck } from 'react-icons/bs';
+import SafeImage from '@/components/common/SafeImage';
+import CancelShipmentDialog from './components/CancelShipmentDialog';
+import { TrackingHistoryItem } from '@/components/common/TrackingHistoryItem';
 
-export function TrackingHistoryItem({
-    icon: Icon,
-    title,
-    subtitle,
-    datetime,
-    show_line = true,
-    active = false,
-    children
-}: {
-    icon: IconType,
-    title: string,
-    subtitle: string,
-    datetime?: string,
-    show_line?: boolean,
-    active?: boolean,
-    children?: ReactNode
-}) {
-    return (
-        <div className="relative pb-8">
-            {!!show_line && (
-                <div className="absolute left-5 top-10 bottom-0 w-0.5 bg-green-200"></div>
-            )}
-
-            <div className="flex gap-4">
-                <div className="relative flex-shrink-0">
-                    {active && (
-                        <span className="absolute inset-0 w-10 h-10 rounded-full animate-ping bg-green-400 opacity-30"></span>
-                    )}
-
-                    <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center relative 
-                        ${active ? "bg-green-600" : "bg-green-400"} text-white`}
-                    >
-                        <Icon
-                            className={`w-5 h-5 ${active ? "text-white" : "text-white"
-                                }`}
-                        />
-                    </div>
-                </div>
-
-                <div className="flex-1 pt-1">
-                    <div className="flex items-start justify-between gap-4 mb-1">
-                        <div className='w-full'>
-                            <p className="font-semibold text-gray-900">{title}</p>
-                            <p className="text-sm text-gray-600 my-1">{subtitle}</p>
-                            {children}
-                        </div>
-
-                        {!!datetime && <div className="text-right flex-shrink-0">
-                            <p className="text-sm text-gray-500">
-                                {formatDate(datetime)}
-                            </p>
-                            <p className="text-sm text-gray-500">
-
-                                {formatTime(datetime, 'Y-MM-DD HH:mm:ss')}
-                            </p>
-                        </div>}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
 
 
 
@@ -110,10 +53,26 @@ export default function ShipmentDetail() {
     const navigate = useNavigate();
     const { internal_reference_number } = useParams<{ internal_reference_number: string }>();
     const [loading, setLoading] = useState(true);
-    const [state, setState] = useState<ShipmentDetailState>();
-    const [form, setValue, setForm] = useForm<any>({})
+    const [state, setStateValue, setState] = useForm<ShipmentDetailState>();
+    const [form, setValue, setForm] = useForm<any>({
+        items: [],
+        package_type: ShipmentPackageType.Individual
+    })
     const [reasons, setReasons] = useState<{ id: number, name: string, description: string }[]>([]);
     const [loadingReasons, setLoadingReasons] = useState(false);
+
+
+    const returnItems = () => {
+        const modal_id = Modal.show({
+            title: 'Return Items',
+            subtitle: 'Update stock for returned items',
+            maxWidth: 700,
+            content: () => <ShipmentItemReturnDialog state={state} onSuccess={() => {
+                load();
+                Modal.close(modal_id);
+            }} />
+        })
+    }
 
     const load = async () => {
         if (!internal_reference_number) {
@@ -123,7 +82,20 @@ export default function ShipmentDetail() {
         var r = await UserOrderService.shipmentDetail(internal_reference_number);
         if (r.success) {
             setState(r.data);
-            setForm({});
+            setForm({
+                package_type: r.data.shipment.package_type,
+                package_weight: r.data.shipment.package_weight,
+                package_length: r.data.shipment.package_length,
+                package_width: r.data.shipment.package_width,
+                package_height: r.data.shipment.package_height,
+                shipment_provided: r.data.shipment.shipment_provided,
+                notes: r.data.shipment.remarks,
+                tracking_number: r.data.shipment.tracking_number,
+                pickup_datetime: r.data.shipment.pickup_datetime,
+                dispatch_datetime: r.data.shipment.dispatch_datetime,
+                status: r.data.shipment.status,
+                items: r.data.shipment_items
+            });
             setLoading(false);
         } else {
             navigate(-1);
@@ -158,66 +130,22 @@ export default function ShipmentDetail() {
         })
     }
 
-    // Static shipment data
-    const shipment = {
-        shipment_number: "SHP-2024-001-A",
-        order_number: "ORD-2024-001",
-        tracking_number: "1Z999AA10123456784",
-        carrier: "UPS",
-        service_type: "Express Shipping",
-        status: "in_transit",
-        estimated_delivery: "2024-01-18T17:00:00Z",
-        shipped_date: "2024-01-16T09:30:00Z",
-        actual_delivery: null,
-        shipping_cost: 25.00,
-        weight: "5.2 kg",
-        dimensions: "45 x 35 x 25 cm",
-        items: [
-            {
-                product_name: "Premium Wireless Headphones",
-                sku: "WH-1000XM5",
-                quantity_ordered: 2,
-                quantity_shipped: 2,
-                unit_price: 299.99
-            },
-            {
-                product_name: "USB-C Fast Charger",
-                sku: "CHR-USBC-65W",
-                quantity_ordered: 3,
-                quantity_shipped: 3,
-                unit_price: 49.99
-            }
-        ],
-        origin_address: {
-            name: "TechStore NYC Warehouse",
-            street: "500 Industrial Way",
-            city: "Brooklyn",
-            state: "NY",
-            postal_code: "11201",
-            country: "United States"
-        },
-        destination_address: {
-            name: "Sarah Johnson",
-            street: "123 Madison Avenue",
-            city: "New York",
-            state: "NY",
-            postal_code: "10016",
-            country: "United States"
-        },
-        tracking_history: [
 
-            {
-                timestamp: "2024-01-16T09:30:00Z",
-                status: "label_created",
-                location: "Brooklyn, NY",
-                description: "Shipping label created"
-            }
-        ],
-        notes: "Handle with care - fragile electronics"
-    };
+    const cancelShipment = () => {
+        const modal_id = Modal.show({
+            title: 'Cancel Shipment',
+            subtitle: `#${internal_reference_number}`,
+            maxWidth: 600,
+            content: () => <CancelShipmentDialog
+                onSuccess={() => {
+                    Modal.close(modal_id);
+                    load();
+                }}
+                shipment={state.shipment}
+            />
 
-
-
+        })
+    }
 
 
 
@@ -241,12 +169,19 @@ export default function ShipmentDetail() {
     var cancelled_items_returend = state.shipment_logs.find(s => s.status == UserOrderStatus.CancelledItemsReturned);
     var status_meta = getUserOrderStatusMeta(state.shipment.status);
     var cancelled = state.shipment_logs.find(s => s.status == UserOrderStatus.Cancelled);
+    var cancellation = state.user_order_issues.find(s => s.shipment_id == state.shipment.id);
+
+    var can_update = state.shipment.status !== UserOrderStatus.Cancelled;
 
     return (<AppPage
         enableBack={true}
-        title={'Shipment     #' + internal_reference_number}
+        title={'Shipment #' + internal_reference_number}
         subtitle={`Placed on ${formatDateTime(state?.shipment.order_created_at)}`}
-        actions={<Btn><LuPlus />Add Update</Btn>}
+        actions={<div className='flex flex-row items-center gap-3'>
+            <DownloadInvoiceBtn internal_reference_number={state.shipment.invoice_internal_reference_number} />
+            {!cancelled && state.shipment.status !== UserOrderStatus.Cancelled && <Btn size={'sm'} variant={'outline'} onClick={() => printLabels()}>Print Labels <LuPrinter /></Btn>}
+            {!delivered && !dispatched && !cancelled && state.shipment.status !== UserOrderStatus.Cancelled && <Btn size={'sm'} variant={'destructive'} onClick={cancelShipment}><TbHomeCancel /> Cancel Shipment</Btn>}
+        </div>}
     >
         {state.user_order_issues.length == 0 && <div className="bg-white border rounded-lg border-gray-200 px-4 md:px-8 py-6 mb-6">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -261,9 +196,15 @@ export default function ShipmentDetail() {
                             #{state.shipment.order_internal_reference_number}
                         </Link>
                     </div>
-                    <p className="text-sm font-medium text-blue-600 mt-1">
-                        Tracking: {state.shipment.tracking_number || '--'}
-                    </p>
+                    <div className="text-sm text-gray-500 flex flex-row items-center gap-2">
+                        <span>Invoice : </span>
+                        <Link
+                            to={'/invoices/' + state.shipment.invoice_internal_reference_number}
+                            className='text-blue-500 underline'
+                        >
+                            #{state.shipment.invoice_internal_reference_number}
+                        </Link>
+                    </div>
                 </div>
 
 
@@ -331,6 +272,22 @@ export default function ShipmentDetail() {
                     </CardHeader>
                     <CardContent className="pt-6">
                         <div className="relative">
+
+                            {delivered && <TrackingHistoryItem
+                                icon={BsHouseCheck}
+                                active={!delivered && !cancelled_items_returend}
+                                title='Order Delivered'
+                                subtitle={'Order sucessfuly delivered to customer'}
+                                datetime={delivered?.created_at}
+                            >
+
+
+                                {delivered && delivered.remarks && <div className='bg-sky-50 border-sky-400 border  self-start inline-flex rounded-lg p-2  flex-col'>
+                                    <span className='text-sm text-gray-600'>{delivered.remarks}</span>
+                                </div>}
+
+                            </TrackingHistoryItem>}
+
                             {cancelled_items_returend && <TrackingHistoryItem
                                 icon={LuCornerDownLeft}
                                 active={false}
@@ -344,31 +301,32 @@ export default function ShipmentDetail() {
                                 </div>}
 
                             </TrackingHistoryItem>}
+                            {state.user_order_issues.length == 0 && !can_update && !delivered && <TrackingHistoryItem
+
+                                icon={IoWarningOutline}
+                                active={false}
+                                title='Order Cancelled'
+                                subtitle={'Customer cancelled the order'}
+                                datetime={state?.shipment?.updated_at}
+                            >
+
+
+
+                            </TrackingHistoryItem>}
                             {state.user_order_issues.map(user_order_issue => {
                                 return <TrackingHistoryItem
                                     key={user_order_issue.id}
                                     icon={IoWarningOutline}
-                                    active={!delivered && !cancelled_items_returend}
+                                    active={!cancellation && !delivered && !cancelled_items_returend}
                                     title='Order Cancelled'
                                     subtitle={user_order_issue.universal_category_name}
                                     datetime={user_order_issue?.created_at}
                                 >
+                                    <span className='text-xs text-red-700'>{cancellation?.issue_source == UserOrderIssueSource.Customer && 'Cancelled by customer'}</span>
+                                    <span className='text-xs text-red-700'>{cancellation?.issue_source == UserOrderIssueSource.Seller && 'Cancelled by seller'}</span>
+                                    <span className='text-xs text-red-700'>{cancellation?.issue_source == UserOrderIssueSource.Delivery && 'Cancelled due to delivery failure'}</span>
 
-                                    {!cancelled_items_returend && <div className='flex flex-col gap-3 p-3 bg-sky-50 border-sky-400 border w-full rounded-lg'>
-                                        <TextField value={form.remarks} onChange={setValue('remarks')} placeholder='Enter Notes / Remarks' multiline rows={5}>Notes / Remarks</TextField>
-                                        <div>
-                                            <Btn size={'sm'} variant={'destructive'} asyncClick={async () => {
-                                                var r = await UserOrderService.failedDeliveryItemsReturned({
-                                                    shipment_id: state.shipment.id,
-                                                    remarks: form.remarks
-                                                });
-                                                if (r.success) {
-                                                    load();
-                                                }
-                                                return r.success;
-                                            }}>Items Returned<LuCornerDownLeft /></Btn>
-                                        </div>
-                                    </div>}
+                                    {!cancellation && !cancelled_items_returend && <Btn size={'sm'} variant={'destructive'} onClick={returnItems}>Items Returned<LuCornerDownLeft /></Btn>}
 
                                     {cancelled && cancelled.remarks && <div className='bg-sky-50 border-sky-400 border  self-start inline-flex rounded-lg p-2  flex-col'>
                                         <span className='text-sm text-gray-600'>{cancelled.remarks}</span>
@@ -433,7 +391,7 @@ export default function ShipmentDetail() {
                                 })()}
 
 
-                                {state.user_order_issues.length == 0 && <div className={cn(
+                                {!delivered && state.user_order_issues.length == 0 && <div className={cn(
                                     'flex flex-col gap-3 p-3 bg-sky-50 border-sky-400 border w-full rounded-lg transition-all',
                                     form.status == UserOrderStatus.DeliveryAttempted && 'bg-red-50 border-red-400'
                                 )}>
@@ -721,17 +679,17 @@ export default function ShipmentDetail() {
                                 </div>}
                             </TrackingHistoryItem>}
 
-                            <TrackingHistoryItem
+                            {!!state.shipment.shipment_provided && <TrackingHistoryItem
                                 icon={LuTag}
                                 active={!ready_for_shipment}
                                 title='Print Labels'
                                 subtitle={`Print lables for selected items`}
                                 datetime={''}
                             >
-                                <div className='flex flex-row gap-3 mb-3'>
+                                {can_update && <div className='flex flex-row gap-3 mb-3'>
                                     <Btn size={'sm'} variant={'outline'} onClick={() => printLabels()}>Print Labels <LuPrinter /></Btn>
-                                </div>
-                                {!ready_for_shipment && <div className='flex flex-col gap-3 p-3 bg-sky-50 border-sky-400 border w-full rounded-lg'>
+                                </div>}
+                                {can_update && !ready_for_shipment && <div className='flex flex-col gap-3 p-3 bg-sky-50 border-sky-400 border w-full rounded-lg'>
                                     <TextField value={form.remarks} onChange={setValue('remarks')} placeholder='Enter Notes / Remarks' multiline rows={5}>Notes / Remarks</TextField>
                                     <div>
                                         <Btn size={'sm'} variant={'destructive'} asyncClick={async () => {
@@ -749,7 +707,7 @@ export default function ShipmentDetail() {
                                 {ready_for_shipment && !!ready_for_shipment?.remarks && <div className='bg-sky-50 border-sky-400 border  self-start inline-block rounded-lg p-2'>
                                     <span className='text-sm text-gray-600'>{ready_for_shipment.remarks}</span>
                                 </div>}
-                            </TrackingHistoryItem>
+                            </TrackingHistoryItem>}
 
                             <TrackingHistoryItem
                                 icon={LuListCheck}
@@ -757,10 +715,188 @@ export default function ShipmentDetail() {
                                 subtitle={`You have selected ${state.shipment_items.length} ${state.shipment_items.length == 1 ? 'Item' : 'Items'} for processing`}
                                 datetime={state.shipment.created_at}
                             >
-                                <div className='flex flex-row gap-3 flex-wrap'>
-                                    <Btn size={'xs'} variant={'outline'}><LuPencil /> Edit List</Btn>
+                                {(!form.show_shipping_editor && !!state.shipment.shipment_provided) && <div className='flex flex-row gap-3 flex-wrap'>
+                                    {!dispatched && <Btn size={'xs'} variant={'outline'} onClick={() => setValue('show_shipping_editor')(true)}><LuPencil /> Edit List</Btn>}
                                     {state.shipment_items.map((item) => <Badge variant={'outline'} key={item.id}>{item.name} ({item.quantity} {item.unit_name})</Badge>)}
-                                </div>
+                                </div>}
+                                {can_update && !cancellation && (form.show_shipping_editor || !state.shipment.shipment_provided) && <div className='flex flex-col gap-3'>
+                                    <Radio value={form.package_type || ShipmentPackageType.Individual} onChange={setValue('package_type')} options={ShipmentPackageTypeArray}>
+                                        Packaging Type
+                                    </Radio>
+                                    {form.package_type == ShipmentPackageType.Individual && <div className="space-y-4">
+                                        {form.items.map((item: any, idx: number) => (
+                                            <div key={item.id} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                                                <div className="flex items-center gap-3 mb-4 border-b border-gray-100 pb-3">
+                                                    <span className="bg-indigo-100 text-indigo-700 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">{idx + 1}</span>
+                                                    <h4 className="font-bold text-gray-800">{item.name}</h4>
+                                                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded ml-auto">Qty: {item.quantity}</span>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                    <TextField
+                                                        type="number"
+                                                        value={item.package_weight}
+                                                        onChange={setValue(`items[id:${item.id}].package_weight`)}
+                                                        placeholder="0.0"
+                                                    >
+                                                        Weight (kg)
+                                                    </TextField>
+
+                                                    <TextField
+                                                        type="number"
+                                                        value={item.package_length}
+                                                        onChange={setValue(`items[id:${item.id}].package_length`)}
+
+                                                        placeholder="0.0"
+                                                    >
+                                                        Length (cm)
+                                                    </TextField>
+
+                                                    <TextField
+                                                        type="number"
+                                                        value={item.package_width}
+                                                        onChange={setValue(`items[id:${item.id}].package_width`)}
+                                                        placeholder="0.0"
+                                                    >
+                                                        Width (cm)
+                                                    </TextField>
+
+                                                    <TextField
+                                                        type="number"
+                                                        value={item.package_height}
+                                                        onChange={setValue(`items[id:${item.id}].package_height`)}
+                                                        placeholder="0.0"
+                                                    >
+                                                        Height (cm)
+                                                    </TextField>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>}
+
+                                    {form.package_type == ShipmentPackageType.Consolidated && <div className=' bg-white rounded-lg border shadow'>
+                                        <div className='flex flex-col border-b  p-3'>
+                                            <span className='text-2xl font-medium'>Consolidated Package</span>
+                                            <span className='text-xs text-gray-500'>Deliver goods in single package</span>
+                                        </div>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-3">
+                                            <TextField
+                                                type="number"
+                                                value={form.package_weight}
+                                                onChange={setValue(`package_weight`)}
+                                                placeholder="0.0"
+                                            >
+                                                Weight (kg)
+                                            </TextField>
+
+                                            <TextField
+                                                type="number"
+                                                value={form.package_length}
+                                                onChange={setValue(`package_length`)}
+
+                                                placeholder="0.0"
+                                            >
+                                                Length (cm)
+                                            </TextField>
+
+                                            <TextField
+                                                type="number"
+                                                value={form.package_width}
+                                                onChange={setValue(`package_width`)}
+                                                placeholder="0.0"
+                                            >
+                                                Width (cm)
+                                            </TextField>
+
+                                            <TextField
+                                                type="number"
+                                                value={form.package_height}
+                                                onChange={setValue(`package_height`)}
+                                                placeholder="0.0"
+                                            >
+                                                Height (cm)
+                                            </TextField>
+                                        </div>
+                                    </div>}
+
+                                    <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 space-y-4">
+                                        <h3 className="font-bold text-gray-900 flex items-center gap-2">Shipment Info</h3>
+
+                                        <TextField
+                                            placeholder="TRK-000000000"
+                                            value={form.tracking_number}
+                                            onChange={setValue('tracking_number')}
+                                        >
+                                            Tracking Number (Optional)
+                                        </TextField>
+
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <DateTimeField
+                                                mode="datetime"
+                                                placeholder="Select date"
+                                                value={form.pickup_datetime}
+                                                onChange={setValue('pickup_datetime')}
+                                                previewFormat='DD MMM, Y LT'
+
+                                            >
+                                                Pickup Date
+                                            </DateTimeField>
+
+                                            <DateTimeField
+                                                mode="datetime"
+                                                placeholder="Select date"
+                                                value={form.dispatch_datetime}
+                                                onChange={setValue('dispatch_datetime')}
+                                                previewFormat='DD MMM, Y LT'
+                                            >
+                                                Dispatch Date
+                                            </DateTimeField>
+                                        </div>
+
+                                        <TextField
+                                            multiline
+                                            rows={4}
+                                            placeholder="Any special handling instructions..."
+                                            value={form.notes}
+                                            onChange={setValue('notes')}
+                                        >
+                                            Notes / Remarks
+                                        </TextField>
+                                    </div>
+
+                                    <div>
+                                        <Btn asyncClick={async () => {
+                                            var r = await UserOrderService.updateShipment({
+                                                shipment_id: state.shipment.id,
+                                                items: form.items.map((i: ShipmentItem) => ({
+                                                    id: i.id,
+                                                    package_weight: i.package_weight,
+                                                    package_length: i.package_length,
+                                                    package_width: i.package_width,
+                                                    package_height: i.package_height
+                                                })),
+                                                tracking_number: form.tracking_number,
+                                                pickup_date: form.pickup_date,
+                                                dispatch_date: form.dispatch_date,
+                                                notes: form.notes,
+                                                package_type: form.package_type,
+                                                package_weight: form.package_weight,
+                                                package_length: form.package_length,
+                                                package_width: form.package_width,
+                                                package_height: form.package_height
+                                            });
+                                            if (r.success) {
+                                                msg.success('Shipment details updated');
+                                                setValue('show_shipping_editor')(false);
+                                                setStateValue('shipment.shipment_provided')(1);
+                                            }
+                                            return r.success;
+                                        }}>
+                                            <LuSave />
+                                            <span className='text-xs'>Save Information</span>
+                                        </Btn>
+                                    </div>
+                                </div>}
                             </TrackingHistoryItem>
                             <TrackingHistoryItem
                                 icon={LuPlus}
@@ -786,7 +922,7 @@ export default function ShipmentDetail() {
                             <CardTitle className="text-lg font-semibold text-gray-900">Shipped Items</CardTitle>
                             <Badge variant="outline" className="gap-2">
                                 <Package className="w-3 h-3" />
-                                {shipment.items.length} Items
+                                {state.shipment_items.length} Items
                             </Badge>
                         </div>
                     </CardHeader>
@@ -799,9 +935,10 @@ export default function ShipmentDetail() {
                                         key={index}
                                         className="flex items-start gap-4 p-4 rounded-lg bg-gray-50 border border-gray-200"
                                     >
-                                        <div className="w-16 h-16 rounded-lg bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
+
+                                        <SafeImage src={item.image} className="w-16 h-16 min-h-16 min-w-16 grow-0 object-contain p-1 rounded-lg bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
                                             <Package className="w-6 h-6 text-gray-400" />
-                                        </div>
+                                        </SafeImage>
 
                                         <div className="flex-1 min-w-0">
                                             <h4 className="font-medium text-gray-900 mb-1">{item.name}</h4>
@@ -852,41 +989,21 @@ export default function ShipmentDetail() {
                                 <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
                                     <MapPin className="w-4 h-4 text-blue-600" />
                                 </div>
-                                <CardTitle className="text-base font-semibold text-gray-900">Origin</CardTitle>
+                                <CardTitle className="text-base font-semibold text-gray-900">Delivery Address</CardTitle>
                             </div>
                         </CardHeader>
                         <CardContent className="pt-6">
                             <div className="space-y-1">
-                                <p className="font-semibold text-gray-900">{shipment.origin_address.name}</p>
-                                <p className="text-sm text-gray-700">{shipment.origin_address.street}</p>
+                                <p className="font-semibold text-gray-900">{state.buyer_party.name}</p>
+                                <p className="text-sm text-gray-700">{state.buyer_party.address}</p>
                                 <p className="text-sm text-gray-700">
-                                    {shipment.origin_address.city}, {shipment.origin_address.state} {shipment.origin_address.postal_code}
+                                    {state.buyer_party.country_name}, {state.buyer_party.state_name} {state.buyer_party.pincode}
                                 </p>
-                                <p className="text-sm text-gray-700">{shipment.origin_address.country}</p>
+                                <p className="text-sm text-gray-700">{state.buyer_party.country_name}</p>
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card className="shadow-sm border-gray-200">
-                        <CardHeader className="border-b border-gray-100 pb-4">
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-                                    <MapPin className="w-4 h-4 text-emerald-600" />
-                                </div>
-                                <CardTitle className="text-base font-semibold text-gray-900">Destination</CardTitle>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="pt-6">
-                            <div className="space-y-1">
-                                <p className="font-semibold text-gray-900">{shipment.destination_address.name}</p>
-                                <p className="text-sm text-gray-700">{shipment.destination_address.street}</p>
-                                <p className="text-sm text-gray-700">
-                                    {shipment.destination_address.city}, {shipment.destination_address.state} {shipment.destination_address.postal_code}
-                                </p>
-                                <p className="text-sm text-gray-700">{shipment.destination_address.country}</p>
-                            </div>
-                        </CardContent>
-                    </Card>
                 </div>
 
                 {/* Shipment Notes */}
@@ -973,28 +1090,42 @@ export default function ShipmentDetail() {
                         <div className="space-y-4">
                             <div>
                                 <p className="text-xs text-gray-500 mb-1">Carrier</p>
-                                <p className="font-semibold text-gray-900">{shipment.carrier}</p>
+                                <p className="font-semibold text-gray-900">{state.shipment.courier_channel_name}</p>
                             </div>
 
-                            <div>
-                                <p className="text-xs text-gray-500 mb-1">Service Type</p>
-                                <p className="font-medium text-gray-900">{shipment.service_type}</p>
-                            </div>
+
 
                             <div>
                                 <p className="text-xs text-gray-500 mb-1">Shipping Cost</p>
-                                <p className="font-semibold text-gray-900">${shipment.shipping_cost.toFixed(2)}</p>
+                                <p className="font-semibold text-gray-900">{state.shipment.currency_symbol}{state.shipment.shipping}</p>
                             </div>
+                            {state.shipment.package_type == ShipmentPackageType.Consolidated && <>
+                                <div className="pt-4 border-t border-gray-100">
+                                    <p className="text-xs text-gray-500 mb-1">Package Weight</p>
+                                    <p className="font-medium text-gray-900">{state.shipment.package_weight}KG</p>
+                                </div>
 
-                            <div className="pt-4 border-t border-gray-100">
-                                <p className="text-xs text-gray-500 mb-1">Package Weight</p>
-                                <p className="font-medium text-gray-900">{shipment.weight}</p>
-                            </div>
+                                <div>
+                                    <p className="text-xs text-gray-500 mb-1">Dimensions</p>
+                                    <p className="font-medium text-gray-900">w{state.shipment.package_width} x l{state.shipment.package_length} x h{state.shipment.package_height} CM</p>
+                                </div>
+                            </>}
+                            {state.shipment.package_type == ShipmentPackageType.Individual && state.shipment_items.map(item => {
+                                return (<div key={item.id} className='border-t   border-gray-100 pt-4'>
+                                    <span className='font-medium text-xl text-gray-800'>{item.name}</span>
+                                    <div className="">
+                                        <p className="text-xs text-gray-500 mb-1">Package Weight</p>
+                                        <p className="font-medium text-gray-900">{item.package_weight}KG</p>
+                                    </div>
 
-                            <div>
-                                <p className="text-xs text-gray-500 mb-1">Dimensions</p>
-                                <p className="font-medium text-gray-900">{shipment.dimensions}</p>
-                            </div>
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">Dimensions</p>
+                                        <p className="font-medium text-gray-900">w{item.package_width} x l{item.package_length} x h{item.package_height} CM</p>
+                                    </div>
+                                </div>);
+                            })}
+
+
                         </div>
                     </CardContent>
                 </Card>

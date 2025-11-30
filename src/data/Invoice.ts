@@ -1,21 +1,19 @@
+import { Shipment } from "./Shipment";
 import { Party } from "./UserOrder";
 
-export interface ShipmentDetailState {
-    seller_party: Party,
+export interface InvoiceDetailState {
+    invoice: Invoice;
+    invoice_items: InvoiceItem[];
+    invoice_item_taxes: InvoiceItemTax[],
     buyer_party: Party,
-    shipment: Shipment;
-    shipment_items: ShipmentItem[];
-    shipment_logs: ShipmentLog[];
-    delivery_agent: DeliveryAgent;
-    user_order_issues: UserOrderIssue[];
+    seller_party: Party,
+    shipments: Shipment[]
 }
 
-export type Shipment = {
+interface Invoice {
     id: number;
     package_type: number;
     user_id: string;
-    country_name: string;
-    country_image: string;
     delivery_agent_user_id: string;
     cancellation_universal_category_id: number;
     organization_id: number;
@@ -27,7 +25,6 @@ export type Shipment = {
     pickup_datetime: string;
     dispatch_datetime: string;
     remarks: string;
-    courier_channel_name: string;
     reference_number: string;
     currency_symbol: string;
     amount: string;
@@ -43,21 +40,15 @@ export type Shipment = {
     created_at: string;
     updated_at: string;
     order_internal_reference_number: string;
-    invoice_internal_reference_number: string;
-    items_count: number;
     order_created_at: string;
-    shipment_provided: number;
-    items: ShipmentItem[]
-    buyer_party: Party
 }
 
-export type ShipmentItem = {
+interface InvoiceItem {
     id: number;
     organization_id: number;
     shipment_id: number;
     user_order_item_id: number;
     name: string;
-    image: string;
     barcode: string;
     code: string;
     sku: string;
@@ -72,8 +63,6 @@ export type ShipmentItem = {
     product_price_id: number;
     user_id: string;
     quantity: number;
-    quantity_returned: number;
-    update_stock: boolean;
     unit_id: number;
     unit_name: string;
     mrp: string;
@@ -100,44 +89,15 @@ export type ShipmentItem = {
     currency_code: string;
 }
 
-interface ShipmentLog {
-    id: number;
-    created_user_id: string;
-    shipment_id: number;
-    status: number;
-    remarks: string;
-    location: string;
-    failure_universal_category_id: number | null;
-    next_datetime: string;
-    seller_only: number;
-    created_at: string;
-    updated_at: string;
-    universal_category_name: string;
-    universal_category_description: string;
-}
 
-interface DeliveryAgent {
-    id: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    mobile: string;
-    image: string;
-}
 
-interface UserOrderIssue {
+export type InvoiceItemTax = {
     id: number;
-    organization_id: number;
-    created_by_user_id: string;
-    issue_source: number;
-    issue_type: number;
-    issue_universal_category_id: number;
-    user_order_id: number;
-    shipment_id: number;
-    status: number;
-    internal_reference_number: string;
-    created_at: string;
-    updated_at: string;
-    universal_category_name: string;
-    universal_category_description: string;
+    invoice_id: number;
+    invoice_item_id: number;
+    tax_component_id: number;
+    user_id: number;
+    name: string;
+    percentage: number;
+    amount: number;
 }

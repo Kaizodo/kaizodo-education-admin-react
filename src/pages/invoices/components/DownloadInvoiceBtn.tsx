@@ -11,6 +11,11 @@ export default function DownloadInvoiceBtn({ internal_reference_number }: { inte
         setDownloading(true);
         try {
             var blob: any = await UserOrderService.invoice(internal_reference_number);
+            if (blob! instanceof Blob) {
+                msg.error('Unable to export')
+                setDownloading(false);
+                return;
+            }
             const a = document.createElement('a');
             const blobUrl = window.URL.createObjectURL(blob);
             a.href = blobUrl;

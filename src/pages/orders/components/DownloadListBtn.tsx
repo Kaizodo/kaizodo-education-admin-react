@@ -29,5 +29,5 @@ export default function DownloadListBtn({ internal_reference_number, organizatio
         setDownloading(false);
     }
 
-    return (<Btn onClick={download} loading={downloading} size={'sm'}><LuDownload />Download List</Btn>)
+    return (<Btn onClick={download} loading={downloading} size={'sm'} variant={'outline'}><LuDownload />Download List</Btn>)
 }
