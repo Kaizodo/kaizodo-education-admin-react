@@ -5,14 +5,15 @@ import { lazy, Suspense } from 'react';
 import Btn from '../Btn';
 import CenterLoading from '../CenterLoading';
 import { Modal } from '../Modal';
-import { DiscountService } from '@/services/DiscountService';
+import { DiscountPlanService } from '@/services/DiscountPlanService';
 
 
-const LazyEditorDialog = lazy(() => import('@/pages/discount/components/DiscountEditorDialog'));
+const LazyEditorDialog = lazy(() => import('@/pages/product-management/pages/discount-plans/components/DiscountPlanEditorDialog'));
 
 
-export default function SuggestDiscount({ children = 'Discount Type', value, onChange, session_id, selected, placeholder = 'Select discount type', onSelect, includedValues }: SuggestProp & {
-    session_id?: number
+export default function SuggestDiscount({ children = 'Discount Plan', value, onChange, valid_only, load_applications, selected, placeholder = 'Select discount plan', onSelect, includedValues }: SuggestProp & {
+    load_applications?: boolean,
+    valid_only?: boolean
 }) {
     return (
         <Dropdown
@@ -39,8 +40,8 @@ export default function SuggestDiscount({ children = 'Discount Type', value, onC
                 }}><FaPlus />Add New</Btn>);
             }}
             getOptions={async ({ page, keyword }) => {
-                var r = await DiscountService.search({
-                    page, keyword, session_id
+                var r = await DiscountPlanService.search({
+                    page, keyword, load_applications, valid_only
                 });
                 if (r.success) {
                     return r.data.records;

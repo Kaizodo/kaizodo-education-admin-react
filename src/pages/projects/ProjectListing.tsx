@@ -48,11 +48,11 @@ export default function ProjectListing() {
             title='Projects'
             subtitle='Track projects and their progress'
         >
-            <div className='border bg-white rounded-lg p-3 shadow flex flex-row items-end gap-3'>
+            <div className='border bg-white rounded-lg p-3 shadow flex flex-row items-end gap-3 mb-6'>
                 <div className='flex-1'>
                     <Search placeholder='Search project' value={filters.keyword} onChange={e => setFilter('keyword', 'debounce')(e.target.value, true)} />
                 </div>
-                <div>
+                {/* <div>
                     <Dropdown
                         value={filters.status}
                         onChange={setFilter('status', 'debounce')}
@@ -62,7 +62,7 @@ export default function ProjectListing() {
                             { id: UserOrderStatus.Active, name: 'Active Order' },
 
                         ]}>Order Status</Dropdown>
-                </div>
+                </div> */}
             </div>
 
             <div className="space-y-6">

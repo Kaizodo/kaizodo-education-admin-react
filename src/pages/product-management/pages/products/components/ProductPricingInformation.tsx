@@ -159,6 +159,7 @@ export default function ProductPricingInformation({ state, setStateValue }: Comm
                                 <>
                                     <TableHeading><HeadingTitle>Quantity</HeadingTitle></TableHeading>
                                     <TableHeading><HeadingTitle>SKU</HeadingTitle></TableHeading>
+                                    <TableHeading><HeadingTitle>Barcode Number</HeadingTitle></TableHeading>
                                     <TableHeading><HeadingTitle>Expiry Date</HeadingTitle></TableHeading>
                                 </>
                             }
@@ -193,6 +194,8 @@ export default function ProductPricingInformation({ state, setStateValue }: Comm
                                     <>
                                         <TableCell><TextField type='number' disabled={!pp.country_id} value={pp.quantity} onChange={setValue(`prices[id:${pp.id}].quantity`)} /></TableCell>
                                         <TableCell><TextField disabled={!pp.country_id} value={pp.sku} onChange={setValue(`prices[id:${pp.id}].sku`)} /></TableCell>
+                                        <TableCell><TextField disabled={!pp.country_id} value={pp.barcode} onChange={setValue(`prices[id:${pp.id}].barcode`)} /></TableCell>
+
                                         <TableCell><DateTimeField value={pp.expiry_date} onChange={setValue(`prices[id:${pp.id}].expiry_date`)} mode='date' placeholder='Select a date' /></TableCell>
                                     </>
                                 }

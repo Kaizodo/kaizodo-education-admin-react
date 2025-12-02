@@ -6,7 +6,7 @@ import { UserService } from '@/services/UserService';
 import { lazy, Suspense, useEffect, useState } from 'react';
 
 import UserProfileAdvance from './UserProfileAdvance';
-const LazyEditorDalog = lazy(() => import('./UserEditorDialog'));
+const LazyEditorDalog = lazy(() => import('./ClientEditorDialog'));
 
 interface Props {
     id?: number,

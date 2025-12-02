@@ -10,6 +10,15 @@ export class ClientService {
         return Api(`${this.endpoint}/search`, form);
     }
 
+
+    public static async createQuick(form: any) {
+        return Api(`${this.endpoint}/create-quick`, form);
+    }
+
+    public static async createProfile(form: any) {
+        return Api(`${this.endpoint}/create-profile`, form);
+    }
+
     public static async create(form: any) {
         return Api(`${this.endpoint}/create`, form);
     }

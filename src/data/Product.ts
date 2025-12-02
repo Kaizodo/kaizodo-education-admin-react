@@ -78,6 +78,7 @@ export type ProductPrice = {
     popular: number,
     quantity: number,
     sku: string
+    barcode: string
 }
 
 export type ProductMedia = {

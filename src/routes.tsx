@@ -8,6 +8,8 @@ export const routes: RouteType[] = [
     { path: 'login', element: lazy(() => import('@/pages/login/Login')) },
     {
         path: '', element: AuthLayout, children: [
+            { path: 'quick-sell', element: lazy(() => import('@/pages/orders/QuickSell')) },
+            { path: 'quick-pos', element: lazy(() => import('@/pages/orders/QuickPos')) },
             {
                 element: lazy(() => import('@/components/app/MainLayout')), children: [
                     { path: 'page-not-found', element: lazy(() => import('@/pages/errors/NotFound404')) },
@@ -24,6 +26,8 @@ export const routes: RouteType[] = [
                     { path: 'referral-earnings', element: lazy(() => import('@/pages/referral-earning-withdrawal/ReferralEarningWithdrawal')) },
                     { path: 'marketing-material', element: lazy(() => import('@/pages/marketing-material/MarketingMaterial')) },
                     { path: 'faqs', element: lazy(() => import('@/pages/faqs/Faqs')) },
+                    { path: 'pos', element: lazy(() => import('@/pages/pos/PosHome')) },
+
                     { path: 'projects', element: lazy(() => import('@/pages/projects/ProjectListing')) },
                     { path: 'projects/:internal_reference_number', element: lazy(() => import('@/pages/projects/ProjectDetail')) },
                     { path: 'phases', element: lazy(() => import('@/pages/phase/PhaseManagement')) },

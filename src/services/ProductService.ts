@@ -9,6 +9,9 @@ export class ProductService {
     public static async search(form: any) {
         return Api(`${this.endpoint}/search`, form);
     }
+    public static async searchByPrice(form: any) {
+        return Api(`${this.endpoint}/search-by-price`, form);
+    }
 
     public static async create(form: any) {
         return Api(`${this.endpoint}/create`, form);
@@ -93,5 +96,13 @@ export class ProductService {
         return Api(`${this.endpoint}/delete`, { product_id: id });
     }
 
+
+    public static async loadPrices(form: {
+        product_id: number,
+        tax_code_id: number,
+        country_id: number
+    }) {
+        return Api(`${this.endpoint}/load-prices`, form);
+    }
 
 }

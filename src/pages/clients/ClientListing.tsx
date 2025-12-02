@@ -23,7 +23,7 @@ import { FaEnvelope, FaPhone } from 'react-icons/fa6';
 import moment from 'moment';
 
 
-const LazyEditorDalog = lazy(() => import('./components/UserEditorDialog'));
+const LazyEditorDalog = lazy(() => import('./components/ClientEditorDialog'));
 
 
 

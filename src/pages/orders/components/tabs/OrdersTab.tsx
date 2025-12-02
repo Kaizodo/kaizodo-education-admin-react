@@ -8,7 +8,7 @@ import Btn from '@/components/common/Btn';
 import { Badge } from '@/components/ui/badge';
 import { getDefaultPaginated, PaginationType } from '@/data/pagination';
 import { UserOrderService } from '@/services/UserOrderService';
-import { getUserOrderStatusMeta, UserOrder, UserOrderStatus, UserOrderStatusArray } from '@/data/order';
+import { getUserOrderIssueTypeName, getUserOrderStatusMeta, UserOrder, UserOrderStatus, UserOrderStatusArray } from '@/data/order';
 import { useNavigate } from 'react-router-dom';
 import NoRecords from '@/components/common/NoRecords';
 import Pagination from '@/components/common/Pagination';
@@ -32,6 +32,7 @@ import { HiOutlineArrowTurnDownRight } from 'react-icons/hi2';
 import { RiExpandUpDownLine } from 'react-icons/ri';
 import DownloadInvoiceBtn from '@/pages/invoices/components/DownloadInvoiceBtn';
 import { Search } from '@/components/ui/search';
+import { UserOrderItem } from '@/data/UserOrder';
 
 const defaultFilters = {
     page: 1,
@@ -203,9 +204,13 @@ export default function OrdersTab({ showFilters, tab }: { tab: string, showFilte
                             </TableHeader>
                             <TableBody>
                                 {paginated.records.flatMap((order) => {
-                                    const meta = getUserOrderStatusMeta(order.status);
                                     var organization_orders = paginated.data.organization_orders.filter((oo: any) => oo.user_order_id == order.id);
                                     var organizations = paginated.data.organizations.filter((ox: any) => organization_orders.map((oo: any) => oo.organization_id).includes(ox.id));
+                                    var items: UserOrderItem[] = paginated.data.items.filter((i: any) => i.user_order_id == order.id);
+                                    var refunds: { id: number, user_order_id: number, organization_id: number, organization_order_id: number, status: number }[] = paginated.data.refunds.filter((i: any) => i.user_order_id == order.id);
+                                    var issues: { id: number, organization_id: number, organization_order_id: number, status: number, issue_type: number }[] = paginated.data.issues.filter((i: any) => i.user_order_id == order.id);
+                                    var top_level_item_status = [...new Set(items.map(i => i.status))];
+
                                     return [
                                         (<TableRow key={`heading_${order.id}`}>
                                             <TableCell>
@@ -262,7 +267,18 @@ export default function OrdersTab({ showFilters, tab }: { tab: string, showFilte
                                             </TableCell>
 
                                             <TableCell>
-                                                <Badge className={`${meta.bg} ${meta.fg}`}>{meta.name}</Badge>
+                                                <div className='flex flex-col gap-1 justify-start items-start'>
+                                                    {refunds.length > 0 && <Badge variant={'outline'}>Refunds {refunds.length}</Badge>}
+                                                    {top_level_item_status.map(status => {
+                                                        const s_meta = getUserOrderStatusMeta(status);
+                                                        const items_count = items.filter(i => i.status == status).length;
+                                                        if (items_count == 0) {
+                                                            return null;
+                                                        }
+                                                        return <Badge key={status} variant={'destructive'} className={`${s_meta.bg} ${s_meta.fg} gap-1 flex`}>{s_meta.name} <b>{items_count}</b></Badge>;
+                                                    })}
+                                                    {issues.map(issue => <Badge key={issue.id} variant={'destructive'} className='gap-1 flex'>{getUserOrderIssueTypeName(issue.issue_type)} <b>{issues.length}</b></Badge>)}
+                                                </div>
                                             </TableCell>
 
                                             <TableCell className="text-right space-x-2">
@@ -284,6 +300,7 @@ export default function OrdersTab({ showFilters, tab }: { tab: string, showFilte
                                             if (!organization) {
                                                 return null;
                                             }
+                                            var org_level_item_status = [...new Set(items.filter(i => i.organization_id == organization.id).map(i => i.status))];
                                             return (<TableRow key={`store_${order.id}_${oo.id}`}>
                                                 <TableCell></TableCell>
                                                 <TableCell className='text-end'>
@@ -320,16 +337,20 @@ export default function OrdersTab({ showFilters, tab }: { tab: string, showFilte
                                                     {oo.currency_symbol}{oo.amount}
                                                 </TableCell>
 
-                                                <TableCell>
-                                                    <Badge className={`${meta.bg} ${meta.fg}`}>{meta.name}</Badge>
-                                                </TableCell>
 
-                                                <TableCell className="text-right space-x-2" colSpan={2}>
-                                                    <div className='grid grid-cols-4 gap-3'>
-                                                        <Badge className='text-center justify-center' variant={'outline'}>Pending <span className='font-bold ms-1'>1</span></Badge>
-                                                        <Badge className='text-center justify-center' variant={'outline'}>Process</Badge>
-                                                        <Badge className='text-center justify-center' variant={'outline'}>Transit</Badge>
-                                                        <Badge className='text-center justify-center' variant={'outline'}>Cancelled</Badge>
+
+                                                <TableCell className="text-right space-x-2" colSpan={3}>
+                                                    <div className='flex flex-row gap-1 flex-wrap'>
+                                                        {refunds.filter(r => r.organization_id == organization.id).length > 0 && <Badge variant={'outline'}>Refunds {refunds.length}</Badge>}
+                                                        {org_level_item_status.map(status => {
+                                                            const s_meta = getUserOrderStatusMeta(status);
+                                                            const items_count = items.filter(i => i.status == status).length;
+                                                            if (items_count == 0) {
+                                                                return null;
+                                                            }
+                                                            return <Badge key={status} variant={'destructive'} className={`${s_meta.bg} ${s_meta.fg} gap-1 flex`}>{s_meta.name} <b>{items_count}</b></Badge>;
+                                                        })}
+                                                        {issues.filter(s => s.organization_id == organization.id).map(issue => <Badge key={issue.id} variant={'destructive'} className='gap-1 flex'>{getUserOrderIssueTypeName(issue.issue_type)} <b>{issues.length}</b></Badge>)}
                                                     </div>
                                                 </TableCell>
                                             </TableRow>);

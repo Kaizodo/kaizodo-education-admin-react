@@ -252,7 +252,8 @@ const Products = () => {
                                             <span>Clone of </span>
                                             <Link to={"/product-management/products/" + record.product_id} className="text-blue-700 font-medium cursor-pointer hover:text-blue-900">{record.main_product_name}</Link>
                                         </div>}
-                                        <span className="text-xs">/products/{record.product_category_slug}/{record.slug}-{record.id}</span>
+                                        {record.show_in_listing ? <Link to={record.url} className="text-xs" target="_blank">{record.url}</Link> : <span className="text-xs text-red-700 italic">Not Shown on website</span>}
+
                                     </div>
                                 </TableCell>
 

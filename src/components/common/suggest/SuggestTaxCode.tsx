@@ -11,8 +11,9 @@ import { TaxCodeService } from '@/services/TaxCodeService';
 const LazyEditorDialog = lazy(() => import('@/pages/product-management/pages/tax-codes/components/TaxCodeEditorDialog'));
 
 
-export default function SuggestTaxCode({ children = 'Tax Code', value, onChange, disabled, selected, country_id, placeholder = 'Select Taxcode', onSelect, includedValues }: SuggestProp & {
-    country_id?: number
+export default function SuggestTaxCode({ children = 'Tax Code', value, onChange, disabled, selected, fetch_rates, country_id, placeholder = 'Select Taxcode', onSelect, includedValues }: SuggestProp & {
+    country_id?: number,
+    fetch_rates?: boolean
 }) {
 
 
@@ -43,7 +44,7 @@ export default function SuggestTaxCode({ children = 'Tax Code', value, onChange,
             }}
             getOptions={async ({ page, keyword }) => {
                 var r = await TaxCodeService.search({
-                    page, keyword, country_id
+                    page, keyword, country_id, fetch_rates
                 });
                 if (r.success) {
                     return r.data.records;

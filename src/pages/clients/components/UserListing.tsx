@@ -31,7 +31,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const LazyEditorDalog = lazy(() => import('./UserEditorDialog'));
+const LazyEditorDalog = lazy(() => import('./ClientEditorDialog'));
 const LazyUserProfile = lazy(() => import('./UserProfile'));
 const LazyEmployeeProfile = lazy(() => import('./EmployeeProfile'));
 const LazyUserBorrowedBooks = lazy(() => import('./UserBorrowedBooks'));
