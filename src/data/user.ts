@@ -1069,7 +1069,7 @@ export const PaymentMethodArray = [
     { id: PaymentMethod.UPI, name: "UPI" },
     { id: PaymentMethod.Paypal, name: "PayPal" },
     { id: PaymentMethod.ClosedWallet, name: 'Wallet' },
-    { id: PaymentMethod.ClosedWallet, name: 'Online' }
+    { id: PaymentMethod.Online, name: 'Online' }
 ];
 
 export function getPaymentMethodName(id: PaymentMethod) {

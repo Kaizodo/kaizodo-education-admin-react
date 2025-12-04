@@ -48,6 +48,7 @@ type Props = {
 };
 
 export default function Dropdown({ value, includedValues = [undefined], selected, showClearBtn = true, onChange, onSelect, children, placeholder, searchable = true, disabled, getOptions, footer }: Props) {
+    console.log(selected);
     const [open, setOpen] = useState(false)
     const [searching, setSearching] = useState(false);
     const [records, setRecords] = useState<DropdownItemType[]>([]);
@@ -63,6 +64,7 @@ export default function Dropdown({ value, includedValues = [undefined], selected
     }, [value]);
 
     useEffect(() => {
+        console.log(selected);
         if (selected && !records.find(r => r.id == selected.id)) {
             if (!!selected?.name && selected?.id !== undefined) {
                 setRecords(r => [...r, selected]);
@@ -84,10 +86,9 @@ export default function Dropdown({ value, includedValues = [undefined], selected
         if (selected?.name) {
             latestRecords = [...latestRecords.filter(s => s.id !== selected.id), selected];
         }
-        setRecords(latestRecords);
-        if (initilized) {
+        console.log(latestRecords);
+        setRecords(latestRecords.filter(Boolean));
 
-        }
         setInitilized(true);
         setSearching(false);
     }

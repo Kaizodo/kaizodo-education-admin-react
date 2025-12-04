@@ -1,16 +1,21 @@
-import Btn from '@/components/common/Btn'
-import { msg } from '@/lib/msg';
-import { UserOrderService } from '@/services/UserOrderService';
-import { useState } from 'react'
-import { LuDownload } from 'react-icons/lu'
+import Btn from "@/components/common/Btn";
+import { msg } from "@/lib/msg";
+import { PosService } from "@/services/PosService";
+import { useState } from "react";
+import { LuDownload } from "react-icons/lu";
 
-export default function DownloadInvoiceBtn({ internal_reference_number, title = 'Invoice', additional_data = {} }: { internal_reference_number: string, title?: string, additional_data?: any }) {
+type Props = {
+    title?: string,
+    organization_id: number,
+    internal_reference_number: string
+};
+export default function DownloadPoBtn({ organization_id, internal_reference_number, title = 'Download PO' }: Props) {
     const [downloading, setDownloading] = useState(false);
 
     const download = async () => {
         setDownloading(true);
         try {
-            var blob: any = await UserOrderService.invoice(internal_reference_number, additional_data);
+            var blob: any = await PosService.download({ internal_reference_number, organization_id });
             console.log(blob);
             if (!(blob instanceof Blob)) {
                 msg.error('Unable to export')

@@ -15,9 +15,13 @@ import NoRecords from '@/components/common/NoRecords';
 import Pagination from '@/components/common/Pagination';
 import { OrganizationService } from '@/services/OrganizationService';
 import { useNavigate } from 'react-router-dom';
-import { LuImage } from 'react-icons/lu';
+import { LuCopy, LuImage } from 'react-icons/lu';
 
 import SafeImage from '@/components/common/SafeImage';
+import { Modal } from '@/components/common/Modal';
+import CloneOrganizationDialog from './components/CloneOrganizationDialog';
+import { StoreService } from '@/services/StoreService';
+import { Badge } from '@/components/ui/badge';
 
 
 export default function StoreListing() {
@@ -44,13 +48,23 @@ export default function StoreListing() {
 
     const search = async () => {
         setSearching(true);
-        var r = await OrganizationService.search(filters);
+        var r = await StoreService.search(filters);
         if (r.success) {
             setPaginated(r.data);
         }
         setSearching(false);
     }
 
+    const clone = (record: any) => {
+        const modal_id = Modal.show({
+            title: 'Clone Organization',
+            subtitle: 'Create copy of organization',
+            content: () => <CloneOrganizationDialog organization={record} onSuccess={() => {
+                search();
+                Modal.close(modal_id);
+            }} />
+        })
+    }
 
 
 
@@ -62,6 +76,7 @@ export default function StoreListing() {
         }
 
     }, [filters]);
+
 
 
 
@@ -93,6 +108,11 @@ export default function StoreListing() {
                                 <TableHead></TableHead>
                                 <TableHead>Store</TableHead>
                                 <TableHead>Domain</TableHead>
+                                <TableHead>Country</TableHead>
+                                <TableHead>State</TableHead>
+                                <TableHead>City</TableHead>
+                                <TableHead>Locality</TableHead>
+                                <TableHead>Pincode</TableHead>
                                 <TableHead className='text-end'>Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -105,11 +125,28 @@ export default function StoreListing() {
                                             <LuImage className='text-3xl text-gray-400' />
                                         </SafeImage>
                                     </TableCell>
-                                    <TableCell>{record.name}</TableCell>
+                                    <TableCell>
+                                        <div className='flex flex-col justify-start items-start'>
+                                            <span className='font-medium text-sm'>{record.name}</span>
+                                            <span className='text-xs text-gray-600 mb-1'>{record.nickname}</span>
+                                            {!record.organization_id && <Badge>Main Organization</Badge>}
+                                        </div>
+                                    </TableCell>
                                     <TableCell>{record.domain}</TableCell>
+                                    <TableCell>{record.country_name}</TableCell>
+                                    <TableCell>
+                                        <div className='flex flex-col gap-1'>
+                                            <span className='text-sm'>{record.state_name}</span>
+                                            <span className='text-xs text-gray-600'>GST:- {record.gst_number}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>{record.city_name}</TableCell>
+                                    <TableCell>{record.locality_name}</TableCell>
+                                    <TableCell>{record.pincode}</TableCell>
                                     <TableCell>
 
                                         <div className="flex gap-2 justify-end">
+                                            <Btn variant={'outline'} size={'sm'} onClick={() => clone(record)}><LuCopy /> Clone</Btn>
                                             <Btn variant="outline" size="sm" onClick={() => navigate('/stores/update/' + record.id)}>
                                                 <Edit className="h-4 w-4" />
                                             </Btn>

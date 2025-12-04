@@ -115,8 +115,8 @@ export class UserOrderService {
         });
     }
 
-    public static async invoice(internal_reference_number: string) {
-        return Api('orders/invoice', { internal_reference_number }, {
+    public static async invoice(internal_reference_number: string, additional_data: any = {}) {
+        return Api('orders/invoice', { internal_reference_number, ...additional_data }, {
             responseType: 'blob',
             download: true
         });

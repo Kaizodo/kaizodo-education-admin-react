@@ -20,6 +20,7 @@ import SuggestDistrict from '@/components/common/suggest/SuggestDistrict';
 import SuggestLocality from '@/components/common/suggest/SuggestLocality';
 import { useDefaultParams } from '@/hooks/use-default-params';
 import { useNavigate } from 'react-router-dom';
+import SuggestStore from '@/components/common/suggest/SuggestStore';
 
 
 
@@ -83,13 +84,15 @@ export default function StoreOnboardingStepBasicInformation({ onCreate, organiza
                 contentClassName="px-6 pb-6 flex flex-col gap-6"
 
             >
+                <SuggestStore value={form.organization_id} onChange={setValue('organization_id')} placeholder='Select a parent company'>Parent Company</SuggestStore>
                 <TextField value={form.name} onChange={setValue('name')} placeholder="Enter store name">Store Name *</TextField>
+                <TextField value={form.nickname} onChange={setValue('nickname')} placeholder="Enter nick name" subtitle='Nickname will be used to search'>Nick Name*</TextField>
                 <TextField value={form.code} onChange={setValue('code')} placeholder="e.g., ST001">Unique Code/ID *</TextField>
 
 
                 <div className='grid grid-cols-2 gap-3'>
 
-                    <DateTimeField value={form.dof} onChange={setValue('dof')} placeholder='Select founding date' mode='date'>Date of Establishment / Founding</DateTimeField>
+                    <DateTimeField value={form.dof} onChange={setValue('dof')} outputFormat='Y-MM-DD' previewFormat='DD MMM, Y' placeholder='Select founding date' mode='date'>Date of Establishment / Founding</DateTimeField>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="logo">Small Size Logo</Label>
@@ -149,8 +152,10 @@ export default function StoreOnboardingStepBasicInformation({ onCreate, organiza
                     <SuggestDistrict value={form.district_id} selected={{ id: form.district_id, name: form.district_name }} onChange={setValue('district_id')} />
                     <SuggestLocality value={form.locality_id} selected={{ id: form.locality_id, name: form.locality_name }} onChange={setValue('locality_id')} />
                     <TextField value={form.pincode} onChange={setValue('pincode')} placeholder='Enter pincode'>Pincode</TextField>
+
                 </div>
                 <TextField value={form.address} onChange={setValue('address')} placeholder="Enter complete address" multiline>Address</TextField>
+
                 <TextField value={form.map_location} onChange={setValue('map_location')} placeholder="Maps URL or coordinates" multiline>Google Maps Location</TextField>
 
             </AppCard>

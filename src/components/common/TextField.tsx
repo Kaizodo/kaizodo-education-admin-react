@@ -2,6 +2,8 @@ import { Label } from '../ui/label'
 import { Input } from '../ui/input'
 import { Textarea } from '../ui/textarea'
 import { ReactNode } from 'react'
+import { cn } from '@/lib/utils'
+import { ClassValue } from 'clsx'
 
 type Props = {
     value?: any,
@@ -16,10 +18,12 @@ type Props = {
     multiline?: boolean,
     rows?: number,
     max?: number,
-    min?: number
+    min?: number,
+    no_arrows?: boolean,
+    className?: ClassValue
 }
 
-export default function TextField({ children, subtitle, rows, value, onChange, onEnter, disabled, placeholder, multiline, autofocus, type, max, min }: Props) {
+export default function TextField({ children, subtitle, rows, value, no_arrows = false, className, onChange, onEnter, disabled, placeholder, multiline, autofocus, type, max, min }: Props) {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault()
@@ -53,6 +57,10 @@ export default function TextField({ children, subtitle, rows, value, onChange, o
                         onChange={(e) => onChange(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder={placeholder}
+                        className={cn(
+                            no_arrows && "[&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [appearance:textfield]",
+                            className
+                        )}
                     />
                 )}
                 {!!subtitle && <span className='text-[10px] text-blue-500'>{subtitle}</span>}

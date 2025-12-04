@@ -9,7 +9,22 @@ export const routes: RouteType[] = [
     {
         path: '', element: AuthLayout, children: [
             { path: 'quick-sell', element: lazy(() => import('@/pages/orders/QuickSell')) },
-            { path: 'quick-pos', element: lazy(() => import('@/pages/orders/QuickPos')) },
+            {
+                path: 'pos', element: lazy(() => import('@/pages/pos/PosLayout')), children: [
+                    { path: '', element: lazy(() => import('@/pages/pos/PosHome')) },
+                    { path: 'drafts', element: lazy(() => import('@/pages/pos/PosDrafts')) },
+                    { path: 'invoices', element: lazy(() => import('@/pages/pos/PosInvoices')) },
+                    { path: 'proforma-invoices', element: lazy(() => import('@/pages/pos/PosProformas')) },
+                    { path: 'customers', element: lazy(() => import('@/pages/pos/PosHome')) },
+                    { path: 'session', element: lazy(() => import('@/pages/pos/PosSession')) },
+                    { path: 'job-cards', element: lazy(() => import('@/pages/pos/PosJobCards')) },
+                    { path: 'purchase', element: lazy(() => import('@/pages/pos/PosPurchase')) },
+                    { path: 'purchase-orders', element: lazy(() => import('@/pages/pos/PosPurchaseOrders')) },
+                    { path: 'purchase-orders/:internal_reference_number', element: lazy(() => import('@/pages/pos/PosPurchaseOrderReceive')) },
+                    { path: ':internal_reference_number', element: lazy(() => import('@/pages/pos/PosHome')) },
+                ]
+            },
+
             {
                 element: lazy(() => import('@/components/app/MainLayout')), children: [
                     { path: 'page-not-found', element: lazy(() => import('@/pages/errors/NotFound404')) },
@@ -22,11 +37,12 @@ export const routes: RouteType[] = [
                     { path: 'subscription-topups', element: lazy(() => import('@/pages/subscription-topups/SubscriptionTopups')) },
                     { path: 'comparison-points', element: lazy(() => import('@/pages/comparison-points/ComparisonPoints')) },
                     { path: 'clients', element: lazy(() => import('@/pages/clients/ClientListing')) },
+                    { path: 'vendors', element: lazy(() => import('@/pages/vendors/OrganizationVendorListing')) },
                     { path: 'referral-schemes', element: lazy(() => import('@/pages/referral-scheme/ReferralScheme')) },
                     { path: 'referral-earnings', element: lazy(() => import('@/pages/referral-earning-withdrawal/ReferralEarningWithdrawal')) },
                     { path: 'marketing-material', element: lazy(() => import('@/pages/marketing-material/MarketingMaterial')) },
                     { path: 'faqs', element: lazy(() => import('@/pages/faqs/Faqs')) },
-                    { path: 'pos', element: lazy(() => import('@/pages/pos/PosHome')) },
+
 
                     { path: 'projects', element: lazy(() => import('@/pages/projects/ProjectListing')) },
                     { path: 'projects/:internal_reference_number', element: lazy(() => import('@/pages/projects/ProjectDetail')) },

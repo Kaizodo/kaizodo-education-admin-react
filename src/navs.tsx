@@ -28,7 +28,7 @@ import { VscFeedback } from "react-icons/vsc";
 import { RxIdCard } from "react-icons/rx";
 import { RiDiscountPercentLine } from "react-icons/ri";
 import { FaTimeline } from "react-icons/fa6";
-import { PiNetwork, PiProjectorScreenChart } from "react-icons/pi";
+import { PiCashRegister, PiNetwork, PiProjectorScreenChart } from "react-icons/pi";
 
 export const navs: NavType[] = [
     { route: '', label: 'Dashboard', icon: LuHouse },
@@ -59,7 +59,16 @@ export const navs: NavType[] = [
         icon: LiaUserTieSolid,
         route: 'clients'
     },
-
+    {
+        label: 'POS',
+        icon: PiCashRegister,
+        route: 'pos'
+    },
+    {
+        label: 'Vendors',
+        icon: PiCashRegister,
+        route: 'vendors'
+    },
     {
         label: 'Projects & Steps',
         icon: PiNetwork,

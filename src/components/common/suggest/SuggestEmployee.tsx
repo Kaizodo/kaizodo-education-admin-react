@@ -11,7 +11,7 @@ import { Modal } from '../Modal';
 import { EmployeeService } from '@/services/EmployeeService';
 
 
-const LazyUserEditorDialog = lazy(() => import('@/pages/users/components/UserEditorDialog'));
+const LazyUserEditorDialog = lazy(() => import('@/pages/employees/components/EmployeeEditorDialog'));
 
 
 export default function SuggestEmployee({ children,
@@ -44,10 +44,9 @@ export default function SuggestEmployee({ children,
                 return (<Btn size={'xs'} onClick={() => {
                     const modal_id = Modal.show({
                         title: 'Add Driver',
-                        maxWidth: 700,
+                        maxWidth: 500,
                         content: () => <Suspense fallback={<CenterLoading className='h-[200px] relative' />}>
                             <LazyUserEditorDialog
-                                modifier='employee'
                                 onSuccess={(data) => {
                                     updateOptions(data);
                                     Modal.close(modal_id);

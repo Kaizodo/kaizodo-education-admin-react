@@ -30,7 +30,10 @@ export default function SuggestStore({
                     keyword,
                     page,
                 });
-                return response.success ? response.data.records : [];
+                return response.success ? response.data.records.map(r => ({
+                    ...r,
+                    description: r.nickname
+                })) : [];
             }}
         >
             {children}

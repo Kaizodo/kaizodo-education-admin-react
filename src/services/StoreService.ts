@@ -159,5 +159,8 @@ export class StoreService {
     public static async deleteUser(form: any) {
         return Api(`${this.endpoint}/delete-user`, form);
     }
+    public static async clone(form: any) {
+        return Api(`${this.endpoint}/clone`, form);
+    }
 
 }

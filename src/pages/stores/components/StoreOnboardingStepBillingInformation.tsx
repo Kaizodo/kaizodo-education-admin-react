@@ -18,7 +18,7 @@ import { msg } from '@/lib/msg';
 
 
 
-export default function StoreOnboardingStepBillingInformation({ organization_id, onLoading, registerCallback }: OrganizationOnboardingStepsProps & {
+export default function StoreOnboardingStepBillingInformation({ organization_id, $state, onLoading, registerCallback }: OrganizationOnboardingStepsProps & {
     organization_id?: number
 }) {
     const { context } = useGlobalContext();
@@ -92,6 +92,8 @@ export default function StoreOnboardingStepBillingInformation({ organization_id,
         }
     };
 
+
+
     useEffect(() => {
         if (!uploadingRef.current) {
             const nextIndex = uploads.findIndex(u => !u.uploaded && !u.uploading);
@@ -101,16 +103,22 @@ export default function StoreOnboardingStepBillingInformation({ organization_id,
 
     const load = async () => {
         setLoading(true);
-        var r = await StoreService.loadDocuments(Number(id));
+        var r = await StoreService.loadBillingDetails(Number(id));
         if (r.success) {
-            setForm(r.data);
-            setLoading(false);
+            setForm((f: any) => ({ ...f, ...r.data }));
+            var r = await StoreService.loadDocuments(Number(id));
+            if (r.success) {
+                setForm((f: any) => ({ ...f, ...r.data }));
+                setLoading(false);
+            }
         }
+
     }
 
     useEffect(() => {
         registerCallback?.(async () => {
-            return true;
+            var r = await StoreService.saveBillingDetails({ ...$state, ...form });
+            return r.success;
         })
     });
 

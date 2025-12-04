@@ -10,6 +10,19 @@ export enum Panel {
     Admin = 3
 }
 
+export type PosSession = {
+    id: number;
+    is_closed: number;
+    user_id: number;
+    organization_id: number;
+    opening_balance: number;
+    opening_remarks: string;
+    closing_balance: number;
+    closing_remarks: string;
+    total_sale: string;
+    created_at: string;
+    updated_at: string;
+};
 
 export type ContextOrganiation = {
     id?: number,
@@ -27,6 +40,7 @@ export const defaultContextOrganization = {
 
 export interface GlobalContextType {
     user: User,
+    pos_session?: PosSession,
     settings: any,
     organization: ContextOrganiation
 }

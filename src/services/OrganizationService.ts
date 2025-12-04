@@ -5,6 +5,19 @@ export class OrganizationService {
 
     private static endpoint = 'organization';
 
+
+    public static async quickCreate(form: {
+        gst_number: number
+    }) {
+        return Api(`${this.endpoint}/quick-create`, form);
+    }
+
+    public static async gstSearch(form: {
+        gst_number: number
+    }) {
+        return Api(`${this.endpoint}/gst-search`, form);
+    }
+
     public static async search(form: {
         page: number,
         keyword: string
