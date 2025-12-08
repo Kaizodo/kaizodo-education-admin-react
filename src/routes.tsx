@@ -14,14 +14,15 @@ export const routes: RouteType[] = [
                     { path: '', element: lazy(() => import('@/pages/pos/PosHome')) },
                     { path: 'drafts', element: lazy(() => import('@/pages/pos/PosDrafts')) },
                     { path: 'invoices', element: lazy(() => import('@/pages/pos/PosInvoices')) },
+                    { path: 'invoices/:internal_reference_number', element: lazy(() => import('@/pages/pos/PosInvoiceDetail')) },
                     { path: 'proforma-invoices', element: lazy(() => import('@/pages/pos/PosProformas')) },
-                    { path: 'customers', element: lazy(() => import('@/pages/pos/PosHome')) },
+                    { path: 'customers', element: lazy(() => import('@/pages/pos/PosCustomers')) },
                     { path: 'session', element: lazy(() => import('@/pages/pos/PosSession')) },
                     { path: 'job-cards', element: lazy(() => import('@/pages/pos/PosJobCards')) },
+                    { path: 'job-cards/:internal_reference_number', element: lazy(() => import('@/pages/pos/PosHome')) },
                     { path: 'purchase', element: lazy(() => import('@/pages/pos/PosPurchase')) },
                     { path: 'purchase-orders', element: lazy(() => import('@/pages/pos/PosPurchaseOrders')) },
                     { path: 'purchase-orders/:internal_reference_number', element: lazy(() => import('@/pages/pos/PosPurchaseOrderReceive')) },
-                    { path: ':internal_reference_number', element: lazy(() => import('@/pages/pos/PosHome')) },
                 ]
             },
 
@@ -128,7 +129,18 @@ export const routes: RouteType[] = [
                     { path: 'discount-plans', element: lazy(() => import('@/pages/product-management/pages/discount-plans/DiscountPlans')) },
                 ]
             },
-
+            {
+                path: 'exam-management', element: lazy(() => import('@/pages/exam-management/ExamLayout')), children: [
+                    { path: '', element: lazy(() => import('@/pages/exam-management/pages/dashboard/ProductDashboard')) },
+                    { path: 'exams', element: lazy(() => import('@/pages/exam-management/pages/exams/ExamListing')) },
+                    { path: 'exam-categories', element: lazy(() => import('@/pages/exam-management/pages/exam-categories/ExamCategoryListing')) },
+                    { path: 'exam-question-groups', element: lazy(() => import('@/pages/exam-management/pages/exam-question-groups/ExamQuestionGroupListing')) },
+                    { path: 'exam-question-groups/:id', element: lazy(() => import('@/pages/exam-management/pages/exam-question-groups/ExamQuestionGroupEditor')) },
+                    { path: 'subjects', element: lazy(() => import('@/pages/exam-management/pages/subjects/SubectListing')) },
+                    { path: 'chapters', element: lazy(() => import('@/pages/exam-management/pages/chapters/ChapterListing')) },
+                    { path: 'sections', element: lazy(() => import('@/pages/exam-management/pages/exam-sections/ExamSectionListing')) },
+                ]
+            },
             {
                 path: 'lead-management', element: lazy(() => import('@/pages/lead-management/LeadLayout')), children: [
                     { path: '', element: lazy(() => import('@/pages/lead-management/dashboard/LeadDashboard')) },

@@ -2,7 +2,6 @@ import axios, { ResponseType } from 'axios';
 import { AuthenticationService } from '@/services/AuthenticationService';
 import { Storage } from './storage';
 import { msg } from './msg';
-import { getMainDomain } from './utils';
 
 export type ApiResponseType = {
     success: boolean;
@@ -22,7 +21,7 @@ export const enum ApiResponseCode {
 }
 
 export const PRODUCTION_MODE = import.meta.env.MODE === 'production';
-export const ApiHost = PRODUCTION_MODE ? 'api.kaizodo-education.kaizodo.in' : 'localhost:8000';
+export const ApiHost = PRODUCTION_MODE ? 'api.prexms.com' : 'localhost:8000';
 
 export const getApiEndpoint = () => {
     return `${PRODUCTION_MODE ? 'https' : 'http'}://${ApiHost}/api/admin/`;
@@ -66,12 +65,11 @@ export async function Api(
         if (!/https?:\/\//.test(url)) {
             url = `${getApiEndpoint()}${url}`;
         }
-        const organization = getMainDomain();
 
         let headers: any = {
             'Accept': options.download ? 'application/octet-stream' : 'application/json',
             'Authorization': `Bearer ${token}`,
-            'organization': organization
+            'organization': window.location.hostname
         };
 
         if (!(body instanceof FormData) && typeof body === 'object') {

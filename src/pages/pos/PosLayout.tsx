@@ -1,11 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { User, FileText, Users, Clock, Save, } from 'lucide-react';
 import { LuArrowLeft, LuLoader, LuStore } from 'react-icons/lu';
 import CenterLoading from '@/components/common/CenterLoading';
 
-import { useForm } from '@/hooks/use-form';
 
-import moment from 'moment';
 
 import NoRecords from '@/components/common/NoRecords';
 import Btn from '@/components/common/Btn';
@@ -15,25 +13,16 @@ import { useGlobalContext } from '@/hooks/use-global-context';
 import { PiCashRegister } from 'react-icons/pi';
 import SessionManager from './components/SessionManager';
 import { PosService } from '@/services/PosService';
-import SuggestStore from '@/components/common/suggest/SuggestStore';
 import { Link, NavLink, Outlet } from 'react-router-dom';
-import { Storage } from '@/lib/storage';
 import { cn } from '@/lib/utils';
 import { MdAddTask, MdOutlineInventory } from 'react-icons/md';
-import { Organization } from '@/data/Organization';
+import OrganizationSwitch from '@/components/app/OrganizationSwitch';
 
 
 
 export default function PosLayout() {
-    const { context, setContext } = useGlobalContext();
-    const [form, setValue] = useForm<any>({
-        loaded: false,
-        country_id: undefined,
-        invoice_date: moment().format('Y-MM-DD'),
-        due_date: moment().format('Y-MM-DD'),
-        user_id: undefined,
-        products: []
-    });
+    const { context } = useGlobalContext();
+
     const [stats, setStats] = useState({
         last_internal_reference_number: '',
         total_draft: 0,
@@ -54,32 +43,24 @@ export default function PosLayout() {
             setLoading(true);
         }
         setStatsLoading(true);
-        var r = await PosService.dashboard({ organization_id: form.organization_id });
+        var r = await PosService.dashboard({ organization_id: context?.organization?.id });
         if (r.success) {
             setStats(r.data);
         }
-        setLoading(false);
+        if (mainLoading) {
+            setLoading(false);
+        }
+
         setStatsLoading(false);
     }
 
 
 
     useEffect(() => {
-        if (form.organization_id) {
-            Storage.set('organization_id', form.organization_id);
+        if (context.organization?.id) {
             loadStats();
         }
-    }, [form.organization_id])
-
-
-    useEffect(() => {
-        (async () => {
-            var organization_id = await Storage.get('organization_id');
-            if (organization_id) {
-                setValue('organization_id')(organization_id);
-            }
-        })()
-    }, [])
+    }, [context.organization])
 
 
 
@@ -96,7 +77,7 @@ export default function PosLayout() {
                         <Link to={'/'}>
                             <Btn variant={'outline'} size={'sm'}><LuArrowLeft /></Btn>
                         </Link>
-                        <SuggestStore children='' value={form.organization_id} onChange={setValue('organization_id')} onSelect={(o: Organization) => setContext(c => ({ ...c, organization: o }))} />
+                        <OrganizationSwitch />
                     </div>
 
                     <nav className="flex-1 flex justify-center h-full">
@@ -111,6 +92,7 @@ export default function PosLayout() {
                             { route: '/pos/session', icon: Clock, label: "Today's Closing", count: null, color: 'text-red-300' },
 
                         ].map(item => (<NavLink
+                            key={item.route}
                             to={item.route}
                             end={item.route === '/pos'}
                             className={({ isActive }) => cn(
@@ -141,11 +123,11 @@ export default function PosLayout() {
                 </div>
             </header>
 
-            {!!form.organization_id && !loading && <div className="w-full flex-1">
-                <Outlet context={{ organization_id: form.organization_id, loadStats }} />
+            {!!context.organization?.id && !loading && <div className="w-full flex-1">
+                <Outlet context={{ organization_id: context.organization.id, loadStats }} />
             </div>}
-            {!form.organization_id && <NoRecords icon={LuStore} title='Select a store' subtitle='To continue billing please select a store' action={<SuggestStore children='' value={form.organization_id} onChange={setValue('organization_id')} />} />}
-            {!!form.organization_id && loading && <CenterLoading className="relative h-screen" />}
+            {!context?.organization?.id && <NoRecords icon={LuStore} title='Select a store' subtitle='To continue billing please select a store' action={<OrganizationSwitch />} />}
+            {!!context?.organization?.id && loading && <CenterLoading className="relative h-screen" />}
         </div>
     );
 };

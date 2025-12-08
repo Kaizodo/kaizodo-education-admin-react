@@ -16,7 +16,11 @@ export default function SafeImage({
 
     // handle empty src
     useEffect(() => {
-        if (!src) setErr(true);
+        if (!src) {
+            setErr(true);
+        } else {
+            setErr(false);
+        }
     }, [src]);
 
     if (err)

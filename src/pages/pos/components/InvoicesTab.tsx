@@ -7,19 +7,31 @@ import { Table, TableHead, TableBody, TableRow, TableCell, TableHeader } from "@
 import { getDefaultPaginated, PaginationType } from "@/data/pagination";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useForm } from "@/hooks/use-form";
+import { useGlobalContext } from "@/hooks/use-global-context";
 import { msg } from "@/lib/msg";
 import { formatDate, formatTime } from "@/lib/utils";
-import DownloadInvoiceBtn from "@/pages/invoices/components/DownloadInvoiceBtn";
+import { downloadInvoice } from "@/pages/invoices/components/DownloadInvoiceBtn";
 import { PosService } from "@/services/PosService";
 import { useEffect, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
-export default function InvoicesTab({ organization_id, is_draft, is_proforma, has_project }: { organization_id: number, is_draft: boolean, is_proforma: boolean, has_project: boolean }) {
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { LuArrowRight, LuDownload } from "react-icons/lu";
+
+export default function InvoicesTab({ is_draft, is_proforma, has_project }: { is_draft: boolean, is_proforma: boolean, has_project: boolean }) {
+    const { context } = useGlobalContext();
     const { loadStats } = useOutletContext<{ loadStats: (mainLoading: boolean) => void }>();
     const [searching, setSearching] = useState(true);
     const [paginated, setPaginatedValue, setPaginated] = useForm<PaginationType<any>>(getDefaultPaginated());
 
     const [filters, setFilter] = useForm<any>({
-        organization_id,
+        debounce: true,
         is_proforma,
         is_draft,
         has_project,
@@ -31,7 +43,7 @@ export default function InvoicesTab({ organization_id, is_draft, is_proforma, ha
 
     const search = async () => {
         setSearching(true);
-        var r = await PosService.searchInvoices(filters);
+        var r = await PosService.searchInvoices({ ...filters, organization_id: context.organization.id });
         if (r.success) {
             setPaginated(r.data);
         }
@@ -49,8 +61,10 @@ export default function InvoicesTab({ organization_id, is_draft, is_proforma, ha
 
 
     useEffect(() => {
-        setFilter('is_draft', 'is_proforma', 'organization_id', 'has_project')(is_draft, is_proforma, organization_id, has_project);
-    }, [is_draft, is_proforma, organization_id, has_project])
+        if (context.organization?.id) {
+            setFilter('is_draft', 'is_proforma', 'has_project')(is_draft, is_proforma, has_project);
+        }
+    }, [is_draft, is_proforma, has_project, context.organization?.id])
 
     return (
         <div className="bg-white rounded-lg border">
@@ -91,7 +105,7 @@ export default function InvoicesTab({ organization_id, is_draft, is_proforma, ha
                             <TableCell className="text-right">{record.currency_symbol}{record.amount}</TableCell>
                             <TableCell className="text-center">{record.items_count}</TableCell>
                             <TableCell className="text-center">{record.total_quantity}</TableCell>
-                            <TableCell className="text-center">
+                            <TableCell className="">
                                 <div className="flex flex-col gap-1">
                                     <span className="text-sm">{formatDate(record.created_at)}</span>
                                     <span className="text-xs text-gray-500">{formatTime(record.created_at)}</span>
@@ -120,13 +134,43 @@ export default function InvoicesTab({ organization_id, is_draft, is_proforma, ha
                                             })
                                         }}>Delete</Btn>
                                     </>}
-                                    {!is_draft && !has_project && <DownloadInvoiceBtn additional_data={{
-                                        label: 'dc1'
-                                    }} title="Delivery Challan Copy(1)" internal_reference_number={record.internal_reference_number} />}
-                                    {!is_draft && !has_project && <DownloadInvoiceBtn additional_data={{
-                                        label: 'dc'
-                                    }} title="Delivery Challan" internal_reference_number={record.internal_reference_number} />}
-                                    {!is_draft && !has_project && <DownloadInvoiceBtn internal_reference_number={record.internal_reference_number} />}
+
+                                    {!is_draft && !has_project && <DropdownMenu>
+                                        <DropdownMenuTrigger>
+                                            <Btn variant="outline" size={'sm'}>Downloads <LuDownload /></Btn>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent className="w-56" align="start">
+                                            <DropdownMenuLabel>Available Downloads</DropdownMenuLabel>
+                                            <DropdownMenuGroup>
+                                                <DropdownMenuItem onClick={async () => {
+                                                    var msg_id = msg.loading('Downloading...');
+                                                    await downloadInvoice({ internal_reference_number: record.internal_reference_number });
+                                                    msg.dismiss(msg_id);
+                                                }} className="justify-between">Download Invoice <LuDownload /></DropdownMenuItem>
+                                                <DropdownMenuItem onClick={async () => {
+                                                    var msg_id = msg.loading('Downloading...');
+                                                    await downloadInvoice({
+                                                        internal_reference_number: record.internal_reference_number, additional_data: {
+                                                            label: 'dc'
+                                                        }
+                                                    });
+                                                    msg.dismiss(msg_id);
+                                                }} className="justify-between">Delivery Challan <LuDownload /></DropdownMenuItem>
+                                                <DropdownMenuItem onClick={async () => {
+                                                    var msg_id = msg.loading('Downloading...');
+                                                    await downloadInvoice({
+                                                        internal_reference_number: record.internal_reference_number, additional_data: {
+                                                            label: 'dc1'
+                                                        }
+                                                    });
+                                                    msg.dismiss(msg_id);
+                                                }} className="justify-between">Delivery Challan Copy(1)<LuDownload /></DropdownMenuItem>
+                                            </DropdownMenuGroup>
+
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>}
+                                    {(!is_draft && !has_project) && <Link to={'/pos/invoices/' + record.internal_reference_number}><Btn size="sm" variant="outline">View Details <LuArrowRight /></Btn></Link>}
+
                                 </div>
                             </TableCell>
                         </TableRow>)}

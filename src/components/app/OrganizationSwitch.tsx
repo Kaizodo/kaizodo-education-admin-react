@@ -3,23 +3,33 @@ import Dropdown from "../common/Dropdown";
 import { StoreService } from "@/services/StoreService";
 import { Storage } from "@/lib/storage";
 import { useGlobalContext } from "@/hooks/use-global-context";
-import { defaultContextOrganization } from "@/data/global";
+import { ContextOrganiation, defaultContextOrganization } from "@/data/global";
 
 
 
 
 export default function OrganizationSwitch() {
-    const { setContext } = useGlobalContext();
-    const [value, setValue] = useState();
+    const { context, setContext } = useGlobalContext();
+    const [value, setValue] = useState<number | undefined>(0);
 
     useEffect(() => {
-        Storage.set('organization_id', value);
-        if (!value) {
+        if (value !== 0 && value === undefined) {
+            Storage.set('organization', undefined);
             setContext(c => ({ ...c, organization: defaultContextOrganization }))
         }
     }, [value])
 
 
+    useEffect(() => {
+
+        (async () => {
+            var o = await Storage.get<ContextOrganiation>('organization');
+            if (o) {
+                setValue(o.id);
+                setContext(c => ({ ...c, organization: o ? o : defaultContextOrganization }))
+            }
+        })()
+    }, []);
 
 
     return (
@@ -29,7 +39,11 @@ export default function OrganizationSwitch() {
             onChange={setValue}
             placeholder={'Switch Organization'}
             includedValues={[]}
-            onSelect={(organization) => setContext(c => ({ ...c, organization }))}
+            selected={context.organization as any}
+            onSelect={async (organization) => {
+                await Storage.set<ContextOrganiation>('organization', organization);
+                setContext(c => ({ ...c, organization }));
+            }}
             getOptions={async (filters) => {
                 var r = await StoreService.search({
                     ...filters,
@@ -38,7 +52,10 @@ export default function OrganizationSwitch() {
                 return [{
                     id: undefined,
                     name: 'All Stores'
-                }, ...r.data.records];
+                }, ...r.data.records.map((rx: any) => ({
+                    ...rx,
+                    description: rx.nickname
+                }))];
             }}
 
         >

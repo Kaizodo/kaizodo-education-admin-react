@@ -1,3 +1,4 @@
+import { useOrganizationId } from '@/hooks/use-organization-id';
 import Dropdown from '../Dropdown';
 import { SuggestProp } from './Suggest';
 import { ExamService } from '@/services/ExamService';
@@ -5,14 +6,15 @@ import { ExamService } from '@/services/ExamService';
 
 
 export default function SuggestExam({
-    children = 'Exam / Assessment',
+    children = 'Exam',
     value,
     onChange,
     selected,
-    placeholder = 'Select assessment',
+    placeholder = 'Select exam',
     onSelect,
     includedValues,
 }: SuggestProp) {
+    const organization_id = useOrganizationId();
     return (
         <Dropdown
             searchable={true}
@@ -26,6 +28,7 @@ export default function SuggestExam({
                 const r = await ExamService.search({
                     page,
                     keyword,
+                    organization_id
                 });
                 return r.data.records;
             }}

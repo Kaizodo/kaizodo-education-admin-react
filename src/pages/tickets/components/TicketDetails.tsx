@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { Download, ChevronDown } from 'lucide-react';
-import { getTicketCategoryTypeName, TicketPriorityArray, TicketState, TicketStatusArray, TicketStatusEnum } from '@/data/Ticket';
+import { getTicketCategoryActionName, TicketPriorityArray, TicketState, TicketStatusArray } from '@/data/Ticket';
 import TicketDetailSkeleton from './TicketDetailSkeleton';
 import { TicketService } from '@/services/TicketService';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
@@ -48,7 +48,7 @@ const ConversationDetails = ({ state }: { state: TicketState }) => {
             <div className="flex space-x-2 mb-6">
                 <Tag bgColor={status?.bg} textColor={status?.fg}>{status?.name}</Tag>
                 <Tag bgColor={priority?.bg} textColor={priority?.fg}>{priority?.name}</Tag>
-                <Tag bgColor="bg-blue-100" textColor="text-blue-700">{getTicketCategoryTypeName(state.ticket.ticket_category_type)}</Tag>
+                <Tag bgColor="bg-blue-100" textColor="text-blue-700">{getTicketCategoryActionName(state.ticket.ticket_category_type)}</Tag>
             </div>
 
             {/* Message Bubble */}

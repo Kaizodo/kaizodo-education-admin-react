@@ -28,7 +28,7 @@ import { VscFeedback } from "react-icons/vsc";
 import { RxIdCard } from "react-icons/rx";
 import { RiDiscountPercentLine } from "react-icons/ri";
 import { FaTimeline } from "react-icons/fa6";
-import { PiCashRegister, PiNetwork, PiProjectorScreenChart } from "react-icons/pi";
+import { PiCashRegister, PiExam, PiNetwork, PiProjectorScreenChart } from "react-icons/pi";
 
 export const navs: NavType[] = [
     { route: '', label: 'Dashboard', icon: LuHouse },
@@ -112,6 +112,7 @@ export const navs: NavType[] = [
         route: 'orders'
     },
     { label: 'Product Management', icon: LuCrown, route: 'product-management' },
+    { label: 'Exam Management', icon: PiExam, route: 'exam-management' },
     { label: 'Lead Management', icon: TbUserStar, route: 'lead-management' },
     { label: 'Website Management', icon: FaGlobeAsia, route: 'website-management' },
     { label: 'Data Management', icon: BsDatabaseGear, route: 'data-management' },

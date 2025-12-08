@@ -24,7 +24,7 @@ import SuggestStore from '@/components/common/suggest/SuggestStore';
 
 
 
-export default function StoreOnboardingStepBasicInformation({ onCreate, organization_id, onLoading, registerCallback, $state }: OrganizationOnboardingStepsProps & {
+export default function StoreOnboardingStepBasicInformation({ onUpdate, organization_id, onLoading, registerCallback, $state }: OrganizationOnboardingStepsProps & {
     onCreate: (id: number) => void,
     organization_id?: number
 }) {
@@ -39,6 +39,7 @@ export default function StoreOnboardingStepBasicInformation({ onCreate, organiza
         setLoading(true);
         var r = await StoreService.loadBasicDetails(Number(id));
         if (r.success) {
+            onUpdate?.(r.data);
             setForm(r.data);
             setLoading(false);
         }
@@ -70,6 +71,10 @@ export default function StoreOnboardingStepBasicInformation({ onCreate, organiza
         }
     }, []);
 
+
+    useEffect(() => {
+        onUpdate?.(form);
+    }, [form])
 
     if (loading) {
         return <CenterLoading className="relative h-[400px]" />

@@ -1,6 +1,6 @@
 import Btn from '@/components/common/Btn';
 import CenterLoading from '@/components/common/CenterLoading';
-import { TicketCategoryTypeArray, TicketCategoryTypeEnum, TicketCategoryTypeOptions } from '@/data/Ticket';
+import { TicketCategoryActionArray, TicketCategoryActionEnum } from '@/data/Ticket';
 import { msg } from '@/lib/msg';
 import { TeamService } from '@/services/TeamService';
 import { useState, useEffect } from 'react';
@@ -15,7 +15,7 @@ export default function TeamTicketSupportEditor({ id }: { id: number }) {
         id: number,
         name: string,
         description: string,
-        ticket_category_type: TicketCategoryTypeEnum
+        ticket_category_type: TicketCategoryActionEnum
     }[]>([]);
 
     const load = async () => {
@@ -105,11 +105,11 @@ export default function TeamTicketSupportEditor({ id }: { id: number }) {
                     Ticket Category Type (Multi-Select)
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {TicketCategoryTypeOptions.map((type) => (
+                    {TicketCategoryActionArray.map((type) => (
                         <button
-                            key={type.type}
+                            key={type.id}
                             type="button"
-                            onClick={() => toggleType(type.type)}
+                            onClick={() => toggleType(type.id)}
                             className={`
                     p-4 rounded-xl text-center transition-all duration-200 shadow-md h-24
                     flex items-center justify-center font-medium border
@@ -137,7 +137,7 @@ export default function TeamTicketSupportEditor({ id }: { id: number }) {
                 ) : (
                     <>
                         {selectedType.map(ticket_category_type => {
-                            var found = TicketCategoryTypeArray.find(t => t.id == ticket_category_type);
+                            var found = TicketCategoryActionArray.find(t => t.id == ticket_category_type);
                             if (!found) {
                                 return null;
                             }

@@ -3,10 +3,7 @@ import Api from '@/lib/api';
 export class ClientService {
     private static endpoint = 'client';
 
-    public static async search(form: {
-        page: number,
-        keyword: string
-    }) {
+    public static async search(form: any) {
         return Api(`${this.endpoint}/search`, form);
     }
 

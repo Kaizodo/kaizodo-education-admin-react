@@ -12,7 +12,7 @@ export const ProductNavs: NavItem[] = [
     { icon: AiOutlineProduct, label: 'Products', section: 'main', route: 'products' },
     { icon: RiDiscountPercentLine, label: 'Discount & Coupons', section: 'main', route: 'discount-plans' },
     { icon: MdOutlineCategory, label: 'Categories', section: 'management', route: 'product-categories' },
-    { icon: TbPercentage, label: 'Tax Codes', section: 'management', route: 'tax-codes' }, ,
+    { icon: TbPercentage, label: 'Tax Codes', section: 'management', route: 'tax-codes' },
     { icon: LuBadgeIndianRupee, label: 'Tax Components', section: 'management', route: 'tax-components' },
     { icon: PiScales, label: 'Units', section: 'management', route: 'units' },
     { icon: IoExtensionPuzzleOutline, label: 'Features & Attributes', section: 'management', route: 'features' },

@@ -18,9 +18,10 @@ import moment from 'moment';
 import { SeoBtn } from '@/components/common/seo-manager/SeoManager';
 import { Seo } from '@/data/Seo';
 import { ArticleType } from '@/data/article';
+import { useOrganizationId } from '@/hooks/use-organization-id';
 
 export default function ArticleListing({ article_type }: { article_type: ArticleType }) {
-
+    const organization_id = useOrganizationId();
     var title = `Blogs`;
     var subtitle = `Manage blogs from this section`;
     var name = `Blog`;
@@ -41,7 +42,7 @@ export default function ArticleListing({ article_type }: { article_type: Article
     const setFilter = useSetValue(setFilters);
     const search = async () => {
         setSearching(true);
-        var r = await ArticleService.search({ ...filters, article_type });
+        var r = await ArticleService.search({ ...filters, article_type, organization_id });
         if (r.success) {
             setReponse(r.data);
             setSearching(false);
@@ -78,7 +79,7 @@ export default function ArticleListing({ article_type }: { article_type: Article
 
     useEffect(() => {
         search();
-    }, [filters])
+    }, [filters, organization_id])
     return (
         <Card>
             <CardHeader>

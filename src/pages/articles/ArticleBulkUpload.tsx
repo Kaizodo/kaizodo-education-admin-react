@@ -11,8 +11,8 @@ import SafeHtml from '@/components/common/SafeHtml';
 import { BsPatchQuestion } from 'react-icons/bs';
 import { Modal } from '@/components/common/Modal';
 import ArticleBulkUploadInstructions from './components/ArticleBulkUploadInstructions';
-import { pickImageUrl } from './components/SimpleMediaPicker';
 import { ArticleService } from '@/services/ArticleService';
+import { pickImageUrl } from '@/components/common/SimpleMediaPicker';
 
 
 
@@ -240,6 +240,7 @@ const BlockComponent = ({ block, onUpdate }: { block: ContentBlock, onUpdate: (k
 export default function ArticleBulkUpload() {
     const [blocks, setBlocks] = useState<ContentBlock[]>([])
     const [form, setValue] = useForm({
+        content: '',
         article_type: ArticleType.Blog
     });
 

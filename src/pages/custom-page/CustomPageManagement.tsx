@@ -16,10 +16,12 @@ import NoRecords from '@/components/common/NoRecords';
 import Pagination from '@/components/common/Pagination';
 import { Modal } from '@/components/common/Modal';
 import { CustomPageService } from '@/services/CustomPageService';
+import { useOrganizationId } from '@/hooks/use-organization-id';
 
 const LazyEditorDalog = lazy(() => import('./components/CustomPageEditorDailog'));
 
 export default function CustomPageManagement() {
+    const organization_id = useOrganizationId();
     const [searching, setSearching] = useState(true);
     const [paginated, setPaginated] = useState<PaginationType<any>>(getDefaultPaginated());
     const [filters, setFilters] = useState<{
@@ -40,7 +42,7 @@ export default function CustomPageManagement() {
 
     const search = async () => {
         setSearching(true);
-        var r = await CustomPageService.search(filters);
+        var r = await CustomPageService.search({ ...filters, organization_id });
         if (r.success) {
             setPaginated(r.data);
         }
@@ -54,7 +56,7 @@ export default function CustomPageManagement() {
             search();
         }
 
-    }, [filters]);
+    }, [filters, organization_id]);
 
     const openEditor = async (id?: number) => {
         const modal_id = Modal.show({

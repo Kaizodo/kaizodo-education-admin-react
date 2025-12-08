@@ -12,7 +12,7 @@ import { LuMessageCircleX } from 'react-icons/lu';
 import Pagination from '@/components/common/Pagination';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import moment from 'moment';
-import { getTicketCategoryTypeName, TicketPriorityArray, TicketStatusArray } from '@/data/Ticket';
+import { getTicketCategoryActionName, TicketPriorityArray, TicketStatusArray } from '@/data/Ticket';
 
 
 
@@ -38,7 +38,7 @@ const TicketListItem = ({ ticket, internal_reference_number }: { ticket: any, in
                         </Avatar>
                         <div className='flex flex-col'>
                             <p className="font-medium text-gray-900 text-sm">{ticket?.user?.first_name}  {ticket?.user?.last_name}</p>
-                            <span className='text-xs text-red-500'>{getTicketCategoryTypeName(ticket.ticket_category_type)}</span>
+                            <span className='text-xs text-red-500'>{getTicketCategoryActionName(ticket.ticket_category_type)}</span>
                         </div>
                     </div>
                     <span className="text-xs text-gray-500">{moment(ticket.updated_at ?? ticket.created_at).format('LT')}</span>

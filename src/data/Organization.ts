@@ -14,7 +14,9 @@ export const enum StoreOnboardingStep {
     ProductCategories = 3,
     Employees = 4,
     Domain = 5,
-    ConfirmSubmition = 6
+    Settings = 6,
+    Navigation = 7,
+    ConfirmSubmition = 8
 }
 
 

@@ -53,7 +53,6 @@ export default function Orders() {
     useEffect(() => {
         (async () => {
             var synkedTab = await Storage.get<string>('orders_tab');
-            console.log(synkedTab);
             if (synkedTab && navs.find(t => t.id == synkedTab)) {
                 setTab(synkedTab);
             }

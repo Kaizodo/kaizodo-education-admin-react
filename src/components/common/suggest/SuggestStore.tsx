@@ -30,7 +30,7 @@ export default function SuggestStore({
                     keyword,
                     page,
                 });
-                return response.success ? response.data.records.map(r => ({
+                return response.success ? response.data.records.map((r: any) => ({
                     ...r,
                     description: r.nickname
                 })) : [];

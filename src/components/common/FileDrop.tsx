@@ -59,7 +59,7 @@ export default function FileDrop({ children, onChange, accept = [], className, t
             {!!children && <Label className="mb-2">{children}</Label>}
             <div
                 className={cn(
-                    `bg-white border-4 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors flex items-center justify-center ${highlight ? "border-blue-500 bg-blue-50" : "border-gray-300"}`,
+                    `bg-white border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors flex items-center justify-center ${highlight ? "border-blue-500 bg-blue-50" : "border-gray-300"}`,
                     className,
                     size == 'sm' && 'p-2'
                 )}
@@ -83,8 +83,8 @@ export default function FileDrop({ children, onChange, accept = [], className, t
                 />
                 <label htmlFor="file-upload" className="flex flex-col items-center justify-center text-center cursor-pointer">
                     <LucideUploadCloud className="w-12 h-12 text-indigo-500 mb-3" />
-                    <p className="text-lg font-semibold text-gray-700">
-                        {title} Drag & Drop your Image or Video here
+                    <p className="text-sm font-semibold text-gray-700">
+                        {title ?? "Drag & Drop your Image or Video here"}
                     </p>
                     <p className="text-sm text-gray-500 mt-1">
                         or <span className="text-indigo-600 font-medium hover:text-indigo-700">click to browse</span>.

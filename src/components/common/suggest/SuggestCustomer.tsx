@@ -2,16 +2,12 @@ import Dropdown from '../Dropdown';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { AvatarImage } from '@radix-ui/react-avatar';
 import { nameLetter } from '@/lib/utils';
-import { FaEnvelope, FaPhone, FaPlus } from 'react-icons/fa6';
+import { FaEnvelope, FaPhone } from 'react-icons/fa6';
 import { SuggestProp } from './Suggest';
-import { lazy, Suspense } from 'react';
-import Btn from '../Btn';
-import CenterLoading from '../CenterLoading';
-import { Modal } from '../Modal';
+
 import { EmployeeService } from '@/services/EmployeeService';
 
 
-const LazyUserEditorDialog = lazy(() => import('@/pages/users/components/UserEditorDialog'));
 
 
 export default function SuggestCustomer({ children,
@@ -40,26 +36,7 @@ export default function SuggestCustomer({ children,
             placeholder={placeholder}
             includedValues={includedValues}
             onSelect={onSelect}
-            footer={(updateOptions) => {
-                return (<Btn size={'xs'} onClick={() => {
-                    const modal_id = Modal.show({
-                        title: 'Add Driver',
-                        maxWidth: 700,
-                        content: () => <Suspense fallback={<CenterLoading className='h-[200px] relative' />}>
-                            <LazyUserEditorDialog
-                                modifier='employee'
-                                onSuccess={(data) => {
-                                    updateOptions(data);
-                                    Modal.close(modal_id);
 
-                                }}
-                                onCancel={() => {
-                                    Modal.close(modal_id);
-                                }} />
-                        </Suspense>
-                    })
-                }}><FaPlus />Add New</Btn>);
-            }}
             getOptions={async ({ page, keyword }) => {
                 var r = await EmployeeService.search({
                     page,

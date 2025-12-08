@@ -17,13 +17,16 @@ type ModalProps = {
     maxWidth?: string | number,
     onClose?: (data?: any) => void,
     header?: false | ReactNode | ComponentType<any>,
-    content: ReactNode | ComponentType<any>
+    content: ReactNode | ComponentType<any>,
+    disabled?: boolean;
 };
 
 // Create context for modal instance
 interface ModalContextType {
     modal_id: string;
     update: (props: Partial<ModalProps>) => void;
+    disableModal: () => void;
+    enableModal: () => void;
 }
 
 const ModalContext = createContext<ModalContextType | null>(null);
@@ -128,7 +131,7 @@ const ModalContainer: React.FC = () => {
                 >
                     <div
                         className="absolute inset-0 bg-black opacity-50 transition-opacity duration-300 px-3 z-[51]"
-                        onClick={() => Modal.close(id)}
+                        onClick={() => !props.disabled && Modal.close(id)}
                     />
                     <div
                         style={{
@@ -137,7 +140,12 @@ const ModalContainer: React.FC = () => {
                         className={cn(`flex flex-col bg-primary-foreground rounded-lg shadow-lg w-full relative z-[52] transition-transform duration-300 ${visibleModals.includes(id) ? 'scale-100' : 'scale-95'}`)}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <ModalContext.Provider value={{ modal_id: id, update: (props) => Modal.update(id, props) }}>
+                        <ModalContext.Provider value={{
+                            modal_id: id,
+                            update: (props) => Modal.update(id, props),
+                            disableModal: () => Modal.update(id, { disabled: true }),
+                            enableModal: () => Modal.update(id, { disabled: false })
+                        }}>
                             {isValidElement(props.header) ? (
                                 props.header
                             ) : typeof props.header === 'function' ? (
@@ -151,7 +159,7 @@ const ModalContainer: React.FC = () => {
                                     <Btn
                                         type='button'
                                         variant={'ghost'}
-                                        onClick={() => Modal.close(id)}
+                                        onClick={() => !props.disabled && Modal.close(id)}
                                     ><FaTimes /></Btn>
                                 </div>
                             )}

@@ -26,21 +26,55 @@ function setByPath(obj: any, path: string | number | (string | number)[], value:
     // Removal handling
     if (typeof path === "string" && path.endsWith("-")) {
         const pathWithoutDash = path.slice(0, -1);
-        const base = pathWithoutDash.split("[")[0];
-        const inside = pathWithoutDash.split("[")[1]?.replace("]", "") || "";
+        const keys = normalizePath(pathWithoutDash);
+        if (keys.length < 1) return obj;
 
-        const selectors = inside.split(",").map(s => {
-            const [field, raw] = s.split(":");
-            const val = /^\d+$/.test(raw) ? Number(raw) : raw;
-            return { field, val };
-        });
+        const lastKey = keys.pop()!;
+        let current: any = obj;
 
-        const arr = obj[base];
-        if (Array.isArray(arr)) {
-            obj[base] = arr.filter(item =>
-                !selectors.every(sel => item?.[sel.field] === sel.val)
-            );
+        for (let i = 0; i < keys.length; i++) {
+            let key: any = keys[i];
+
+            if (typeof key === "string" && key.includes(":")) {
+                const [field, raw] = key.split(":");
+                const matchValue = /^\d+$/.test(raw) ? Number(raw) : raw;
+
+                if (!Array.isArray(current)) return obj;
+
+                const found = current.find((x: any) => x?.[field] === matchValue);
+                if (!found) return obj;
+                current = found;
+                continue;
+            }
+
+            if (current[key] === undefined || current[key] === null || typeof current[key] !== "object") {
+                return obj;
+            }
+            current = current[key];
         }
+
+        if (Array.isArray(current)) {
+            if (typeof lastKey === "number") {
+                if (lastKey >= 0 && lastKey < current.length) {
+                    current.splice(lastKey, 1);
+                }
+            } else if (typeof lastKey === "string" && lastKey.includes(":")) {
+                const selStr = lastKey.includes(",") ? lastKey.split(",").map((s: string) => s.trim()) : [lastKey];
+                const selectors = selStr.map((s: string) => {
+                    const [field, raw] = s.split(":");
+                    const val = /^\d+$/.test(raw!) ? Number(raw) : raw;
+                    return { field, val };
+                });
+
+                const filtered = current.filter((item: any) =>
+                    !selectors.every((sel: { field: string; val: any }) => item?.[sel.field] === sel.val)
+                );
+                current.splice(0, current.length, ...filtered);
+            }
+        } else if (typeof current === "object" && typeof lastKey === "string") {
+            delete current[lastKey];
+        }
+
         return obj;
     }
 
@@ -68,38 +102,48 @@ function setByPath(obj: any, path: string | number | (string | number)[], value:
             const arr = obj[base];
             if (!Array.isArray(arr)) return obj;
 
-            if (!updatePart) {
+            if (updatePart) {
+                const rules = updatePart.split("|").map(r => {
+                    const [k, rest] = r.split("=");
+                    const parts = rest.split(",");
+                    return {
+                        key: k,
+                        match: /^\d+$/.test(parts[0]) ? Number(parts[0]) : parts[0],
+                        unmatch: parts[1]
+                            ? (/^\d+$/.test(parts[1]) ? Number(parts[1]) : parts[1])
+                            : undefined
+                    };
+                });
+
+                arr.forEach(item => {
+                    const isMatch = selectors.every(sel => item?.[sel.field] === sel.val);
+                    rules.forEach(rule => {
+                        if (isMatch) {
+                            item[rule.key] = rule.match;
+                        } else if (rule.unmatch !== undefined) {
+                            item[rule.key] = rule.unmatch;
+                        }
+                    });
+                });
+
+                return obj;
+            } else {
+                // Handle get or whole object set/upsert
                 const found = arr.find(item =>
                     selectors.every(sel => item?.[sel.field] === sel.val)
                 );
-                if (found) return found;
-                return obj;
-            }
-
-            const rules = updatePart.split("|").map(r => {
-                const [k, rest] = r.split("=");
-                const parts = rest.split(",");
-                return {
-                    key: k,
-                    match: /^\d+$/.test(parts[0]) ? Number(parts[0]) : parts[0],
-                    unmatch: parts[1]
-                        ? (/^\d+$/.test(parts[1]) ? Number(parts[1]) : parts[1])
-                        : undefined
-                };
-            });
-
-            arr.forEach(item => {
-                const isMatch = selectors.every(sel => item?.[sel.field] === sel.val);
-                rules.forEach(rule => {
-                    if (isMatch) {
-                        item[rule.key] = rule.match;
-                    } else if (rule.unmatch !== undefined) {
-                        item[rule.key] = rule.unmatch;
+                if (value !== undefined) {
+                    if (found) {
+                        Object.assign(found, value);
+                    } else {
+                        arr.push(value);
                     }
-                });
-            });
-
-            return obj;
+                    return obj;
+                } else {
+                    if (found) return found;
+                    return obj;
+                }
+            }
         }
     }
 
@@ -118,9 +162,23 @@ function setByPath(obj: any, path: string | number | (string | number)[], value:
             if (!Array.isArray(current)) return obj; // no error
 
             const found = current.find((x: any) => x?.[field] === matchValue);
-            if (!found) return obj; // silent no-op
+            if (!found) {
+                if (isLast && value !== undefined) {
+                    current.push(value);
+                }
+                return obj;
+            }
             current = found;
-            continue;
+            if (isLast) {
+                if (value === undefined) {
+                    return current;
+                } else {
+                    Object.assign(current, value);
+                }
+                return obj;
+            } else {
+                continue;
+            }
         }
 
         if (isLast) {
@@ -136,7 +194,12 @@ function setByPath(obj: any, path: string | number | (string | number)[], value:
                 current[key] === null ||
                 typeof current[key] !== "object"
             ) {
-                current[key] = typeof keys[i + 1] === "number" ? [] : {};
+                const nextKey = keys[i + 1];
+                const isArrayNext = nextKey !== undefined && (
+                    typeof nextKey === "number" ||
+                    (typeof nextKey === "string" && nextKey.includes(":"))
+                );
+                current[key] = isArrayNext ? [] : {};
             }
             current = current[key];
         }
@@ -179,5 +242,6 @@ Update item: setValue('someArray[id:1].name')('new name') or bulk setValue('some
 Remove item: setValue('someArray[id:1,name:abcd something,otherkey:1]-')()
 Get item: setValue('someArray[id:1]')() (returns item, no-op if set)
 Nested set: setValue('obj.arr[0].prop')('value')
+Whole object upsert: setValue('someArray[id:1]')(newObj) merges if exists, pushes if not
 
 */

@@ -48,7 +48,6 @@ type Props = {
 };
 
 export default function Dropdown({ value, includedValues = [undefined], selected, showClearBtn = true, onChange, onSelect, children, placeholder, searchable = true, disabled, getOptions, footer }: Props) {
-    console.log(selected);
     const [open, setOpen] = useState(false)
     const [searching, setSearching] = useState(false);
     const [records, setRecords] = useState<DropdownItemType[]>([]);
@@ -64,7 +63,6 @@ export default function Dropdown({ value, includedValues = [undefined], selected
     }, [value]);
 
     useEffect(() => {
-        console.log(selected);
         if (selected && !records.find(r => r.id == selected.id)) {
             if (!!selected?.name && selected?.id !== undefined) {
                 setRecords(r => [...r, selected]);
@@ -83,11 +81,12 @@ export default function Dropdown({ value, includedValues = [undefined], selected
         }
         setSearching(true);
         var latestRecords = await getOptions({ keyword: keyword, page: 1, ids: ids });
-        if (selected?.name) {
-            latestRecords = [...latestRecords.filter(s => s.id !== selected.id), selected];
-        }
-        console.log(latestRecords);
-        setRecords(latestRecords.filter(Boolean));
+
+        setRecords(r => [
+            ...new Map(
+                [selected as DropdownItemType, ...r, ...latestRecords].filter(Boolean).map(i => [i.id, i])
+            ).values()
+        ]);
 
         setInitilized(true);
         setSearching(false);
@@ -151,9 +150,9 @@ export default function Dropdown({ value, includedValues = [undefined], selected
                                         <LuLoader className="animate-spin" />
                                     </div>
                                 </CommandItem>}
-                                {!searching && records.map((record) => (
+                                {!searching && records.map((record, index) => (
                                     <CommandItem
-                                        key={record.id}
+                                        key={record.id + '_' + index}
                                         value={`${record.id}`}
                                         onSelect={() => {
                                             if (onSelect) {

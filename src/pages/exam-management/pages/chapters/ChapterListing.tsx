@@ -1,0 +1,152 @@
+
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Edit, Trash2 } from 'lucide-react';
+import { getDefaultPaginated, PaginationType } from '@/data/pagination';
+import { useSetValue } from '@/hooks/use-set-value';
+import { useDebounce } from '@/hooks/use-debounce';
+import { msg } from '@/lib/msg';
+import CenterLoading from '@/components/common/CenterLoading';
+import AppPage from '@/components/app/AppPage';
+import Btn from '@/components/common/Btn';
+import { FaPlus } from 'react-icons/fa';
+import AppCard from '@/components/app/AppCard';
+import NoRecords from '@/components/common/NoRecords';
+import Pagination from '@/components/common/Pagination';
+import { Modal } from '@/components/common/Modal';
+import { ChapterService } from '@/services/ChapterService';
+import { Search } from '@/components/ui/search';
+import { formatDateTime } from '@/lib/utils';
+import { useOrganizationId } from '@/hooks/use-organization-id';
+
+const LazyEditorDialog = lazy(() => import('./components/ChapterEditorDialog'));
+
+export default function ChapterListing() {
+    const organization_id = useOrganizationId();
+    const [searching, setSearching] = useState(true);
+    const [paginated, setPaginated] = useState<PaginationType<any>>(getDefaultPaginated());
+    const [filters, setFilters] = useState<{
+        debounce?: boolean,
+        page: number,
+        keyword: string,
+    }>({
+        debounce: true,
+        page: 1,
+        keyword: '',
+    });
+
+    const setFilter = useSetValue(setFilters);
+
+    const debounceSearch = useDebounce(() => {
+        search();
+    }, 300, 1);
+
+    const search = async () => {
+        setSearching(true);
+        var r = await ChapterService.search({ ...filters, organization_id });
+        if (r.success) {
+            setPaginated(r.data);
+        }
+        setSearching(false);
+    }
+
+    useEffect(() => {
+        if (filters.debounce) {
+            debounceSearch();
+        } else {
+            search();
+        }
+
+    }, [filters, organization_id]);
+
+    const openEditor = async (id?: number) => {
+        const modal_id = Modal.show({
+            title: !id ? 'Add Chapter' : 'Update Chapter',
+            content: () => <Suspense fallback={<CenterLoading className='h-[400px] relative' />}>
+                <LazyEditorDialog id={id} onSuccess={() => {
+                    search();
+                    Modal.close(modal_id);
+                }} onCancel={() => {
+                    Modal.close(modal_id);
+                }} />
+            </Suspense>
+        });
+    }
+
+
+
+
+
+    return (
+        <AppPage
+            title='Chapters'
+            subtitle='Manage chapters to distinguish the questions'
+            actions={<div className='me-4'><Btn size={'sm'} onClick={() => openEditor()}><FaPlus />Add New</Btn></div>}
+            containerClassName="md:pt-0"
+        >
+            <AppCard contentClassName="p-0">
+
+                <div className='p-3'>
+                    <Search placeholder='Search by name...' value={filters.keyword} onChange={v => setFilter('keyword', 'debounce')(v.target.value, true)} />
+                </div>
+
+                <div className="overflow-x-auto">
+                    {searching && <CenterLoading className='h-[400px] relative' />}
+                    {!searching && <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Name</TableHead>
+                                <TableHead>Subject</TableHead>
+                                <TableHead>Description</TableHead>
+                                <TableHead>Last Updated</TableHead>
+                                <TableHead className='text-end'>Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {paginated.records.map((record) => (
+                                <TableRow key={record.id}>
+                                    <TableCell>{record.name}</TableCell>
+                                    <TableCell>{record.subject_name}</TableCell>
+                                    <TableCell>{record.description}</TableCell>
+                                    <TableCell>
+                                        <div className='flex flex-col'>
+                                            <span className='text-xs italic text-gray-500'>Created : {formatDateTime(record.created_at)}</span>
+                                            <span className='text-xs italic text-gray-500'>Last Update : {formatDateTime(record.updated_at ?? record.created_at)}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className='text-end'>
+                                        {record.organization_id == organization_id && <div className="flex gap-2 justify-end">
+                                            <Btn variant="outline" size="sm" onClick={() => openEditor(record.id)}>
+                                                <Edit className="h-4 w-4" />
+                                            </Btn>
+                                            <Btn onClick={() => {
+                                                msg.confirm('Delete ' + record.name, 'Are you sure you want to delete ' + record.name + '? this action cannot be undone.', {
+                                                    onConfirm: async () => {
+                                                        var r = await ChapterService.delete({ id: record.id, organization_id });
+                                                        if (r.success) {
+                                                            search();
+                                                        }
+                                                        return r.success;
+                                                    }
+                                                })
+                                            }} variant="outline" size="sm">
+                                                <Trash2 className="h-4 w-4" />
+                                            </Btn>
+                                        </div>}
+                                        {record.organization_id !== organization_id && <span className='text-xs italic text-gray-600'>No Actions</span>}
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>}
+                    {!searching && paginated.records.length == 0 && <NoRecords />}
+                    <div className='p-3'>
+                        <Pagination paginated={paginated} onChange={(page) => setFilter('page', 'debounce')(page, false)} />
+
+                    </div>
+                </div>
+            </AppCard>
+        </AppPage>
+    );
+};
+

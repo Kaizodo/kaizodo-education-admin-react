@@ -56,3 +56,22 @@ export const enum ExamTheme {
     ION = 0,
     NTA = 1
 }
+
+
+export const enum ExamType {
+    Free = 0,
+    AIR = 1,
+    Open = 2,
+    Quiz = 3
+}
+
+export const ExamTypeArray = [
+    { id: ExamType.Free, name: 'Free', description: 'Anyone can signup and attempt the exam without payment' },
+    { id: ExamType.AIR, name: 'AIR', description: 'ALL INDIA RANK, ranks will be calculated in this type of exam' },
+    { id: ExamType.Open, name: 'Open', description: 'Unranked exams and without slot booking exams' },
+    { id: ExamType.Quiz, name: 'Quiz', description: 'Quick testing with limited number of answering options.' },
+];
+
+export function getExamTypeName(id: ExamType) {
+    return ExamTypeArray.find(a => a.id === id) || null;
+}

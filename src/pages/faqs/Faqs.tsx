@@ -9,6 +9,7 @@ import { FaqService } from "@/services/FaqService";
 import { msg } from "@/lib/msg";
 import CenterLoading from "@/components/common/CenterLoading";
 import { useForm } from "@/hooks/use-form";
+import { useOrganizationId } from "@/hooks/use-organization-id";
 
 interface Faq {
     id: number;
@@ -99,6 +100,7 @@ function SortableItem({ feature, onRemove, onUpdate }: { feature: Faq; onRemove:
 }
 
 export default function Faqs() {
+    const organization_id = useOrganizationId();
     const [faqs, setFaqs] = useState<Faq[]>([]);
     const [value, setValue] = useState("");
     const [saving, setSaving] = useState(false);
@@ -106,7 +108,7 @@ export default function Faqs() {
 
     const save = async () => {
         setSaving(true);
-        var r = await FaqService.save({ faqs });
+        var r = await FaqService.save({ faqs, organization_id });
         if (r.success) {
             msg.success('Details saved');
         }
@@ -115,7 +117,7 @@ export default function Faqs() {
 
     const load = async () => {
         setLoading(true);
-        var r = await FaqService.load();
+        var r = await FaqService.load({ organization_id });
         if (r.success) {
             setFaqs(r.data);
         }
@@ -161,7 +163,7 @@ export default function Faqs() {
 
     useEffect(() => {
         load();
-    }, []);
+    }, [organization_id]);
 
 
 

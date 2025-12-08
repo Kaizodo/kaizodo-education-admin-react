@@ -10,7 +10,6 @@ import FileField from '@/components/common/FileField';
 import { useCropper } from '@/hooks/use-cropper';
 import { getImageObjectUrl } from '@/lib/utils';
 import { BannerService } from '@/services/BannerService';
-import SuggestBannerCategory from '@/components/common/suggest/SuggestBannerCategory';
 
 interface Props {
     id?: number,
@@ -68,22 +67,21 @@ export default function BannerEditorDialog({ id, onCancel, onSuccess }: Props) {
                     {!!form.image && <img src={form.image} onError={() => setValue('image')(null)} className='w-full border rounded-sm' />}
                 </div>
 
-                    <TextField value={form.name} onChange={setValue('name')} placeholder="Title">Title</TextField>
-                    <SuggestBannerCategory value={form.banner_category_id} onChange={setValue('banner_category_id')} selected={{ id: form.banner_category_id, name: form.bannner_category_name }}></SuggestBannerCategory>
-                    <TextField value={form.description} onChange={setValue('description')} multiline placeholder="Short description">Description</TextField>
-                    <TextField value={form.on_click_url} onChange={setValue('on_click_url')} placeholder="Enter Btn Url">Btn Click</TextField>
-                    <FileField onChange={async (files) => {
-                        if (files.length > 0) {
-                            const file = await openCropperFile(files[0], {
-                                aspectRatio: 3 / 2,
-                                format: 'file'
-                            });
-                            if (file instanceof File) {
-                                const image = await getImageObjectUrl(file);
-                                setValue('image_file', 'image')(file, image);
-                            }
+                <TextField value={form.name} onChange={setValue('name')} placeholder="Title">Title</TextField>
+                <TextField value={form.description} onChange={setValue('description')} multiline placeholder="Short description">Description</TextField>
+                <TextField value={form.on_click_url} onChange={setValue('on_click_url')} placeholder="Enter Btn Url">Btn Click</TextField>
+                <FileField onChange={async (files) => {
+                    if (files.length > 0) {
+                        const file = await openCropperFile(files[0], {
+                            aspectRatio: 3 / 2,
+                            format: 'file'
+                        });
+                        if (file instanceof File) {
+                            const image = await getImageObjectUrl(file);
+                            setValue('image_file', 'image')(file, image);
                         }
-                    }}>Featured Image</FileField>
+                    }
+                }}>Featured Image</FileField>
             </ModalBody>
             <ModalFooter>
                 <Btn onClick={save} loading={saving}>Save Details</Btn>

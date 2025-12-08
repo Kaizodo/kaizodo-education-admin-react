@@ -8,7 +8,8 @@ export class MediaManagerService {
         page?: number,
         per_page?: number,
         keyword?: string,
-        media_manager_category_id?: number
+        media_manager_category_id?: number,
+        category_name?: string
     }) {
         return Api(`${this.endpoint}/search`, form);
     }
@@ -29,8 +30,9 @@ export class MediaManagerService {
 
     public static async upload(form: {
         media: File,
+        category_name?: string,
         media_manager_category_id?: number
-    }, onUploadProgress: (progress: number) => void) {
+    }, onUploadProgress?: (progress: number) => void) {
         return Api(`${this.endpoint}/upload`, form, { onUploadProgress });
     }
 

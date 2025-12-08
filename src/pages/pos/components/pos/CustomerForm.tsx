@@ -7,6 +7,7 @@ import TextField from '@/components/common/TextField';
 import { ApiResponseType } from '@/lib/api';
 import { msg } from '@/lib/msg';
 import { ClientService } from '@/services/ClientService';
+import { useGlobalContext } from '@/hooks/use-global-context';
 
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export default function CustomerForm({ mobile, onSuccess, onCancel }: Props) {
+    const { context } = useGlobalContext();
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState<any>({ mobile });
     const setValue = useSetValue(setForm);
@@ -24,7 +26,7 @@ export default function CustomerForm({ mobile, onSuccess, onCancel }: Props) {
 
     const save = async () => {
         setSaving(true);
-        let r: ApiResponseType = await ClientService.createQuick(form)
+        let r: ApiResponseType = await ClientService.createQuick({ ...form, organization_id: context.organization?.id })
         if (r.success) {
             msg.success('Customer added successfuly!');
             onSuccess(r.data);

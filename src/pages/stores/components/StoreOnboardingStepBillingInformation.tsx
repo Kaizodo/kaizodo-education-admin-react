@@ -135,6 +135,9 @@ export default function StoreOnboardingStepBillingInformation({ organization_id,
     }, []);
 
 
+
+
+
     if (loading) {
         return <CenterLoading className="relative h-[400px]" />
     }

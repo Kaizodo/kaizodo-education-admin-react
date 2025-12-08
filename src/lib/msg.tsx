@@ -84,7 +84,7 @@ export class msg {
     return toast.dismiss(id);
   }
 
-  public static async loading(message: string = '', options?: ToastOptions) {
+  public static loading(message: string = '', options?: ToastOptions) {
     return toast.custom((t) => (
       <div
         className={`flex items-center gap-2 p-3 rounded-lg shadow bg-white ${t.visible ? 'animate-enter' : 'animate-leave'

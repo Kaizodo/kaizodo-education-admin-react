@@ -5,14 +5,9 @@ export class SubjectService {
     private static endpoint = 'subject';
 
 
-    public static async all() {
-        return Api(`${this.endpoint}/all`);
-    }
 
-    public static async search(form: {
-        page: number,
-        keyword: string
-    }) {
+
+    public static async search(form: any) {
         return Api(`${this.endpoint}/search`, form);
     }
 
@@ -24,17 +19,15 @@ export class SubjectService {
         return Api(`${this.endpoint}/update`, form);
     }
 
-    public static async detail(id: number) {
-        return Api(`${this.endpoint}/detail`, { id });
+    public static async detail(form: any) {
+        return Api(`${this.endpoint}/detail`, form);
     }
 
-    public static async delete(id: number) {
-        return Api(`${this.endpoint}/delete`, { id });
+    public static async delete(form: any) {
+        return Api(`${this.endpoint}/delete`, form);
     }
-    
-    public static async fetch(class_id: number){
-        return Api(`${this.endpoint}/fetch`,{class_id});
-    }
+
+
 
 
 }

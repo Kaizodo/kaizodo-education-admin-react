@@ -6,23 +6,24 @@ import { Modal } from '../Modal';
 import { FaPlus } from 'react-icons/fa6';
 import { SuggestProp } from './Suggest';
 import { ExamCategoryService } from '@/services/ExamCategoryService';
+import { useOrganizationId } from '@/hooks/use-organization-id';
 
-const LazyEditorDialog = lazy(() =>
-    import('@/pages/exam-category/components/ExamCategoryEditorDailog')
-);
+const LazyEditorDialog = lazy(() => import('@/pages/exam-management/pages/exam-categories/components/ExamCategoryEditorDialog'));
 
 export default function SuggestExamCategory({
     children = 'Exam Category',
     value,
     onChange,
     selected,
+    disabled,
     placeholder = 'Select Exam Category',
     onSelect,
     includedValues,
-    is_external,
-}: SuggestProp & { is_external?: 0 | 1 }) {
+}: SuggestProp) {
+    const organization_id = useOrganizationId();
     return (
         <Dropdown
+            disabled={disabled}
             searchable={true}
             value={value}
             onChange={onChange}
@@ -35,7 +36,7 @@ export default function SuggestExamCategory({
                     const res = await ExamCategoryService.search?.({
                         page,
                         keyword,
-                        is_external, 
+                        organization_id
                     });
                     if (res?.success && Array.isArray(res.data.records)) {
                         return res.data.records;

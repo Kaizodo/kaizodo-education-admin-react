@@ -7,7 +7,8 @@ export class CustomPageService {
 
     public static async search(form: {
         page: number,
-        keyword: string
+        keyword: string,
+        organization_id: number
     }) {
         return Api(`${this.endpoint}/search`, form);
     }

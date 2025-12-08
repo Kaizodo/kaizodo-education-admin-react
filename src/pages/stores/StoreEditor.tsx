@@ -3,7 +3,7 @@ import { StoreOnboardingStep } from '@/data/Organization';
 import { useSetValue } from '@/hooks/use-set-value';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef, useState } from 'react'
-import { LuArrowLeft, LuArrowRight, LuCircleCheck } from 'react-icons/lu';
+import { LuArrowLeft, LuArrowRight, LuCircleCheck, LuImage } from 'react-icons/lu';
 import { RiMenu3Fill } from 'react-icons/ri';
 import StoreOnboardingStepBasicInformation from './components/StoreOnboardingStepBasicInformation';
 import { useParams } from 'react-router-dom';
@@ -13,11 +13,15 @@ import StoreOnboardingStepEmployees from './components/StoreOnboardingStepEmploy
 import StoreOnboardingStepDomain from './components/StoreOnboardingStepDomain';
 import { useLocation } from 'react-router-dom';
 import StoreOnboardingStepConfirmation from './components/StoreOnboardingStepConfirmation';
+import StoreOnboardingStepSettings from './components/StoreOnboardingStepSettings';
+import StoreOnboardingStepNavigation from './components/StoreOnboardingStepNavigation';
+import SafeImage from '@/components/common/SafeImage';
 
 export type OrganizationOnboardingStepsProps = {
     $state: any,
     onLoading?: (loading: boolean) => void,
-    registerCallback?: (callback: () => Promise<boolean>) => void
+    registerCallback?: (callback: () => Promise<boolean>) => void,
+    onUpdate?: (data: any) => void
 }
 
 export default function StoreEditor() {
@@ -27,7 +31,7 @@ export default function StoreEditor() {
     const [state, setState] = useState<any>({});
     const setValue = useSetValue(setState);
     const loc = useLocation();
-
+    const [form, setForm] = useState<any>({});
     const [loading, setLoading] = useState(false);
     const steps = [
         "Basic Details",
@@ -35,6 +39,8 @@ export default function StoreEditor() {
         "Product Categories",
         "Employees",
         "Domain",
+        "Settings",
+        "Navigation",
         "Confirm Submition"
     ];
     const saveCallbackRef = useRef<() => Promise<boolean>>(async () => false);
@@ -74,6 +80,14 @@ export default function StoreEditor() {
             menuOpen ? "left-[0px] md:relative md:left-0 shadow-lg" : "left-[-250px] md:relative md:left-0 md:overflow-hidden md:w-[0px] md:border-none md:opacity-0"
         )
         }>
+            <div className='flex flex-col border-b  py-3 justify-center items-center'>
+
+                <SafeImage src={form.logo_short} className='w-10  flex justify-center items-center text-gray-600 text-3xl'>
+                    <LuImage />
+                </SafeImage>
+                <span className='font-medium text-center'>{form.name}</span>
+                <span className='text-xs italic text-center'>{form.nickname}</span>
+            </div>
             {steps.map((step, step_index) => <div
                 onClick={() => {
                     if (!id) {
@@ -117,11 +131,15 @@ export default function StoreEditor() {
                     registerCallback={fn => saveCallbackRef.current = fn}
                     onLoading={setLoading}
                     onCreate={i => setId(i)}
+                    onUpdate={setForm}
                 />}
                 {currentStep == StoreOnboardingStep.BillingInformation && <StoreOnboardingStepBillingInformation $state={state} registerCallback={fn => saveCallbackRef.current = fn} onLoading={setLoading} />}
                 {currentStep == StoreOnboardingStep.ProductCategories && <StoreOnboardingStepProductCategories $state={state} registerCallback={fn => saveCallbackRef.current = fn} onLoading={setLoading} />}
                 {currentStep == StoreOnboardingStep.Employees && <StoreOnboardingStepEmployees $state={state} registerCallback={fn => saveCallbackRef.current = fn} onLoading={setLoading} />}
                 {currentStep == StoreOnboardingStep.Domain && <StoreOnboardingStepDomain $state={state} registerCallback={fn => saveCallbackRef.current = fn} onLoading={setLoading} />}
+                {currentStep == StoreOnboardingStep.Settings && <StoreOnboardingStepSettings $state={state} registerCallback={fn => saveCallbackRef.current = fn} onLoading={setLoading} />}
+                {currentStep == StoreOnboardingStep.Navigation && <StoreOnboardingStepNavigation $state={state} registerCallback={fn => saveCallbackRef.current = fn} onLoading={setLoading} />}
+
                 {currentStep == StoreOnboardingStep.ConfirmSubmition && <StoreOnboardingStepConfirmation
                     $state={state}
                     registerCallback={fn => saveCallbackRef.current = fn}

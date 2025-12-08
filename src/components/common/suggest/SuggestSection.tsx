@@ -5,14 +5,15 @@ import { Modal } from '../Modal';
 import { lazy, Suspense } from 'react';
 import { SuggestProp } from './Suggest';
 import CenterLoading from '../CenterLoading';
-import { useGlobalContext } from '@/hooks/use-global-context';
-const LazySectionEditorDialog = lazy(() => import('@/pages/sections/components/SectionEditorDialog'));
+import { ExamSectionService } from '@/services/ExamSectionService';
+import { useOrganizationId } from '@/hooks/use-organization-id';
+const LazySectionEditorDialog = lazy(() => import('@/pages/exam-management/pages/exam-sections/components/ExamSectionEditorDialog'));
 
 
-export default function SuggestSection({ children = 'Section', class_id, value, selected, onChange, placeholder = 'Select section', onSelect, includedValues }: SuggestProp & {
-    class_id?: number
+export default function SuggestSection({ children = 'Section', exclude_ids, value, selected, onChange, placeholder = 'Select section', onSelect, includedValues }: SuggestProp & {
+    exclude_ids?: number[]
 }) {
-    const { context } = useGlobalContext();
+    const organization_id = useOrganizationId();
     return (
         <Dropdown
             searchable={false}
@@ -21,12 +22,14 @@ export default function SuggestSection({ children = 'Section', class_id, value, 
             onChange={onChange}
             placeholder={placeholder}
             includedValues={includedValues}
-            onSelect={onSelect} getOptions={async ({ keyword }) => {
-                var section_ids = context.sections.map(c => c.id);
-                if (class_id) {
-                    section_ids = context.class_sections.filter(cs => cs.class_id == class_id).map(cs => cs.section_id);
-                }
-                return context.sections.filter(c => c.name.toLowerCase().includes(keyword.toLowerCase()) && section_ids.includes(c.id));
+            onSelect={onSelect} getOptions={async ({ keyword, page }) => {
+                const r = await ExamSectionService.search({
+                    keyword,
+                    page,
+                    organization_id,
+                    exclude_ids
+                });
+                return r.data.records;
             }}
             footer={(updateOptions) => {
                 return (<Btn size={'xs'} onClick={() => {

@@ -57,9 +57,7 @@ export default function ProductBasicInformation({ state, setStateValue }: Common
                 </>}
                 <TextField value={form.code} onChange={setValue('code')} placeholder="Enter product code" >Product Code</TextField>
                 {form.product_type === ProductType.Goods && <>
-                    <TextField value={form.sku} onChange={setValue('sku')} placeholder="Enter sku ">SKU (Stock Keeping Unit)</TextField>
-                    <TextField value={form.barcode} onChange={setValue('barcode')} placeholder="Enter barcode" >Barcode</TextField>
-                    <TextField value={form.ean} onChange={setValue('ean')} placeholder="Enter ean">EAN (Article Number)</TextField>
+                    <TextField value={form.ean} onChange={setValue('ean')} placeholder="Enter ean"> (Article Number)</TextField>
                 </>}
                 <SuggestUnit value={form.unit_id} onChange={setValue('unit_id')} selected={{ id: form.unit_id, name: form.unit_name }} />
 
@@ -69,9 +67,18 @@ export default function ProductBasicInformation({ state, setStateValue }: Common
 
                 <div className="grid grid-cols-4 gap-3">
                     <Radio value={form.reduce_stock} onChange={setValue('reduce_stock')} options={YesNoArray} >Reduce Stock?</Radio>
-                    {!!form.reduce_stock && <TextField value={form.quantity} onChange={setValue('quantity')} placeholder="Enter stock quantity" type="number">Stock Quantity</TextField>}
-                    {!!form.reduce_stock && <TextField value={form.stock_alert_quantity} onChange={setValue('stock_alert_quantity')} placeholder="Enter stock alert" type="number">Alert on quantity</TextField>}
+                    {!!form.reduce_stock && <>
+                        <TextField value={form.stock_alert_quantity} onChange={setValue('stock_alert_quantity')} placeholder="Enter stock alert" type="number">Alert on quantity</TextField>
+                    </>}
                 </div>
+                <div className="grid grid-cols-4 gap-3">
+                    <Radio value={form.has_quantity_label} onChange={setValue('has_quantity_label')} options={YesNoArray} >Ask question for quantity ?</Radio>
+                    {!!form.has_quantity_label && <>
+                        <TextField value={form.quantity_question} onChange={setValue('quantity_question')} placeholder="Enter question for add to cart">Quantity Question</TextField>
+                        <TextField value={form.quantity_label} onChange={setValue('quantity_label')} placeholder="Enter label for quantity">Quantity Label</TextField>
+                    </>}
+                </div>
+
 
                 <div className="grid grid-cols-4 gap-3">
                     <Radio value={form.limit_quantity} onChange={setValue('limit_quantity')} options={YesNoArray} >Limit order quantity ?</Radio>

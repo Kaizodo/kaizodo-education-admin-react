@@ -15,8 +15,8 @@ const LoginForm = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState({
-    username: "admin.education@kaizodo.com",
-    password: "ktpl@education"
+    username: "",
+    password: ""
   });
   const setValue = useSetValue(setForm);
   const navigate = useNavigate();

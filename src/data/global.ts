@@ -28,14 +28,18 @@ export type ContextOrganiation = {
     id?: number,
     name: string,
     logo_full: string,
-    logo_short: string
+    logo_short: string,
+    organization_id: number,
+    nickname: string
 }
 
 export const defaultContextOrganization = {
     id: undefined,
     name: '',
     logo_full: '',
-    logo_short: ''
+    logo_short: '',
+    organization_id: 0,
+    nickname: ''
 }
 
 export interface GlobalContextType {

@@ -18,6 +18,7 @@ import { getImageObjectUrl, strToSlug } from '@/lib/utils';
 import { SeoBtn } from '@/components/common/seo-manager/SeoManager';
 import { Seo } from '@/data/Seo';
 import { ArticleType } from '@/data/article';
+import { useOrganizationId } from '@/hooks/use-organization-id';
 
 
 interface Props {
@@ -28,6 +29,7 @@ interface Props {
 }
 
 export default function ArticleEditorDialog({ id, article_type, onCancel, onSuccess }: Props) {
+    const organization_id = useOrganizationId();
     var title = `Blogs`;
     var subtitle = `Manage blogs from this section`;
     var name = `Blog`;
@@ -68,9 +70,9 @@ export default function ArticleEditorDialog({ id, article_type, onCancel, onSucc
         setSaving(true);
         var r: ApiResponseType;
         if (id) {
-            r = await ArticleService.update({ ...form, article_type });
+            r = await ArticleService.update({ ...form, article_type, organization_id });
         } else {
-            r = await ArticleService.create({ ...form, article_type });
+            r = await ArticleService.create({ ...form, article_type, organization_id });
         }
 
         if (r.success) {

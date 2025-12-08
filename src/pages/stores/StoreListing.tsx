@@ -2,18 +2,16 @@
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Edit, Trash2 } from 'lucide-react';
+import { Search, Edit } from 'lucide-react';
 import { getDefaultPaginated, PaginationType } from '@/data/pagination';
 import { useSetValue } from '@/hooks/use-set-value';
 import { useDebounce } from '@/hooks/use-debounce';
-import { msg } from '@/lib/msg';
 import CenterLoading from '@/components/common/CenterLoading';
 import AppPage from '@/components/app/AppPage';
 import Btn from '@/components/common/Btn';
 import { FaPlus } from 'react-icons/fa';
 import NoRecords from '@/components/common/NoRecords';
 import Pagination from '@/components/common/Pagination';
-import { OrganizationService } from '@/services/OrganizationService';
 import { useNavigate } from 'react-router-dom';
 import { LuCopy, LuImage } from 'react-icons/lu';
 
@@ -150,19 +148,7 @@ export default function StoreListing() {
                                             <Btn variant="outline" size="sm" onClick={() => navigate('/stores/update/' + record.id)}>
                                                 <Edit className="h-4 w-4" />
                                             </Btn>
-                                            <Btn onClick={() => {
-                                                msg.confirm('Delete ' + record.name, 'Are you sure you want to delete ' + record.name + '? this action cannot be undone.', {
-                                                    onConfirm: async () => {
-                                                        var r = await OrganizationService.delete(record.id);
-                                                        if (r.success) {
-                                                            search();
-                                                        }
-                                                        return r.success;
-                                                    }
-                                                })
-                                            }} variant="outline" size="sm">
-                                                <Trash2 className="h-4 w-4" />
-                                            </Btn>
+
                                         </div>
                                     </TableCell>
                                 </TableRow>

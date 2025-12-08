@@ -14,6 +14,7 @@ import { useCropper } from '@/hooks/use-cropper';
 import { CustomPageService } from '@/services/CustomPageService';
 import Radio from '@/components/common/Radio';
 import { YesNoArray } from '@/data/Common';
+import { useOrganizationId } from '@/hooks/use-organization-id';
 
 
 interface Props {
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export default function CustomPageEditorDailog({ id, onSuccess, onCancel }: Props) {
+    const organization_id = useOrganizationId();
     const [saving, setSaving] = useState(false);
     const [loading, setLoading] = useState(true);
     const [form, setForm] = useState<any>({});
@@ -47,9 +49,9 @@ export default function CustomPageEditorDailog({ id, onSuccess, onCancel }: Prop
         setSaving(true);
         let r: ApiResponseType;
         if (id) {
-            r = await CustomPageService.update(form);
+            r = await CustomPageService.update({ ...form, organization_id });
         } else {
-            r = await CustomPageService.create(form);
+            r = await CustomPageService.create({ ...form, organization_id });
         }
 
         if (r.success) {

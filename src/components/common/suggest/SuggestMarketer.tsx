@@ -12,7 +12,6 @@ import { MarketerService } from '@/services/MarketerService';
 import { RiDiscountPercentLine } from 'react-icons/ri';
 
 
-const LazyUserEditorDialog = lazy(() => import('@/pages/users/components/UserEditorDialog'));
 
 
 export default function SuggestMarketer({ children = 'Marketer',
@@ -37,26 +36,7 @@ export default function SuggestMarketer({ children = 'Marketer',
             placeholder={placeholder}
             includedValues={includedValues}
             onSelect={onSelect}
-            footer={(updateOptions) => {
-                return (<Btn size={'xs'} onClick={() => {
-                    const modal_id = Modal.show({
-                        title: 'Add Driver',
-                        maxWidth: 700,
-                        content: () => <Suspense fallback={<CenterLoading className='h-[200px] relative' />}>
-                            <LazyUserEditorDialog
-                                modifier='employee'
-                                onSuccess={(data) => {
-                                    updateOptions(data);
-                                    Modal.close(modal_id);
 
-                                }}
-                                onCancel={() => {
-                                    Modal.close(modal_id);
-                                }} />
-                        </Suspense>
-                    })
-                }}><FaPlus />Add New</Btn>);
-            }}
             getOptions={async ({ page, keyword }) => {
                 var r = await MarketerService.search({
                     page,

@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { LuArrowLeft } from 'react-icons/lu';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { RiCollapseHorizontalLine } from 'react-icons/ri';
+import { IconType } from 'react-icons/lib';
 
 export interface NavItem {
     route_root?: string;
-    icon: React.ElementType;
+    icon: IconType;
     label: string;
     route?: string;
     count?: number;

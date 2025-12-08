@@ -49,6 +49,6 @@ function containsWords(text, words) {
 }
 
 const folderPath = './src'; // Target folder
-const wordsToSearch = ['pickMultipleUsers']; // Words to find
+const wordsToSearch = ["SimpleMediaPicker"]; // Words to find
 
 searchFilesForWords(folderPath, wordsToSearch);

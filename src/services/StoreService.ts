@@ -50,6 +50,21 @@ export class StoreService {
         return Api(`${this.endpoint}/load-domain-details`, { id });
     }
 
+
+    public static async saveSettings(form: any) {
+        return Api(`${this.endpoint}/save-settings`, form);
+    }
+    public static async loadSettings(id: number) {
+        return Api(`${this.endpoint}/load-settings`, { id });
+    }
+
+    public static async saveNavigation(form: any) {
+        return Api(`${this.endpoint}/save-navigation`, form);
+    }
+    public static async loadNavigation(id: number) {
+        return Api(`${this.endpoint}/load-navigation`, { id });
+    }
+
     public static async uploadDocument(form: {
         id: number,
         file: File

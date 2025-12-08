@@ -30,6 +30,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 import { ProjectService } from '@/services/ProjectService';
+import Btn from '@/components/common/Btn';
 
 
 
@@ -87,6 +88,11 @@ export default function PosJobCards() {
         var r = await PosService.searchInvoices(filters);
         if (r.success) {
             setPaginated(r.data);
+            if (r.data.records.length > 0) {
+                load(r.data.records[0]);
+            } else {
+                setActiveInvoice({});
+            }
         }
         setSearching(false);
 
@@ -105,7 +111,15 @@ export default function PosJobCards() {
         setLoading(false);
 
     }
-
+    const startProject = async (project_id: number) => {
+        var r = await ProjectService.startProjectDeployment({
+            project_id
+        });
+        if (r.success) {
+            setActiveInvoiceValue(`project_metas[project_id:${project_id}].project.is_ready_deployment`)(1);
+        }
+        return r.success;
+    }
 
     const completePhaseStep = async (project_id: number, phase_id: number, phase_step_id: number) => {
 
@@ -253,7 +267,8 @@ export default function PosJobCards() {
             {!!activeInvoice?.invoice_id && !loading && <div className="flex-1 flex overflow-hidden relative">
 
                 <div className="flex-1 overflow-x-auto overflow-y-hidden bg-slate-100 p-6">
-                    <div className="h-full flex gap-6 min-w-max">
+                    <div className="h-full flex gap-6 min-w-max flex-wrap items-start">
+                        {activeInvoice.project_metas.length == 0 && <NoRecords className="w-full" title='No Job Cards' subtitle='Order does not have any job cards' />}
                         {activeInvoice.project_metas.map((meta: any) => {
                             var item = activeInvoice.products.find((p: any) => p.id == meta.project.product_price_id);
                             if (!item) {
@@ -261,9 +276,13 @@ export default function PosJobCards() {
                             }
                             var is_completed = meta.progress === 100;
                             return (
-                                <div key={item.id} className={"w-80 flex-shrink-0 flex flex-col max-h-full"}>
+                                <div key={item.id} className={"w-80   flex flex-col relative"}>
+                                    {!meta.project.is_ready_deployment && <div className='absolute w-full h-full bg-black bg-opacity-55 z-50 rounded-lg flex flex-col justify-center items-center'>
+                                        <span className='text-white mb-3 flex'>Haven't started yet</span>
+                                        <Btn size={'sm'} variant={'outline'} asyncClick={async () => await startProject(meta.project.id)}>Start Job</Btn>
+                                    </div>}
+                                    <div className={` p-3 rounded-t-xl border-t relative border-l border-r  ${is_completed ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-slate-200 text-slate-800'}`}>
 
-                                    <div className={` p-3 rounded-t-xl border-t border-l border-r  ${is_completed ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-slate-200 text-slate-800'}`}>
                                         <div className="flex justify-between items-start mb-2">
                                             <h3 className="font-bold text-lg leading-tight">{item.name}</h3>
                                             <Badge>{meta.project.quantity}</Badge>
@@ -414,7 +433,7 @@ export default function PosJobCards() {
                             {/* Sidebar Footer Actions */}
                             <div className="p-4 border-t border-slate-200 bg-slate-50 space-y-2">
 
-                                <Link to={'/pos/' + activeInvoice.internal_reference_number}>
+                                <Link to={'/pos/job-cards/' + activeInvoice.internal_reference_number}>
                                     <button className="w-full py-2.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 font-medium text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 transition-colors">
                                         Update Or Collect Payment <LuArrowRight />
                                     </button>

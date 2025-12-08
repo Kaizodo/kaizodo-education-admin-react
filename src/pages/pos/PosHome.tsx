@@ -27,7 +27,6 @@ import { PosService } from '@/services/PosService';
 import { msg } from '@/lib/msg';
 import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Storage } from '@/lib/storage';
 
 
 interface Customer {
@@ -61,7 +60,7 @@ interface Product {
 
 
 export default function PosHome() {
-    const { organization_id, loadStats } = useOutletContext<{ organization_id: number, loadStats: (mainLoading: boolean) => void }>()
+    const { loadStats } = useOutletContext<{ loadStats: (mainLoading: boolean) => void }>()
     const navigate = useNavigate();
     const { internal_reference_number } = useParams<{ internal_reference_number: string }>();
     const { context } = useGlobalContext();
@@ -71,6 +70,9 @@ export default function PosHome() {
         invoice_date: moment().format('Y-MM-DD'),
         due_date: moment().format('Y-MM-DD'),
         user_id: undefined,
+        discount_plan: {
+            discount_plan_applications: []
+        },
         products: []
     });
 
@@ -80,12 +82,24 @@ export default function PosHome() {
 
     const loadInvoice = async () => {
         if (!internal_reference_number) {
+            setForm({
+                ...form,
+                loaded: true,
+                country_id: undefined,
+                invoice_date: moment().format('Y-MM-DD'),
+                due_date: moment().format('Y-MM-DD'),
+                user_id: undefined,
+                products: []
+            });
+            return;
+        }
+        if (!context.organization.id) {
             return;
         }
         setLoading(true);
         var r = await PosService.detail({
             internal_reference_number,
-            organization_id: organization_id
+            organization_id: context.organization.id
         });
         if (r.success) {
             setForm(r.data);
@@ -101,20 +115,24 @@ export default function PosHome() {
     var calculated = calculateOrder(form);
 
 
+
+
+
     useEffect(() => {
-        if (form.organization_id) {
-            Storage.set('organization_id', form.organization_id);
+        if (context.organization.id && internal_reference_number) {
+            loadInvoice();
         }
-    }, [form.organization_id])
 
-
-    useEffect(() => {
-        (async () => {
-            if (organization_id) {
-                setValue('organization_id')(organization_id);
-                loadInvoice();
-            }
-        })()
+        if (!internal_reference_number) {
+            setForm({
+                loaded: true,
+                country_id: undefined,
+                invoice_date: moment().format('Y-MM-DD'),
+                due_date: moment().format('Y-MM-DD'),
+                user_id: undefined,
+                products: []
+            });
+        }
     }, [internal_reference_number])
 
 
@@ -142,7 +160,7 @@ export default function PosHome() {
 
                 const search = async () => {
                     setSearching(true);
-                    var r = await ClientService.search(filters);
+                    var r = await ClientService.search({ ...filters, organization_id: context.organization?.id });
                     if (r.success) {
                         setPaginated(r.data);
                         setSearching(false);
@@ -399,6 +417,7 @@ export default function PosHome() {
                 valid_only={true}
                 load_applications={true}
                 value={form.discount_plan_id}
+                selected={form.discount_plan}
                 onChange={(v) => {
                     if (!v) {
                         setValue('discount_plan_id', 'discount_plan')(v)
@@ -423,7 +442,7 @@ export default function PosHome() {
             page: 1,
             keyword: '',
             dont_search: false,
-            organization_id
+            organization_id: context.organization.id
         });
         const [paginated, setPaginated] = useState<PaginationType<Product>>(getDefaultPaginated());
 
@@ -442,7 +461,7 @@ export default function PosHome() {
             }
             setSearching(true);
 
-            var r = await ProductService.searchByPrice({ ...filters, organization_id });
+            var r = await ProductService.searchByPrice({ ...filters, organization_id: context.organization.id });
             if (r.success) {
                 setPaginated(r.data);
                 setSearching(false);
@@ -616,6 +635,7 @@ export default function PosHome() {
                 is_proforma,
                 has_project,
                 user_id: customer?.id,
+                organization_id: context.organization.id,
                 products: form.products.map((p: any) => ({
                     product_price_id: p.id,
                     quantity: p.quantity
@@ -624,15 +644,15 @@ export default function PosHome() {
 
             if (r.success) {
                 setForm({
-                    ...form,
                     loaded: true,
                     country_id: undefined,
                     invoice_date: moment().format('Y-MM-DD'),
                     due_date: moment().format('Y-MM-DD'),
                     user_id: undefined,
+                    customer: undefined,
                     products: []
                 });
-                loadStats(true);
+                loadStats(false);
                 if (is_draft) {
                     msg.success('Saved in Draft');
                 }
@@ -640,8 +660,15 @@ export default function PosHome() {
                     msg.success('Proforma invoice generated');
                 }
 
-                if (!is_draft && !is_proforma) {
+                if (!is_draft && !is_proforma && !has_project) {
                     msg.success('Invoice generated');
+                    navigate('/pos')
+                } else if (has_project && internal_reference_number) {
+                    msg.success('Job cards updated');
+                    navigate('/pos/job-cards')
+                } else {
+                    msg.success('Job cards created');
+                    navigate('/pos/job-cards')
                 }
             }
             return r.success;
@@ -798,15 +825,15 @@ export default function PosHome() {
     return (<div className="lg:grid lg:grid-cols-4 lg:gap-6 space-y-6 lg:space-y-0 p-6">
         {/* Column 1 (Left) - Configuration Sidebar (lg:col-span-1) */}
         <div className="lg:col-span-1 space-y-4">
-            {!!internal_reference_number && <div className='flex flex-col gap-1 p-2 rounded-lg bg-sky-50 border-sky-400  border'>
+            {!!internal_reference_number && <div className='flex flex-col gap-1 p-2 rounded-lg bg-indigo-500 border-indigo-700 border text-white'>
                 {(!!form.is_draft || !!form.is_proforma || !!form.has_project) && <div className='flex flex-row justify-between items-center'>
-                    {!!form.is_draft && <span className='text-sm font-medium'>Draft</span>}
-                    {!!form.is_proforma && <span className='text-sm font-medium'>Proforma Invoice</span>}
-                    {!!form.has_project && <span className='text-sm font-medium'>Job Card</span>}
+                    {!!form.is_draft && <span className='text-lg uppercase font-medium'>Draft</span>}
+                    {!!form.is_proforma && <span className='text-lg uppercase font-medium'>Proforma Invoice</span>}
+                    {!!form.has_project && <span className='text-lg uppercase font-medium'>Job Card</span>}
                     <Link to="/pos"><Btn variant={'destructive'} size={'xs'}><LuX /></Btn></Link>
                 </div>}
 
-                <div className='flex flex-row justify-between text-xs text-gray-500'>
+                <div className='flex flex-row justify-between text-xs text-white'>
                     <span>{internal_reference_number}</span>
                     <span>{formatDateTime(form?.created_at)}</span>
                 </div>
