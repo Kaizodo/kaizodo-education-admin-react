@@ -4,6 +4,7 @@ import moment, { Moment } from "moment";
 import { twMerge } from "tailwind-merge"
 import tinycolor from "tinycolor2";
 
+
 export function formatDate(date: string) {
   return moment(date).format('DD MMM, Y');
 }

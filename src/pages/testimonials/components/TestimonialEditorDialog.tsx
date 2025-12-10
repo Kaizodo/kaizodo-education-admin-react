@@ -14,6 +14,7 @@ import FileField from '@/components/common/FileField';
 import { useCropper } from '@/hooks/use-cropper';
 import { getImageObjectUrl } from '@/lib/utils';
 import { YesNoArray } from '@/data/Common';
+import { useOrganizationId } from '@/hooks/use-organization-id';
 
 
 interface Props {
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export default function TestimonialEditorDialog({ id, onSuccess, onCancel }: Props) {
+    const organization_id = useOrganizationId();
     const [saving, setSaving] = useState(false);
     const { openCropperFile } = useCropper();
     const [loading, setLoading] = useState(true);
@@ -48,9 +50,9 @@ export default function TestimonialEditorDialog({ id, onSuccess, onCancel }: Pro
         setSaving(true);
         let r: ApiResponseType;
         if (id) {
-            r = await TestimonialService.update(form);
+            r = await TestimonialService.update({ ...form, organization_id });
         } else {
-            r = await TestimonialService.create(form);
+            r = await TestimonialService.create({ ...form, organization_id });
         }
 
         if (r.success) {

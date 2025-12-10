@@ -82,11 +82,16 @@ export default function Dropdown({ value, includedValues = [undefined], selected
         setSearching(true);
         var latestRecords = await getOptions({ keyword: keyword, page: 1, ids: ids });
 
-        setRecords(r => [
-            ...new Map(
-                [selected as DropdownItemType, ...r, ...latestRecords].filter(Boolean).map(i => [i.id, i])
-            ).values()
-        ]);
+        setRecords(r => {
+            const list = [selected as DropdownItemType, ...r, ...latestRecords].filter(Boolean);
+
+            const filtered = keyword
+                ? list.filter(i => i.name?.toLowerCase().includes(keyword.toLowerCase()))
+                : list;
+
+            return [...new Map(filtered.map(i => [i.id, i])).values()];
+        });
+
 
         setInitilized(true);
         setSearching(false);

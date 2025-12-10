@@ -4,21 +4,25 @@ type SafeImageProps = {
     src?: string | null;
     className?: string;
     children: ReactNode;
+    onChangeStatus?: (success: boolean) => void
 } & Omit<ImgHTMLAttributes<HTMLImageElement>, "src" | "className" | "children">;
 
 export default function SafeImage({
     src,
+    onChangeStatus,
     className = "",
     children,
     ...rest
 }: SafeImageProps) {
     const [err, setErr] = useState(false);
 
-    // handle empty src
+
     useEffect(() => {
         if (!src) {
+            onChangeStatus?.(false);
             setErr(true);
         } else {
+            onChangeStatus?.(true);
             setErr(false);
         }
     }, [src]);
@@ -30,7 +34,10 @@ export default function SafeImage({
         <img
             src={src || ""}
             className={className}
-            onError={() => setErr(true)}
+            onError={() => {
+                setErr(true);
+                onChangeStatus?.(false)
+            }}
             alt=""
             {...rest}
         />

@@ -14,7 +14,10 @@ import TextField from '@/components/common/TextField';
 import { StoreService } from '@/services/StoreService';
 import Richtext from '@/components/common/Richtext';
 import NoRecords from '@/components/common/NoRecords';
-import { LuCog } from 'react-icons/lu';
+import { LuCog, LuImagePlus, LuX } from 'react-icons/lu';
+import SafeImage from '@/components/common/SafeImage';
+import Btn from '@/components/common/Btn';
+import { pickImageUrl } from '@/components/common/SimpleMediaPicker';
 
 
 
@@ -125,7 +128,27 @@ export default function StoreOnboardingStepSettings({ organization_id, onLoading
                     <span className='text-center flex items-center justify-center w-full text-3xl font-bold'>Website Content</span>
                     <hr></hr>
                     <strong className='flex'>Landing Page</strong>
+                    <div className='w-full relative'>
+                        {!!form.has_banner_image && <Btn onClick={() => setValue('landing_banner')()} size={'xs'} variant={'destructive'} className='absolute top-2 left-2'><LuX /></Btn>}
+                        <SafeImage
+                            src={form.landing_banner}
+                            className='bg-sky-50 min-h-[200px]  border p-1 rounded-lg flex items-center justify-center object-contain'
+                            onChangeStatus={(success) => {
+                                setValue('has_banner_image')(success);
+                            }}
+                        >
+                            <Btn variant={'outline'} asyncClick={async () => {
+                                var url = await pickImageUrl({
+                                    category_name: `${form.company_name} | Banner`,
+                                    cropped: true
+                                });
+                                setValue('landing_banner')(url);
+                            }}><LuImagePlus /> Select Banner</Btn>
+                        </SafeImage>
+                    </div>
                     <div className="grid grid-cols-2 gap-3">
+                        <TextField value={form.landing_banner} onChange={setValue('landing_banner')} placeholder="Landing main headline">Banner</TextField>
+
                         <TextField value={form.landing_title} onChange={setValue('landing_title')} placeholder="Landing main headline">Landing Title</TextField>
                         <TextField value={form.landing_subtitle} onChange={setValue('landing_subtitle')} placeholder="Short supporting text">Landing Subtitle</TextField>
 

@@ -118,7 +118,6 @@ export default function StoreListing() {
                             {paginated.records.map((record) => (
                                 <TableRow key={record.id}>
                                     <TableCell>
-
                                         <SafeImage src={record.logo_short} className='h-20 w-20 border rounded-lg p-1 items-center justify-center flex'>
                                             <LuImage className='text-3xl text-gray-400' />
                                         </SafeImage>

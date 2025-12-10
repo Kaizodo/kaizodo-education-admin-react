@@ -19,10 +19,12 @@ import { TestimonialService } from '@/services/TestimonialService';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { nameLetter } from '@/lib/utils';
 import { FaRegStar, FaStar } from 'react-icons/fa6';
+import { useOrganizationId } from '@/hooks/use-organization-id';
 
 const LazyEditorDalog = lazy(() => import('./components/TestimonialEditorDialog'));
 
 export default function TestimonialManagement() {
+    const organization_id = useOrganizationId();
     const [searching, setSearching] = useState(true);
     const [paginated, setPaginated] = useState<PaginationType<any>>(getDefaultPaginated());
     const [filters, setFilters] = useState<{
@@ -43,7 +45,7 @@ export default function TestimonialManagement() {
 
     const search = async () => {
         setSearching(true);
-        var r = await TestimonialService.search(filters);
+        var r = await TestimonialService.search({ ...filters, organization_id });
         if (r.success) {
             setPaginated(r.data);
         }
@@ -57,7 +59,7 @@ export default function TestimonialManagement() {
             search();
         }
 
-    }, [filters]);
+    }, [filters, organization_id]);
 
     const openEditor = async (id?: number) => {
         const modal_id = Modal.show({
